@@ -44,7 +44,7 @@
   "gridUnits": "ft",
   "primaryTokenAttribute": "life",
   "secondaryTokenAttribute": "faith",
-  "url": "https://www.holylandsrpg.com",
-  "manifest": "",
-  "download": ""
+  "url": "https://github.com/gmsshadow/holy-lands-rpghttps://github.com/gmsshadow/holy-lands-rpg",
+  "manifest": "https://github.com/gmsshadow/holy-lands-rpg/edit/main/system.json",
+  "download": "https://github.com/gmsshadow/holy-lands-rpg/archive/refs/heads/main.zip"
 }

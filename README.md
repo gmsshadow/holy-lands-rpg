@@ -177,7 +177,7 @@ Adventurer, Fighter, Knight, Warrior
 ## Support & Resources
 
 - **Official Website**: https://www.holylandsrpg.com
-- **Foundry VTT**: Requires version 11 or higher (verified through v12)
+- **Foundry VTT**: Requires version 11 or higher (verified through v13)
 
 ## Credits
 

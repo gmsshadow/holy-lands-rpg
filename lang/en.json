@@ -1,0 +1,74 @@
+{
+  "HOLY-LANDS": {
+    "SystemName": "Holy Lands RPG",
+    
+    "Attributes": {
+      "INT": "Intellect",
+      "WIS": "Wisdom",
+      "PAT": "Patience",
+      "WILL": "Will",
+      "MEM": "Memory",
+      "STR": "Strength",
+      "AGI": "Agility",
+      "SPD": "Speed",
+      "END": "Endurance",
+      "BTY": "Beauty",
+      "CHA": "Charisma",
+      "VIR": "Virtue"
+    },
+    
+    "Abilities": {
+      "Perception": "Perception",
+      "Search": "Search",
+      "Climb": "Climb",
+      "Jump": "Jump",
+      "Balance": "Balance",
+      "Hide": "Hide",
+      "Appeal": "Appeal"
+    },
+    
+    "Classes": {
+      "Adventurer": "Adventurer",
+      "Bard": "Bard",
+      "Cleric": "Cleric",
+      "DevilHunter": "Devil Hunter",
+      "Fighter": "Fighter",
+      "Jester": "Jester",
+      "Knight": "Knight",
+      "Saint": "Saint",
+      "Saisier": "Saisier",
+      "Scout": "Scout",
+      "Spy": "Spy",
+      "Voyager": "Voyager",
+      "Warrior": "Warrior"
+    },
+    
+    "Statures": {
+      "WeeFolk": "WeeFolk",
+      "Dwarfolk": "Dwarfolk",
+      "CommonFolk": "CommonFolk",
+      "GiantFolk": "GiantFolk"
+    },
+    
+    "WeaponSkills": {
+      "LightArms": "Light Arms",
+      "HeavyArms": "Heavy Arms",
+      "Missile": "Missile",
+      "Thrown": "Thrown"
+    },
+    
+    "SavingThrows": {
+      "Death": "Death",
+      "Poison": "Poison",
+      "Disease": "Disease",
+      "Magic": "Magic",
+      "Fear": "Fear",
+      "Sin": "Sin"
+    },
+    
+    "Currency": {
+      "Gold": "Gold",
+      "Silver": "Silver"
+    }
+  }
+}

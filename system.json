@@ -1,0 +1,50 @@
+{
+  "id": "holy-lands-rpg",
+  "title": "Holy Lands RPG",
+  "description": "A Christian-themed tabletop RPG system set in medieval times where faith and virtue guide adventurers.",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "Faith Quest Games (System Creator)",
+      "url": "https://www.holylandsrpg.com"
+    }
+  ],
+  "compatibility": {
+    "minimum": "11",
+    "verified": "13"
+  },
+  "esmodules": [
+    "module/holy-lands.mjs"
+  ],
+  "styles": [
+    "styles/holy-lands.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "documentTypes": {
+    "Actor": {
+      "character": {},
+      "npc": {}
+    },
+    "Item": {
+      "weapon": {},
+      "armor": {},
+      "equipment": {},
+      "miracle": {},
+      "blessing": {},
+      "skill": {}
+    }
+  },
+  "gridDistance": 5,
+  "gridUnits": "ft",
+  "primaryTokenAttribute": "life",
+  "secondaryTokenAttribute": "faith",
+  "url": "https://www.holylandsrpg.com",
+  "manifest": "",
+  "download": ""
+}

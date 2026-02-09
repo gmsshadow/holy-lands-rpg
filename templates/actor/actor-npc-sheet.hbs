@@ -1,0 +1,63 @@
+<form class="{{cssClass}} flexcol" autocomplete="off">
+  <header class="sheet-header">
+    <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
+    <div class="header-fields">
+      <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="NPC Name"/></h1>
+      <div class="resource">
+        <div class="resource-group">
+          <label>Life</label>
+          <input type="text" name="system.life.value" value="{{system.life.value}}" data-dtype="Number" placeholder="0"/>
+          <span> / </span>
+          <input type="text" name="system.life.max" value="{{system.life.max}}" data-dtype="Number" placeholder="10"/>
+        </div>
+      </div>
+      <div class="npc-info">
+        <div class="info-group">
+          <label>Level</label>
+          <input type="text" name="system.level" value="{{system.level}}" data-dtype="Number"/>
+        </div>
+        <div class="info-group">
+          <label>Type</label>
+          <input type="text" name="system.type" value="{{system.type}}"/>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="sheet-body">
+    <div class="attributes-simple">
+      <h3>Attributes</h3>
+      <div class="attributes-grid">
+        {{#each system.attributes as |attr key|}}
+        <div class="attribute-simple">
+          <label>{{attr.label}}</label>
+          <input type="text" name="system.attributes.{{key}}.value" value="{{attr.value}}" data-dtype="Number"/>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+
+    <div class="combat-simple">
+      <h3>Combat</h3>
+      <div class="combat-stats">
+        <div class="stat">
+          <label>Attack</label>
+          <input type="text" name="system.combat.attack" value="{{system.combat.attack}}" data-dtype="Number"/>
+        </div>
+        <div class="stat">
+          <label>Defense</label>
+          <input type="text" name="system.combat.defense" value="{{system.combat.defense}}" data-dtype="Number"/>
+        </div>
+        <div class="stat">
+          <label>Damage</label>
+          <input type="text" name="system.combat.damage" value="{{system.combat.damage}}"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="biography">
+      <h3>Biography</h3>
+      {{editor system.biography target="system.biography" button=true owner=owner editable=editable}}
+    </div>
+  </section>
+</form>

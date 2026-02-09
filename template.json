@@ -1,0 +1,330 @@
+{
+  "Actor": {
+    "types": ["character", "npc"],
+    "templates": {
+      "base": {
+        "life": {
+          "value": 10,
+          "max": 10
+        },
+        "faith": {
+          "value": 5,
+          "max": 5
+        },
+        "attributes": {
+          "int": {
+            "value": 9,
+            "label": "Intellect"
+          },
+          "wis": {
+            "value": 9,
+            "label": "Wisdom"
+          },
+          "pat": {
+            "value": 9,
+            "label": "Patience"
+          },
+          "will": {
+            "value": 9,
+            "label": "Will"
+          },
+          "mem": {
+            "value": 9,
+            "label": "Memory"
+          },
+          "str": {
+            "value": 9,
+            "label": "Strength"
+          },
+          "agi": {
+            "value": 9,
+            "label": "Agility"
+          },
+          "spd": {
+            "value": 9,
+            "label": "Speed"
+          },
+          "end": {
+            "value": 9,
+            "label": "Endurance"
+          },
+          "bty": {
+            "value": 9,
+            "label": "Beauty"
+          },
+          "cha": {
+            "value": 9,
+            "label": "Charisma"
+          },
+          "vir": {
+            "value": 9,
+            "label": "Virtue"
+          }
+        },
+        "abilities": {
+          "perception": {
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Perception"
+          },
+          "search": {
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Search"
+          },
+          "climb": {
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Climb"
+          },
+          "jump": {
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Jump"
+          },
+          "balance": {
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Balance"
+          },
+          "hide": {
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Hide"
+          },
+          "appeal": {
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Appeal"
+          }
+        }
+      }
+    },
+    "character": {
+      "templates": ["base"],
+      "biography": "",
+      "level": 1,
+      "experience": 0,
+      "class": "adventurer",
+      "stature": "commonFolk",
+      "age": 20,
+      "gender": "male",
+      "height": "",
+      "weight": "",
+      "classData": {
+        "baseLife": 10,
+        "lifePerLevel": 6,
+        "baseFaith": 5,
+        "faithPerLevel": 4
+      },
+      "saves": {
+        "death": {
+          "value": 0,
+          "label": "Death"
+        },
+        "poison": {
+          "value": 0,
+          "label": "Poison"
+        },
+        "disease": {
+          "value": 0,
+          "label": "Disease"
+        },
+        "magic": {
+          "value": 0,
+          "label": "Magic"
+        },
+        "fear": {
+          "value": 0,
+          "label": "Fear"
+        },
+        "sin": {
+          "value": 0,
+          "label": "Sin"
+        }
+      },
+      "skills": {
+        "gifts": {
+          "gift1": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Gift 1"
+          },
+          "gift2": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Gift 2"
+          },
+          "gift3": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Gift 3"
+          }
+        },
+        "talents": {
+          "talent1": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Talent 1"
+          },
+          "talent2": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Talent 2"
+          },
+          "talent3": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Talent 3"
+          }
+        },
+        "crafts": {
+          "craft1": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Craft 1"
+          },
+          "craft2": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Craft 2"
+          },
+          "craft3": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Craft 3"
+          }
+        }
+      },
+      "weaponSkills": {
+        "lightArms": {
+          "attack": 0,
+          "parry": 0,
+          "critical": 0,
+          "special": 0,
+          "label": "Light Arms"
+        },
+        "heavyArms": {
+          "attack": 0,
+          "parry": 0,
+          "critical": 0,
+          "special": 0,
+          "label": "Heavy Arms"
+        },
+        "missile": {
+          "attack": 0,
+          "critical": 0,
+          "special": 0,
+          "label": "Missile"
+        },
+        "thrown": {
+          "attack": 0,
+          "critical": 0,
+          "special": 0,
+          "label": "Thrown"
+        }
+      },
+      "combat": {
+        "initiative": 0,
+        "defense": 10,
+        "armorRating": 0
+      },
+      "currency": {
+        "gold": 0,
+        "silver": 0
+      },
+      "sins": [],
+      "phobias": []
+    },
+    "npc": {
+      "templates": ["base"],
+      "biography": "",
+      "level": 1,
+      "type": "enemy",
+      "combat": {
+        "attack": 0,
+        "defense": 10,
+        "damage": "1d6"
+      }
+    }
+  },
+  "Item": {
+    "types": ["weapon", "armor", "equipment", "miracle", "blessing", "skill"],
+    "templates": {
+      "base": {
+        "description": "",
+        "quantity": 1,
+        "weight": 0,
+        "cost": {
+          "gold": 0,
+          "silver": 0
+        }
+      }
+    },
+    "weapon": {
+      "templates": ["base"],
+      "weaponSkill": "lightArms",
+      "damage": "1d6",
+      "range": "Melee",
+      "properties": "",
+      "equipped": false
+    },
+    "armor": {
+      "templates": ["base"],
+      "armorRating": 0,
+      "placement": "chest",
+      "equipped": false
+    },
+    "equipment": {
+      "templates": ["base"],
+      "equipped": false
+    },
+    "miracle": {
+      "templates": ["base"],
+      "level": 1,
+      "faithCost": 1,
+      "range": "Touch",
+      "duration": "Instantaneous",
+      "target": "Single",
+      "area": "",
+      "miracleType": "high"
+    },
+    "blessing": {
+      "templates": ["base"],
+      "duration": "Permanent",
+      "effect": ""
+    },
+    "skill": {
+      "templates": ["base"],
+      "skillType": "gift",
+      "proficiency": 0,
+      "attribute1": "str",
+      "attribute2": "agi"
+    }
+  }
+}

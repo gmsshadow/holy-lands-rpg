@@ -1,0 +1,71 @@
+<form class="{{cssClass}} flexcol" autocomplete="off">
+  <header class="sheet-header">
+    <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}" height="64" width="64"/>
+    <div class="header-fields">
+      <h1 class="charname">
+        <input name="name" type="text" value="{{item.name}}" placeholder="Weapon Name"/>
+      </h1>
+    </div>
+  </header>
+
+  <nav class="sheet-tabs tabs" data-group="primary">
+    <a class="item active" data-tab="description">Description</a>
+    <a class="item" data-tab="details">Details</a>
+  </nav>
+
+  <section class="sheet-body">
+    <div class="tab active" data-group="primary" data-tab="description">
+      {{editor system.description target="system.description" button=true owner=owner editable=editable}}
+    </div>
+
+    <div class="tab" data-group="primary" data-tab="details">
+      <div class="form-group">
+        <label>Weapon Skill</label>
+        <select name="system.weaponSkill" data-dtype="String">
+          {{#select system.weaponSkill}}
+          {{#each weaponSkills as |name key|}}
+            <option value="{{key}}">{{name}}</option>
+          {{/each}}
+          {{/select}}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Damage</label>
+        <input type="text" name="system.damage" value="{{system.damage}}" placeholder="1d6"/>
+      </div>
+
+      <div class="form-group">
+        <label>Range</label>
+        <input type="text" name="system.range" value="{{system.range}}" placeholder="Melee"/>
+      </div>
+
+      <div class="form-group">
+        <label>Properties</label>
+        <input type="text" name="system.properties" value="{{system.properties}}" placeholder="Two-handed, etc."/>
+      </div>
+
+      <div class="form-group">
+        <label>Cost (Gold)</label>
+        <input type="text" name="system.cost.gold" value="{{system.cost.gold}}" data-dtype="Number"/>
+      </div>
+
+      <div class="form-group">
+        <label>Cost (Silver)</label>
+        <input type="text" name="system.cost.silver" value="{{system.cost.silver}}" data-dtype="Number"/>
+      </div>
+
+      <div class="form-group">
+        <label>Weight</label>
+        <input type="text" name="system.weight" value="{{system.weight}}" data-dtype="Number"/>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" name="system.equipped" {{checked system.equipped}}/>
+          Equipped
+        </label>
+      </div>
+    </div>
+  </section>
+</form>

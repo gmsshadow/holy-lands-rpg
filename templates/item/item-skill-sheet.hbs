@@ -1,0 +1,33 @@
+<form class="{{cssClass}} flexcol" autocomplete="off">
+  <header class="sheet-header">
+    <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}" height="64" width="64"/>
+    <div class="header-fields">
+      <h1 class="charname">
+        <input name="name" type="text" value="{{item.name}}" placeholder="Skill Name"/>
+      </h1>
+    </div>
+  </header>
+
+  <section class="sheet-body">
+    <div class="form-group">
+      <label>Skill Type</label>
+      <select name="system.skillType" data-dtype="String">
+        {{#select system.skillType}}
+        {{#each skillTypes as |name key|}}
+          <option value="{{key}}">{{name}}</option>
+        {{/each}}
+        {{/select}}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Proficiency</label>
+      <input type="text" name="system.proficiency" value="{{system.proficiency}}" data-dtype="Number"/>
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      {{editor system.description target="system.description" button=true owner=owner editable=editable}}
+    </div>
+  </section>
+</form>

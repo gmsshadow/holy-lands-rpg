@@ -1,0 +1,55 @@
+<form class="{{cssClass}} flexcol" autocomplete="off">
+  <header class="sheet-header">
+    <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}" height="64" width="64"/>
+    <div class="header-fields">
+      <h1 class="charname">
+        <input name="name" type="text" value="{{item.name}}" placeholder="Miracle Name"/>
+      </h1>
+    </div>
+  </header>
+
+  <section class="sheet-body">
+    <div class="form-group">
+      <label>Level</label>
+      <input type="text" name="system.level" value="{{system.level}}" data-dtype="Number"/>
+    </div>
+
+    <div class="form-group">
+      <label>Faith Cost (FC)</label>
+      <input type="text" name="system.faithCost" value="{{system.faithCost}}" data-dtype="Number"/>
+    </div>
+
+    <div class="form-group">
+      <label>Miracle Type</label>
+      <select name="system.miracleType" data-dtype="String">
+        <option value="high" {{#if (eq system.miracleType "high")}}selected{{/if}}>High Miracle</option>
+        <option value="clerical" {{#if (eq system.miracleType "clerical")}}selected{{/if}}>Clerical Miracle</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Range</label>
+      <input type="text" name="system.range" value="{{system.range}}" placeholder="Touch"/>
+    </div>
+
+    <div class="form-group">
+      <label>Duration</label>
+      <input type="text" name="system.duration" value="{{system.duration}}" placeholder="Instantaneous"/>
+    </div>
+
+    <div class="form-group">
+      <label>Target</label>
+      <input type="text" name="system.target" value="{{system.target}}" placeholder="Single"/>
+    </div>
+
+    <div class="form-group">
+      <label>Area</label>
+      <input type="text" name="system.area" value="{{system.area}}" placeholder=""/>
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      {{editor system.description target="system.description" button=true owner=owner editable=editable}}
+    </div>
+  </section>
+</form>

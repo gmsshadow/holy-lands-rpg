@@ -172,6 +172,34 @@
             "bonus": 0,
             "mod": 0,
             "label": "Gift 3"
+          },
+          "gift4": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Gift 3"
+          },
+          "gift5": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Gift 3"
+          },
+          "gift6": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Gift 3"
+          },
+          "gift7": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Gift 3"
           }
         },
         "talents": {
@@ -195,6 +223,34 @@
             "bonus": 0,
             "mod": 0,
             "label": "Talent 3"
+          },
+          "talent4": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Talent 3"
+          },
+          "talent5": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Talent 3"
+          },
+          "talent6": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Talent 3"
+          },
+          "talent7": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Talent 3"
           }
         },
         "crafts": {
@@ -213,6 +269,90 @@
             "label": "Craft 2"
           },
           "craft3": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Craft 3"
+          },
+          "craft4": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Craft 3"
+          },
+          "craft5": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Craft 3"
+          },
+          "craft6": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Craft 3"
+          },
+          "craft7": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Craft 3"
+          },
+          "craft8": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Craft 3"
+          },
+          "craft9": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Craft 3"
+          },
+          "craft10": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Craft 3"
+          },
+          "craft11": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Craft 3"
+          },
+          "craft12": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Craft 3"
+          },
+          "craft13": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Craft 3"
+          },
+          "craft14": {
+            "name": "",
+            "value": 0,
+            "bonus": 0,
+            "mod": 0,
+            "label": "Craft 3"
+          },
+          "craft15": {
             "name": "",
             "value": 0,
             "bonus": 0,

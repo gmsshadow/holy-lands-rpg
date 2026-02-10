@@ -125,29 +125,57 @@
         "faithPerLevel": 4
       },
       "saves": {
-        "death": {
+        "usingMagic": {
           "value": 0,
-          "label": "Death"
+          "label": "Using Magic"
         },
-        "poison": {
+        "curse": {
           "value": 0,
-          "label": "Poison"
+          "label": "Using Melee"
+        },
+        "spell": {
+          "value": 0,
+          "label": "Spell"
         },
         "disease": {
           "value": 0,
           "label": "Disease"
         },
-        "magic": {
+        "poison": {
           "value": 0,
-          "label": "Magic"
+          "label": "Poison"
         },
-        "fear": {
+        "fumesAcid": {
           "value": 0,
-          "label": "Fear"
+          "label": "Fumes/Acid"
+        },
+        "magicItem": {
+          "value": 0,
+          "label": "Magic Item"
+        },
+        "runeTrap": {
+          "value": 0,
+          "label": "Rune Trap"
+        },
+        "death": {
+          "value": 0,
+          "label": "Death"
         },
         "sin": {
           "value": 0,
           "label": "Sin"
+        },
+        "fright": {
+          "value": 0,
+          "label": "Fright"
+        },
+        "miracle": {
+          "value": 0,
+          "label": "Miracle"
+        },
+        "holyItem": {
+          "value": 0,
+          "label": "Holy Item"
         }
       },
       "skills": {
@@ -362,6 +390,13 @@
         }
       },
       "weaponSkills": {
+        "handToHand": {
+          "attack": 0,
+          "parry": 0,
+          "critical": 0,
+          "special": 0,
+          "label": "Hand To Hand"
+        },
         "lightArms": {
           "attack": 0,
           "parry": 0,
@@ -376,6 +411,13 @@
           "special": 0,
           "label": "Heavy Arms"
         },
+        "pairedWeapons": {
+          "attack": 0,
+          "parry": 0,
+          "critical": 0,
+          "special": 0,
+          "label": "Paired Weapons"
+        },
         "missile": {
           "attack": 0,
           "critical": 0,
@@ -387,9 +429,20 @@
           "critical": 0,
           "special": 0,
           "label": "Thrown"
+        },
+        "kickAttack": {
+          "attack": 0,
+          "parry": 0,
+          "critical": 0,
+          "special": 0,
+          "label": "Kick Attack"
         }
       },
       "combat": {
+        "advantage": 0,
+        "dodge": 0,
+        "defend": 0,
+        "damage": 0,
         "initiative": 0,
         "defense": 10,
         "armorRating": 0

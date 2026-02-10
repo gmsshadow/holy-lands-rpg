@@ -48,24 +48,24 @@ export class HolyLandsActor extends Actor {
     abilities.search.value = Math.ceil((attrs.int.value + attrs.pat.value) / 2);
     abilities.search.mod = abilities.search.value + (abilities.search.bonus || 0);
 
-    // Climb = (STR + AGI) / 2, rounded up
-    abilities.climb.value = Math.ceil((attrs.str.value + attrs.agi.value) / 2);
+    // Climb = (WIL + STR) / 2, rounded up
+    abilities.climb.value = Math.ceil((attrs.will.value + attrs.str.value) / 2);
     abilities.climb.mod = abilities.climb.value + (abilities.climb.bonus || 0);
 
-    // Jump = (STR + SPD) / 2, rounded up
-    abilities.jump.value = Math.ceil((attrs.str.value + attrs.spd.value) / 2);
+    // Jump = (WIL + AGI) / 2, rounded up
+    abilities.jump.value = Math.ceil((attrs.will.value + attrs.agi.value) / 2);
     abilities.jump.mod = abilities.jump.value + (abilities.jump.bonus || 0);
 
-    // Balance = (AGI + END) / 2, rounded up
-    abilities.balance.value = Math.ceil((attrs.agi.value + attrs.end.value) / 2);
+    // Balance = (PAT + AGI) / 2, rounded up
+    abilities.balance.value = Math.ceil((attrs.pat.value + attrs.agi.value) / 2);
     abilities.balance.mod = abilities.balance.value + (abilities.balance.bonus || 0);
 
-    // Hide = (AGI + SPD) / 2, rounded up
-    abilities.hide.value = Math.ceil((attrs.agi.value + attrs.spd.value) / 2);
+    // Hide = (WIS + SPD) / 2, rounded up
+    abilities.hide.value = Math.ceil((attrs.wis.value + attrs.spd.value) / 2);
     abilities.hide.mod = abilities.hide.value + (abilities.hide.bonus || 0);
 
-    // Appeal = (CHA + BTY) / 2, rounded up
-    abilities.appeal.value = Math.ceil((attrs.cha.value + attrs.bty.value) / 2);
+    // Appeal = (CHA + VIR) / 2, rounded up
+    abilities.appeal.value = Math.ceil((attrs.cha.value + attrs.vir.value) / 2);
     abilities.appeal.mod = abilities.appeal.value + (abilities.appeal.bonus || 0);
   }
 

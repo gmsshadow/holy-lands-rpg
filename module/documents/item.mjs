@@ -19,7 +19,15 @@ export class HolyLandsItem extends Item {
     const systemData = itemData.system;
     const flags = itemData.flags.holyLandsRpg || {};
 
-    // Make modifications to data here
+    // Initialize armor current values if not set
+    if (this.type === 'armor') {
+      if (systemData.currentADEF === undefined && systemData.aDEF !== undefined) {
+        systemData.currentADEF = systemData.aDEF;
+      }
+      if (systemData.currentPEN === undefined && systemData.PEN !== undefined) {
+        systemData.currentPEN = systemData.PEN;
+      }
+    }
   }
 
   /**

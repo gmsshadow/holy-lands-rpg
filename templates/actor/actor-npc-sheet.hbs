@@ -38,15 +38,30 @@
     </div>
 
     <div class="combat-simple">
+      <h3>Defense</h3>
+      <div class="defense-stats">
+        <div class="stat">
+          <label>nDEF</label>
+          <input type="text" name="system.defense.nDEF" value="{{system.defense.nDEF}}" data-dtype="Number"/>
+        </div>
+        <div class="stat">
+          <label>tDEF</label>
+          <span class="derived-value">{{system.defense.tDEF}}</span>
+        </div>
+      </div>
       <h3>Combat</h3>
       <div class="combat-stats">
         <div class="stat">
-          <label>Attack</label>
-          <input type="text" name="system.combat.attack" value="{{system.combat.attack}}" data-dtype="Number"/>
+          <label>Advantage Bonus</label>
+          <input type="text" name="system.combat.advantageBonus" value="{{system.combat.advantageBonus}}" data-dtype="Number"/>
         </div>
         <div class="stat">
-          <label>Defense</label>
-          <input type="text" name="system.combat.defense" value="{{system.combat.defense}}" data-dtype="Number"/>
+          <label>Dodge Bonus</label>
+          <input type="text" name="system.combat.dodgeBonus" value="{{system.combat.dodgeBonus}}" data-dtype="Number"/>
+        </div>
+        <div class="stat">
+          <label>Defend Bonus</label>
+          <input type="text" name="system.combat.defendBonus" value="{{system.combat.defendBonus}}" data-dtype="Number"/>
         </div>
         <div class="stat">
           <label>Damage</label>

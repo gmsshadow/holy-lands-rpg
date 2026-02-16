@@ -10,19 +10,39 @@
 
   <section class="sheet-body">
     <div class="form-group">
-      <label>Armor Rating (AR)</label>
-      <input type="text" name="system.armorRating" value="{{system.armorRating}}" data-dtype="Number"/>
-    </div>
-
-    <div class="form-group">
-      <label>Placement</label>
-      <select name="system.placement" data-dtype="String">
-        {{#select system.placement}}
+      <label>Armor Placement (AP)</label>
+      <select name="system.ap" data-dtype="String">
+        {{#select system.ap}}
         {{#each armorPlacements as |name key|}}
           <option value="{{key}}">{{name}}</option>
         {{/each}}
         {{/select}}
       </select>
+    </div>
+
+    <div class="form-group">
+      <label>Armor Defense (aDEF)</label>
+      <input type="text" name="system.aDEF" value="{{system.aDEF}}" data-dtype="Number"/>
+    </div>
+
+    <div class="form-group">
+      <label>Current aDEF (for degradation)</label>
+      <input type="text" name="system.currentADEF" value="{{system.currentADEF}}" data-dtype="Number" placeholder="Leave empty to use aDEF"/>
+    </div>
+
+    <div class="form-group">
+      <label>CAP (Critical Armor Point threshold)</label>
+      <input type="text" name="system.CAP" value="{{system.CAP}}" data-dtype="Number"/>
+    </div>
+
+    <div class="form-group">
+      <label>PEN (Penalty value)</label>
+      <input type="text" name="system.PEN" value="{{system.PEN}}" data-dtype="Number"/>
+    </div>
+
+    <div class="form-group">
+      <label>Current PEN (for degradation)</label>
+      <input type="text" name="system.currentPEN" value="{{system.currentPEN}}" data-dtype="Number" placeholder="Leave empty to use PEN"/>
     </div>
 
     <div class="form-group">

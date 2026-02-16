@@ -162,23 +162,43 @@
     </div>
 
     <div class="tab combat" data-group="primary" data-tab="combat">
-      <h3>Combat Stats</h3>
+      <h3>Defense</h3>
+      <div class="defense-stats">
+        <div class="stat">
+          <label>Natural Defense (nDEF)</label>
+          <input type="text" name="system.defense.nDEF" value="{{system.defense.nDEF}}" data-dtype="Number"/>
+        </div>
+        <div class="stat">
+          <label>Armor Defense Total (aDEFTotal)</label>
+          <span class="derived-value">{{system.defense.aDEFTotal}}</span>
+        </div>
+        <div class="stat">
+          <label>Total Defense (tDEF)</label>
+          <span class="derived-value">{{system.defense.tDEF}}</span>
+        </div>
+        <div class="stat">
+          <label>Armor Penalty Total</label>
+          <span class="derived-value">{{system.defense.armorPenaltyTotal}}</span>
+        </div>
+      </div>
+
+      <h3>Combat Bonuses</h3>
       <div class="combat-stats">
         <div class="stat">
-          <label>Advantage</label>
-          <input type="text" name="system.combat.advantage" value="{{system.combat.advantage}}" data-dtype="Number"/>
+          <label>Advantage Bonus</label>
+          <input type="text" name="system.combat.advantageBonus" value="{{system.combat.advantageBonus}}" data-dtype="Number"/>
         </div>
         <div class="stat">
-          <label>Dodge</label>
-          <input type="text" name="system.combat.dodge" value="{{system.combat.dodge}}" data-dtype="Number"/>
-        </div>
-                <div class="stat">
-          <label>Defend</label>
-          <input type="text" name="system.combat.defend" value="{{system.combat.defend}}" data-dtype="Number"/>
+          <label>Dodge Bonus</label>
+          <input type="text" name="system.combat.dodgeBonus" value="{{system.combat.dodgeBonus}}" data-dtype="Number"/>
         </div>
         <div class="stat">
-          <label>Damage</label>
-          <input type="text" name="system.combat.damage" value="{{system.combat.damage}}" data-dtype="Number"/>
+          <label>Defend Bonus</label>
+          <input type="text" name="system.combat.defendBonus" value="{{system.combat.defendBonus}}" data-dtype="Number"/>
+        </div>
+        <div class="stat">
+          <label>Damage Bonus</label>
+          <input type="text" name="system.combat.damageBonus" value="{{system.combat.damageBonus}}" data-dtype="Number"/>
         </div>
       </div>
 
@@ -188,22 +208,22 @@
         <h4>{{ws.label}}</h4>
         <div class="ws-stats">
           <div class="ws-stat">
-            <label>Attack</label>
-            <input type="text" name="system.weaponSkills.{{key}}.attack" value="{{ws.attack}}" data-dtype="Number"/>
-          </div>
-          {{#if ws.parry}}
-          <div class="ws-stat">
-            <label>Parry</label>
-            <input type="text" name="system.weaponSkills.{{key}}.parry" value="{{ws.parry}}" data-dtype="Number"/>
-          </div>
-          {{/if}}
-          <div class="ws-stat">
-            <label>Critical</label>
-            <input type="text" name="system.weaponSkills.{{key}}.critical" value="{{ws.critical}}" data-dtype="Number"/>
+            <label>Attack Bonus</label>
+            <input type="text" name="system.weaponSkills.{{key}}.attackBonus" value="{{ws.attackBonus}}" data-dtype="Number"/>
           </div>
           <div class="ws-stat">
-            <label>Special</label>
-            <input type="text" name="system.weaponSkills.{{key}}.special" value="{{ws.special}}" data-dtype="Number"/>
+            <label>Critical Bonus</label>
+            <input type="text" name="system.weaponSkills.{{key}}.criticalBonus" value="{{ws.criticalBonus}}" data-dtype="Number"/>
+          </div>
+          <div class="ws-stat">
+            <label>Special Bonus</label>
+            <input type="text" name="system.weaponSkills.{{key}}.specialBonus" value="{{ws.specialBonus}}" data-dtype="Number"/>
+          </div>
+          <div class="ws-stat">
+            <label>AtR</label>
+            <input type="text" name="system.weaponSkills.{{key}}.atRCurrent" value="{{ws.atRCurrent}}" data-dtype="Number" style="width: 50px;"/>
+            <span>/</span>
+            <input type="text" name="system.weaponSkills.{{key}}.atRMax" value="{{ws.atRMax}}" data-dtype="Number" style="width: 50px;"/>
           </div>
         </div>
       </div>
@@ -265,8 +285,14 @@
             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24" height="24"/></div>
             <h4>{{item.name}}</h4>
           </div>
-          <div class="item-props">AR: {{item.system.armorRating}}</div>
+          <div class="item-props">
+            AP: {{item.system.ap}} | 
+            aDEF: {{#if item.system.currentADEF}}{{item.system.currentADEF}}{{else}}{{item.system.aDEF}}{{/if}} | 
+            CAP: {{item.system.CAP}} | 
+            PEN: {{#if item.system.currentPEN}}{{item.system.currentPEN}}{{else}}{{item.system.PEN}}{{/if}}
+          </div>
           <div class="item-controls">
+            <a class="item-control item-edit" title="Edit"><i class="fas fa-edit"></i></a>
             <a class="item-control item-delete" title="Delete"><i class="fas fa-trash"></i></a>
           </div>
         </li>

@@ -391,61 +391,83 @@
       },
       "weaponSkills": {
         "handToHand": {
-          "attack": 0,
-          "parry": 0,
-          "critical": 0,
-          "special": 0,
+          "attackBonus": 0,
+          "criticalBonus": 0,
+          "specialBonus": 0,
+          "atRMax": 2,
+          "atRCurrent": 2,
           "label": "Hand To Hand"
         },
         "lightArms": {
-          "attack": 0,
-          "parry": 0,
-          "critical": 0,
-          "special": 0,
+          "attackBonus": 0,
+          "criticalBonus": 0,
+          "specialBonus": 0,
+          "atRMax": 1,
+          "atRCurrent": 1,
           "label": "Light Arms"
         },
         "heavyArms": {
-          "attack": 0,
-          "parry": 0,
-          "critical": 0,
-          "special": 0,
+          "attackBonus": 0,
+          "criticalBonus": 0,
+          "specialBonus": 0,
+          "atRMax": 1,
+          "atRCurrent": 1,
           "label": "Heavy Arms"
         },
         "pairedWeapons": {
-          "attack": 0,
-          "parry": 0,
-          "critical": 0,
-          "special": 0,
+          "attackBonus": 0,
+          "criticalBonus": 0,
+          "specialBonus": 0,
+          "atRMax": 2,
+          "atRCurrent": 2,
           "label": "Paired Weapons"
         },
         "missile": {
-          "attack": 0,
-          "critical": 0,
-          "special": 0,
+          "attackBonus": 0,
+          "criticalBonus": 0,
+          "specialBonus": 0,
+          "atRMax": 1,
+          "atRCurrent": 1,
           "label": "Missile"
         },
         "thrown": {
-          "attack": 0,
-          "critical": 0,
-          "special": 0,
+          "attackBonus": 0,
+          "criticalBonus": 0,
+          "specialBonus": 0,
+          "atRMax": 1,
+          "atRCurrent": 1,
           "label": "Thrown"
         },
         "kickAttack": {
-          "attack": 0,
-          "parry": 0,
-          "critical": 0,
-          "special": 0,
+          "attackBonus": 0,
+          "criticalBonus": 0,
+          "specialBonus": 0,
+          "atRMax": 1,
+          "atRCurrent": 1,
           "label": "Kick Attack"
         }
       },
+      "defense": {
+        "nDEF": 4,
+        "aDEFByAP": {
+          "head": 0,
+          "chest": 0,
+          "arms": 0,
+          "legs": 0,
+          "back": 0,
+          "feet": 0
+        },
+        "aDEFTotal": 0,
+        "tDEF": 4,
+        "armorPenaltyTotal": 0
+      },
       "combat": {
-        "advantage": 0,
-        "dodge": 0,
-        "defend": 0,
-        "damage": 0,
-        "initiative": 0,
-        "defense": 10,
-        "armorRating": 0
+        "advantageBonus": 0,
+        "dodgeBonus": 0,
+        "defendBonus": 0,
+        "damageBonus": 0,
+        "halfDefenseFlag": false,
+        "initiative": 0
       },
       "currency": {
         "gold": 0,
@@ -459,9 +481,27 @@
       "biography": "",
       "level": 1,
       "type": "enemy",
+      "defense": {
+        "nDEF": 4,
+        "aDEFByAP": {
+          "head": 0,
+          "chest": 0,
+          "arms": 0,
+          "legs": 0,
+          "back": 0,
+          "feet": 0
+        },
+        "aDEFTotal": 0,
+        "tDEF": 4,
+        "armorPenaltyTotal": 0
+      },
       "combat": {
+        "advantageBonus": 0,
+        "dodgeBonus": 0,
+        "defendBonus": 0,
+        "damageBonus": 0,
+        "halfDefenseFlag": false,
         "attack": 0,
-        "defense": 10,
         "damage": "1d6"
       }
     }
@@ -489,8 +529,12 @@
     },
     "armor": {
       "templates": ["base"],
-      "armorRating": 0,
-      "placement": "chest",
+      "ap": "chest",
+      "aDEF": 0,
+      "CAP": 0,
+      "PEN": 0,
+      "currentADEF": 0,
+      "currentPEN": 0,
       "equipped": false
     },
     "equipment": {

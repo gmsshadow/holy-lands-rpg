@@ -275,7 +275,56 @@ export class HolyLandsActorSheet extends ActorSheet {
     const itemId = event.currentTarget.closest('.item').dataset.itemId;
     const weapon = this.actor.items.get(itemId);
     
-    return this.actor.rollAttack(weapon);
+    // Prompt for target selection
+    const target = await this._selectTarget();
+    if (!target) return;
+    
+    return this.actor.rollAttack(weapon, target);
+  }
+
+  /**
+   * Select a target actor for combat
+   */
+  async _selectTarget() {
+    const actors = game.actors.filter(a => a.id !== this.actor.id && a.type === 'character' || a.type === 'npc');
+    
+    if (actors.length === 0) {
+      ui.notifications.warn("No valid targets found");
+      return null;
+    }
+    
+    return new Promise((resolve) => {
+      const options = actors.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+      
+      new Dialog({
+        title: "Select Target",
+        content: `
+          <form>
+            <div class="form-group">
+              <label>Choose target:</label>
+              <select name="targetId" autofocus>
+                ${options}
+              </select>
+            </div>
+          </form>
+        `,
+        buttons: {
+          attack: {
+            label: "Attack",
+            callback: (html) => {
+              const targetId = html.find('[name="targetId"]').val();
+              const target = game.actors.get(targetId);
+              resolve(target);
+            }
+          },
+          cancel: {
+            label: "Cancel",
+            callback: () => resolve(null)
+          }
+        },
+        default: "attack"
+      }).render(true);
+    });
   }
 
   /**

@@ -315,18 +315,19 @@ export class HolyLandsActor extends Actor {
   /**
    * Roll a saving throw
    */
-  async rollSave(saveKey, df) {
+  async rollSave(saveKey, df = null) {
     const save = this.system.saves[saveKey];
     if (!save) return;
 
+    const resolvedDf = Number.isFinite(df) ? df : (save.df ?? 10);
     const roll = new Roll("1d20 + @bonus", { bonus: save.value });
     await roll.evaluate();
 
-    const success = roll.total >= df;
+    const success = roll.total >= resolvedDf;
     const critSuccess = roll.terms[0].results?.some(r => r.result === 20);
     const critFail = roll.terms[0].results?.some(r => r.result === 1);
 
-    let flavor = `${save.label} Save (DF ${df})`;
+    let flavor = `${save.label} Save (DF ${resolvedDf})`;
     if (critSuccess) flavor += " - <strong>Critical Success!</strong>";
     else if (critFail) flavor += " - <strong>Critical Failure!</strong>";
     else if (success) flavor += " - Success";

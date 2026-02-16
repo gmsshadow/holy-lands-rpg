@@ -127,54 +127,67 @@
       "saves": {
         "usingMagic": {
           "value": 0,
+          "df": 19,
           "label": "Using Magic"
         },
         "curse": {
           "value": 0,
+          "df": 18,
           "label": "Curse"
         },
         "spell": {
           "value": 0,
+          "df": 17,
           "label": "Spell"
         },
         "disease": {
           "value": 0,
+          "df": 16,
           "label": "Disease"
         },
         "poison": {
           "value": 0,
+          "df": 15,
           "label": "Poison"
         },
         "fumesAcid": {
           "value": 0,
+          "df": 14,
           "label": "Fumes/Acid"
         },
         "magicItem": {
           "value": 0,
+          "df": 13,
           "label": "Magic Item"
         },
         "runeTrap": {
           "value": 0,
+          "df": 12,
           "label": "Rune Trap"
         },
         "death": {
           "value": 0,
+          "df": 11,
           "label": "Death"
         },
         "sin": {
           "value": 0,
+          "df": 10,
           "label": "Sin"
         },
         "fright": {
           "value": 0,
+          "df": 9,
           "label": "Fright"
         },
         "miracle": {
           "value": 0,
+          "df": 8,
           "label": "Miracle"
         },
         "holyItem": {
           "value": 0,
+          "df": 7,
           "label": "Holy Item"
         }
       },

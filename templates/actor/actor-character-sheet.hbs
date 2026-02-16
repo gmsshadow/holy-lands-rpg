@@ -104,7 +104,7 @@
       <div class="saves-grid">
         {{#each system.saves as |save key|}}
         <div class="save">
-          <label>{{save.label}}</label>
+          <label>{{save.label}} (DF {{save.df}})</label>
           <input type="text" name="system.saves.{{key}}.value" value="{{save.value}}" data-dtype="Number" placeholder="0"/>
           <button class="save-roll" data-save="{{key}}">
             <i class="fas fa-dice-d20"></i> Roll

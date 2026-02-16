@@ -259,12 +259,15 @@ export class HolyLandsActorSheet extends ActorSheet {
   async _onSaveRoll(event) {
     event.preventDefault();
     const saveKey = event.currentTarget.dataset.save;
-    
-    // Ask for Difficulty Factor
-    const df = await this._getDifficultyFactor();
-    if (df === null) return;
-    
-    return this.actor.rollSave(saveKey, df);
+
+    // Use automatic DF from save definition (Shift-click to override)
+    if (event.shiftKey) {
+      const df = await this._getDifficultyFactor();
+      if (df === null) return;
+      return this.actor.rollSave(saveKey, df);
+    }
+
+    return this.actor.rollSave(saveKey);
   }
 
   /**

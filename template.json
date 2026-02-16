@@ -131,7 +131,7 @@
         },
         "curse": {
           "value": 0,
-          "label": "Using Melee"
+          "label": "Curse"
         },
         "spell": {
           "value": 0,

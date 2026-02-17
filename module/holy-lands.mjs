@@ -5,6 +5,7 @@
 
 import { HolyLandsActor } from "./documents/actor.mjs";
 import { HolyLandsItem } from "./documents/item.mjs";
+import { HolyLandsCombat } from "./documents/combat.mjs";
 import { HolyLandsActorSheet } from "./sheets/actor-sheet.mjs";
 import { HolyLandsItemSheet } from "./sheets/item-sheet.mjs";
 
@@ -18,6 +19,13 @@ Hooks.once('init', async function() {
   // Define custom Document classes
   CONFIG.Actor.documentClass = HolyLandsActor;
   CONFIG.Item.documentClass = HolyLandsItem;
+  CONFIG.Combat.documentClass = HolyLandsCombat;
+  
+  // Configure Combat settings
+  CONFIG.Combat.initiative = {
+    formula: "1d20 + @combat.advantageBonus",
+    decimals: 0
+  };
 
   // Register sheet application classes
   Actors.unregisterSheet("core", ActorSheet);
@@ -107,6 +115,32 @@ async function preloadHandlebarsTemplates() {
     "systems/holy-lands-rpg/templates/actor/parts/actor-miracles.hbs"
   ]);
 }
+
+/* -------------------------------------------- */
+/*  Combat Hooks                                */
+/* -------------------------------------------- */
+
+Hooks.on("combatStart", (combat, updateData) => {
+  console.log("Holy Lands RPG | Combat started");
+  // Reset all AtR at combat start
+  for (let combatant of combat.combatants) {
+    if (combatant.actor && typeof combatant.actor._resetAtR === 'function') {
+      combatant.actor._resetAtR(combatant.actor.system);
+      combatant.actor.update({ 'system.weaponSkills': combatant.actor.system.weaponSkills });
+    }
+  }
+});
+
+Hooks.on("combatRound", (combat, updateData, updateOptions) => {
+  console.log("Holy Lands RPG | New combat round");
+  // Reset all AtR at start of each round
+  for (let combatant of combat.combatants) {
+    if (combatant.actor && typeof combatant.actor._resetAtR === 'function') {
+      combatant.actor._resetAtR(combatant.actor.system);
+      combatant.actor.update({ 'system.weaponSkills': combatant.actor.system.weaponSkills });
+    }
+  }
+});
 
 /* -------------------------------------------- */
 /*  Chat Message Handlers                       */

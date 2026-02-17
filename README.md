@@ -25,10 +25,17 @@ Holy Lands RPG is a Christian-themed tabletop role-playing game set in medieval 
 - **Grace Effect**: Option to reroll natural 1s during character creation
 
 ### Combat System
-- **Weapon Skills**: Attack, Parry, Critical, and Special bonuses by weapon type
-- **Defense & Armor Rating**: Track character defenses
-- **Initiative**: Determines turn order in combat
-- **Attack & Damage Rolls**: Click-to-roll functionality
+- **Advantage Initiative**: Roll 1d20 + Advantage Bonus at start of each round
+- **Actions per Round (AtR)**: Track how many attacks each character can make
+- **Integrated Combat Tracker**: Full Foundry VTT encounter support
+- **Two-Gate Attack System**: Attack vs. tDEF, then Dodge/Defend resolution
+- **Defense Calculation**: Natural Defense + Armor Defense = Total Defense
+- **Armor Degradation**: CAP-based system for armor wear during combat
+- **Combat Bonuses**: Advantage, Dodge, Defend, and Damage bonuses
+- **Natural 20s/1s**: Critical hits (×2 damage), free counter-attacks, and automatic failures
+- **Click-to-Roll**: Attack, damage, and defense rolls with automatic AtR consumption
+
+📖 **See [COMBAT_GUIDE.md](COMBAT_GUIDE.md) for detailed combat mechanics and examples**
 
 ### Faith-Based Powers
 - **Miracles**: Supernatural abilities powered by Faith points

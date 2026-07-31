@@ -1,0 +1,31 @@
+{
+  "_id": "DkwIcPvCpHBLhHcb",
+  "_key": "!items!DkwIcPvCpHBLhHcb",
+  "name": "Voyager",
+  "type": "class",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "<p>A far-travelled navigator, trader, and tongue-of-many-lands.</p><p><em>Verify Gifts, Talents/Crafts choices, and starting equipment against Genesis Ch7.</em></p>",
+    "key": "voyager",
+    "requirements": "Intellect 10, Charisma 8",
+    "lifeCreationDie": "1d6",
+    "lifePerLevelDie": "1d4",
+    "faithCreationAttrs": [],
+    "faithCreationDie": "1d4",
+    "faithPerLevelDie": "1d4",
+    "statures": [
+      "commonFolk",
+      "weeFolk"
+    ],
+    "blessingsType": "Blessings of Fortune",
+    "grantedGifts": "Appraise\nNavigation\nPolitical Science\nSeafaring\nSpeak addLG\nSwimming\nWS Light Arms",
+    "startingEquipment": "See class description (Genesis Ch7)"
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

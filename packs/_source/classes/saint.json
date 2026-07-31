@@ -1,0 +1,34 @@
+{
+  "_id": "BPy2ESe9eKO6UIMU",
+  "_key": "!items!BPy2ESe9eKO6UIMU",
+  "name": "Saint",
+  "type": "class",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "<p>A vessel of High Miracles whose Faith outshines any blade.</p><p><em>Verify Gifts, Talents/Crafts choices, and starting equipment against Genesis Ch7.</em></p>",
+    "key": "saint",
+    "requirements": "Wisdom 10, Patience 8",
+    "lifeCreationDie": "1d4",
+    "lifePerLevelDie": "1d4",
+    "faithCreationAttrs": [
+      "pat",
+      "vir"
+    ],
+    "faithCreationDie": "1d8",
+    "faithPerLevelDie": "1d6",
+    "statures": [
+      "commonFolk",
+      "weeFolk"
+    ],
+    "blessingsType": "Blessings of Wisdom",
+    "grantedGifts": "Empower Crucifix\nIntuition\nMiracles: Clerical\nMiracles: High\nRead/Write nLG\nSacred Studies",
+    "startingEquipment": "See class description (Genesis Ch7)"
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

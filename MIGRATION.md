@@ -243,3 +243,31 @@ These are deliberate changes, flagged for review:
 - All validation is soft (warnings, nothing blocked), computed in derived
   data so it updates live as skills or bonuses change. Name matching is
   case-insensitive and tolerant ("WS Light Arms", "light arms", etc).
+
+## v2.4.0 — Class items and the Character Classes compendium
+
+- New **class** Item type carrying the Ch7 mechanics: attribute
+  requirements, Life creation die (STR + END + die; note Knight/Warrior use
+  1d8), Life per-level die (1d6 for Cleric/Devil Hunter/Fighter/Knight/
+  Saisier/Warrior, 1d4 others), Faith creation formula (attribute keys +
+  die - e.g. Cleric PAT + VIR + 1d6, Saint PAT + VIR + 1d8), Faith
+  per-level die (Saint 1d6, others 1d4), legal Statures, Blessings type,
+  granted Gifts, and starting equipment text.
+- **Character Classes compendium** (packs/classes) ships all 13 classes,
+  built from JSON sources in packs/_source/classes via the Foundry CLI
+  (rebuild with compilePack after editing sources). Gift lists and
+  equipment are starter data - verify against Ch7.
+- **Drop a class on a character**: replaces any existing class item, syncs
+  the class key (keeping stature-filter compatibility), and offers to roll
+  starting Life & Faith from the class formulas (Grace Effect honoured via
+  rr1). A warning shows if the character's Stature is illegal for the
+  class's own Ch7 list.
+- **Level Up button** (header, when a class is assigned): confirms, then
+  +1 Level, rolls the class Life and Faith dice (GE) and adds each to both
+  maximum and current (p.62), and posts a chat card with the rolls plus
+  reminders for the manual gains: +1 Attribute, +1 Save (Rule of Halves),
+  Talent/Craft picks by level, Miracle selections, and the expected
+  Blessings count (2 per 5 max Faith).
+- A **Start** button re-rolls starting Life & Faith for new characters.
+- Without a class item the old dropdown remains, so nothing breaks for
+  existing characters; the sheet hints at dropping a compendium class.

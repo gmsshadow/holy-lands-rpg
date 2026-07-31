@@ -1,0 +1,76 @@
+<div class="sheet-content">
+<header class="sheet-header">
+  <img class="profile-img" src="{{item.img}}" data-action="editImage" data-edit="img" title="{{item.name}}" height="64" width="64"/>
+  <div class="header-fields">
+    <h1 class="charname">
+      <input name="name" type="text" value="{{item.name}}" placeholder="Class Name"/>
+    </h1>
+  </div>
+</header>
+
+<section class="sheet-body">
+  <div class="form-group">
+    <label>Class Key</label>
+    <select name="system.key">
+      {{selectOptions classKeys selected=system.key}}
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label>Attribute Requirements</label>
+    <input type="text" name="system.requirements" value="{{system.requirements}}" placeholder="Charisma 10, Intellect 8"/>
+  </div>
+
+  <div class="form-group">
+    <label>Life: creation die (Life = STR + END + die, GE)</label>
+    <input type="text" name="system.lifeCreationDie" value="{{system.lifeCreationDie}}" placeholder="1d6"/>
+  </div>
+
+  <div class="form-group">
+    <label>Life: per-level die</label>
+    <input type="text" name="system.lifePerLevelDie" value="{{system.lifePerLevelDie}}" placeholder="1d4"/>
+  </div>
+
+  <div class="form-group">
+    <label>Faith: creation attributes (comma keys, e.g. pat,vir)</label>
+    <input type="text" name="system.faithCreationAttrs" value="{{faithAttrsCsv}}" placeholder="pat"/>
+  </div>
+
+  <div class="form-group">
+    <label>Faith: creation die</label>
+    <input type="text" name="system.faithCreationDie" value="{{system.faithCreationDie}}" placeholder="1d4"/>
+  </div>
+
+  <div class="form-group">
+    <label>Faith: per-level die</label>
+    <input type="text" name="system.faithPerLevelDie" value="{{system.faithPerLevelDie}}" placeholder="1d4"/>
+  </div>
+
+  <div class="form-group">
+    <label>Statures (comma keys: weeFolk,dwarfolk,commonFolk,giantFolk)</label>
+    <input type="text" name="system.statures" value="{{staturesCsv}}"/>
+  </div>
+
+  <div class="form-group">
+    <label>Blessings Type</label>
+    <input type="text" name="system.blessingsType" value="{{system.blessingsType}}" placeholder="Blessings of Duty"/>
+  </div>
+
+  <div class="form-group">
+    <label>Gifts (granted skills)</label>
+    <textarea name="system.grantedGifts" rows="4">{{system.grantedGifts}}</textarea>
+  </div>
+
+  <div class="form-group">
+    <label>Starting Equipment</label>
+    <textarea name="system.startingEquipment" rows="4">{{system.startingEquipment}}</textarea>
+  </div>
+
+  <div class="form-group">
+    <label>Description</label>
+    <prose-mirror name="system.description" value="{{system.description}}" toggled>
+      {{{enrichedDescription}}}
+    </prose-mirror>
+  </div>
+</section>
+</div>

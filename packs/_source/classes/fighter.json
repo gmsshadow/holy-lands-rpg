@@ -1,0 +1,33 @@
+{
+  "_id": "8ITmkgSvX6XOEdxa",
+  "_key": "!items!8ITmkgSvX6XOEdxa",
+  "name": "Fighter",
+  "type": "class",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "<p>A professional soldier at home with any weapon and any stature.</p><p><em>Verify Gifts, Talents/Crafts choices, and starting equipment against Genesis Ch7.</em></p>",
+    "key": "fighter",
+    "requirements": "",
+    "lifeCreationDie": "1d6",
+    "lifePerLevelDie": "1d6",
+    "faithCreationAttrs": [],
+    "faithCreationDie": "1d4",
+    "faithPerLevelDie": "1d4",
+    "statures": [
+      "weeFolk",
+      "dwarfolk",
+      "commonFolk",
+      "giantFolk"
+    ],
+    "blessingsType": "",
+    "grantedGifts": "Blacksmith\nBowsmith\nBuild/Construct\nCombat Abilities\nWeaponry\nWS (choice)",
+    "startingEquipment": "See class description (Genesis Ch7)"
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

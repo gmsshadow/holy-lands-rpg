@@ -1,0 +1,33 @@
+{
+  "_id": "O2Fvutanms062vYn",
+  "_key": "!items!O2Fvutanms062vYn",
+  "name": "Adventurer",
+  "type": "class",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "<p>A free spirit open to any life path, at home in every stature and trade.</p><p><em>Verify Gifts, Talents/Crafts choices, and starting equipment against Genesis Ch7.</em></p>",
+    "key": "adventurer",
+    "requirements": "",
+    "lifeCreationDie": "1d4",
+    "lifePerLevelDie": "1d4",
+    "faithCreationAttrs": [],
+    "faithCreationDie": "1d4",
+    "faithPerLevelDie": "1d4",
+    "statures": [
+      "weeFolk",
+      "dwarfolk",
+      "commonFolk",
+      "giantFolk"
+    ],
+    "blessingsType": "",
+    "grantedGifts": "Choose skills freely with a PF of +2 (see p.65)",
+    "startingEquipment": "See class description (Genesis Ch7)"
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

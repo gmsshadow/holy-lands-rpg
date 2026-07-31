@@ -11,7 +11,7 @@ import { HolyLandsItemSheet } from "./sheets/item-sheet.mjs";
 import { CharacterData } from "./data/actor-character.mjs";
 import { NpcData } from "./data/actor-npc.mjs";
 import {
-  WeaponData, ArmorData, EquipmentData, MiracleData, BlessingData, SkillData
+  WeaponData, ArmorData, EquipmentData, MiracleData, BlessingData, SkillData, ClassData
 } from "./data/items.mjs";
 
 const { Actors, Items } = foundry.documents.collections;
@@ -39,7 +39,8 @@ Hooks.once("init", function() {
     equipment: EquipmentData,
     miracle: MiracleData,
     blessing: BlessingData,
-    skill: SkillData
+    skill: SkillData,
+    class: ClassData
   };
 
   // Configure Combat settings

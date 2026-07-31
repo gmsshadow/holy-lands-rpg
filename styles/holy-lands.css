@@ -587,3 +587,7 @@
   font-size: 0.85em;
   margin: 2px 0;
 }
+
+/* Class item display in the header */
+.holy-lands-rpg .class-item-display { display: flex; align-items: center; gap: 6px; }
+.holy-lands-rpg .class-item-display a { cursor: pointer; }

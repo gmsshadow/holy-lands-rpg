@@ -1,0 +1,30 @@
+{
+  "_id": "I6qsDi3dnjwCChEW",
+  "_key": "!items!I6qsDi3dnjwCChEW",
+  "name": "Saisier",
+  "type": "class",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "<p>An unarmed martial specialist - grappling, throws, and iron discipline.</p><p><em>Verify Gifts, Talents/Crafts choices, and starting equipment against Genesis Ch7.</em></p>",
+    "key": "saisier",
+    "requirements": "Agility 10, Strength 8",
+    "lifeCreationDie": "1d6",
+    "lifePerLevelDie": "1d6",
+    "faithCreationAttrs": [],
+    "faithCreationDie": "1d4",
+    "faithPerLevelDie": "1d4",
+    "statures": [
+      "commonFolk"
+    ],
+    "blessingsType": "Blessings of Duty",
+    "grantedGifts": "Combat Abilities\nCS Grapple\nCS Grapple Escape\nCS Ground Fight\nWS Hand to Hand\nWS Kick Attack",
+    "startingEquipment": "See class description (Genesis Ch7)"
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

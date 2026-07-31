@@ -141,6 +141,96 @@ export class HolyLandsActor extends Actor {
     return this.items.find(i => (i.type === "weapon") && i.system.equipped) ?? null;
   }
 
+  /** The character's Class item, if one has been dropped on the sheet. */
+  get classItem() {
+    return this.items.find(i => i.type === "class") ?? null;
+  }
+
+  /** Apply the Grace Effect reroll modifier to a die formula if enabled. */
+  static graceFormula(formula) {
+    if (!game.settings.get("holy-lands-rpg", "graceEffect")) return formula;
+    return String(formula).replace(/(\d*)d(\d+)/gi, "$&rr1");
+  }
+
+  /**
+   * Roll starting Life and Faith from the Class item (Genesis Ch7):
+   * Life = STR + END + class die (GE); Faith = (class attributes) + die (GE).
+   */
+  async rollStartingLifeFaith() {
+    const cls = this.classItem;
+    if (!cls) {
+      ui.notifications.warn("No Class item on this character.");
+      return;
+    }
+    const attrs = this.system.attributes;
+
+    const lifeRoll = new Roll(this.constructor.graceFormula(cls.system.lifeCreationDie || "1d6"));
+    await lifeRoll.evaluate();
+    const lifeMax = (attrs.str?.value || 0) + (attrs.end?.value || 0) + lifeRoll.total;
+
+    const faithAttrs = cls.system.faithCreationAttrs ?? [];
+    const faithAttrTotal = faithAttrs.reduce((sum, key) => sum + (attrs[key]?.value || 0), 0);
+    const faithRoll = new Roll(this.constructor.graceFormula(cls.system.faithCreationDie || "1d4"));
+    await faithRoll.evaluate();
+    const faithMax = faithAttrTotal + faithRoll.total;
+
+    await this.update({
+      "system.life.max": lifeMax, "system.life.value": lifeMax,
+      "system.faith.max": faithMax, "system.faith.value": faithMax
+    });
+
+    const faithAttrText = faithAttrs.length
+      ? faithAttrs.map(k => attrs[k]?.label ?? k).join(" + ") + " + "
+      : "";
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} - Starting Life &amp; Faith (${cls.name})</strong><br>`
+        + `Life: STR ${attrs.str.value} + END ${attrs.end.value} + ${lifeRoll.total} = <strong>${lifeMax}</strong><br>`
+        + `Faith: ${faithAttrText}${faithRoll.total} = <strong>${faithMax}</strong>`,
+      rolls: [lifeRoll, faithRoll]
+    });
+  }
+
+  /**
+   * Level up (Progressing a Character, p.62): +1 Level; roll the class
+   * per-level Life and Faith dice (GE) and add each to BOTH max and current;
+   * remind about the manual gains (+1 Attribute, +1 Save, Skills, Blessings).
+   */
+  async levelUp() {
+    const cls = this.classItem;
+    if (!cls) {
+      ui.notifications.warn("No Class item on this character - drop one from the Character Classes compendium first.");
+      return;
+    }
+    const newLevel = (this.system.level || 1) + 1;
+
+    const lifeRoll = new Roll(this.constructor.graceFormula(cls.system.lifePerLevelDie || "1d4"));
+    await lifeRoll.evaluate();
+    const faithRoll = new Roll(this.constructor.graceFormula(cls.system.faithPerLevelDie || "1d4"));
+    await faithRoll.evaluate();
+
+    const newFaithMax = (this.system.faith.max || 0) + faithRoll.total;
+    await this.update({
+      "system.level": newLevel,
+      "system.life.max": (this.system.life.max || 0) + lifeRoll.total,
+      "system.life.value": (this.system.life.value || 0) + lifeRoll.total,
+      "system.faith.max": newFaithMax,
+      "system.faith.value": (this.system.faith.value || 0) + faithRoll.total
+    });
+
+    const expectedBlessings = Math.floor(newFaithMax / 5) * 2;
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} reaches Level ${newLevel}!</strong> (${cls.name})<br>`
+        + `Life +${lifeRoll.total} (max and current), Faith +${faithRoll.total} (max and current).<br>`
+        + `<em>Also gain: +1 to one Attribute and +1 to one Saving Throw (Rule of Halves applies); `
+        + `new Talent at Levels 2-3 / new Craft at Levels 3-7 (start at +1 PF); `
+        + `Saints and Clerics select new Miracles. `
+        + `Blessings: should now have ${expectedBlessings} (2 per 5 max Faith).</em>`,
+      rolls: [lifeRoll, faithRoll]
+    });
+  }
+
   /* -------------------------------------------- */
   /*  Checks & Saves                              */
   /* -------------------------------------------- */

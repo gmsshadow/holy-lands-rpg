@@ -20,9 +20,20 @@
     <div class="character-info">
       <div class="info-group">
         <label>Class</label>
+        {{#if classItem}}
+        <div class="class-item-display" data-item-id="{{classItem.id}}">
+          <a data-action="itemEdit" title="Open class"><strong>{{classItem.name}}</strong></a>
+          <a data-action="itemDelete" title="Remove class"><i class="fas fa-times"></i></a>
+        </div>
+        {{#if classStatureInvalid}}
+        <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{classItem.name}} cannot be this Stature (Ch7)</p>
+        {{/if}}
+        {{else}}
         <select name="system.class">
           {{selectOptions classes selected=system.class}}
         </select>
+        <p class="hint">Drop a Class from the Character Classes compendium for full automation.</p>
+        {{/if}}
       </div>
       <div class="info-group">
         <label>Stature</label>
@@ -33,6 +44,14 @@
       <div class="info-group">
         <label>Level</label>
         <input type="number" name="system.level" value="{{system.level}}"/>
+        {{#if classItem}}
+        <button type="button" data-action="levelUp" title="Roll class Life/Faith dice and advance a level">
+          <i class="fas fa-arrow-up"></i> Level Up
+        </button>
+        <button type="button" data-action="rollStartingLifeFaith" title="Roll starting Life and Faith (new characters)">
+          <i class="fas fa-dice"></i> Start
+        </button>
+        {{/if}}
       </div>
       <div class="info-group">
         <label>XP</label>

@@ -86,3 +86,33 @@ export class SkillData extends foundry.abstract.TypeDataModel {
     };
   }
 }
+
+export class ClassData extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    return {
+      description: new fields.HTMLField({ required: true, initial: "" }),
+      key: new fields.StringField({ required: true, initial: "adventurer" }),
+      requirements: new fields.StringField({ required: true, initial: "" }),
+
+      // Creation: Life = STR + END + lifeCreationDie(GE)
+      lifeCreationDie: new fields.StringField({ required: true, initial: "1d6" }),
+      // Per level: add lifePerLevelDie(GE) to max and current Life
+      lifePerLevelDie: new fields.StringField({ required: true, initial: "1d4" }),
+
+      // Creation: Faith = (sum of faithCreationAttrs AVs) + faithCreationDie(GE)
+      faithCreationAttrs: new fields.ArrayField(new fields.StringField()),
+      faithCreationDie: new fields.StringField({ required: true, initial: "1d4" }),
+      // Per level: add faithPerLevelDie(GE) to max and current Faith
+      faithPerLevelDie: new fields.StringField({ required: true, initial: "1d4" }),
+
+      // Statures this class may be (Genesis p.53 / Ch7)
+      statures: new fields.ArrayField(new fields.StringField(), {
+        initial: ["weeFolk", "dwarfolk", "commonFolk", "giantFolk"]
+      }),
+
+      blessingsType: new fields.StringField({ required: true, initial: "" }),
+      grantedGifts: new fields.StringField({ required: true, initial: "" }),
+      startingEquipment: new fields.StringField({ required: true, initial: "" })
+    };
+  }
+}

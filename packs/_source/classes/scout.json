@@ -1,0 +1,31 @@
+{
+  "_id": "7IGvKT9C7JbtwbRQ",
+  "_key": "!items!7IGvKT9C7JbtwbRQ",
+  "name": "Scout",
+  "type": "class",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "<p>A wilderness expert who finds the path and the quarry.</p><p><em>Verify Gifts, Talents/Crafts choices, and starting equipment against Genesis Ch7.</em></p>",
+    "key": "scout",
+    "requirements": "Wisdom 10, Agility 8",
+    "lifeCreationDie": "1d6",
+    "lifePerLevelDie": "1d4",
+    "faithCreationAttrs": [],
+    "faithCreationDie": "1d4",
+    "faithPerLevelDie": "1d4",
+    "statures": [
+      "commonFolk",
+      "weeFolk"
+    ],
+    "blessingsType": "Blessings of Fortune",
+    "grantedGifts": "Camp\nEarth Science\nSneak\nTrack\nWS Missiles\nWS Thrown",
+    "startingEquipment": "See class description (Genesis Ch7)"
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

@@ -99,8 +99,31 @@ export class HolyLandsItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
         craft: "Craft"
       };
     }
+    if (item.type === "class") {
+      context.classKeys = {
+        adventurer: "Adventurer", bard: "Bard", cleric: "Cleric",
+        devilHunter: "Devil Hunter", fighter: "Fighter", jester: "Jester",
+        knight: "Knight", saint: "Saint", saisier: "Saisier",
+        scout: "Scout", spy: "Spy", voyager: "Voyager", warrior: "Warrior"
+      };
+      context.staturesCsv = (item.system.statures ?? []).join(",");
+      context.faithAttrsCsv = (item.system.faithCreationAttrs ?? []).join(",");
+    }
 
     return context;
+  }
+
+  /** @override Convert comma-separated array inputs before submission. */
+  _processFormData(event, form, formData) {
+    const data = super._processFormData(event, form, formData);
+    for (const path of ["system.statures", "system.faithCreationAttrs"]) {
+      const value = foundry.utils.getProperty(data, path);
+      if (typeof value === "string") {
+        foundry.utils.setProperty(data, path,
+          value.split(",").map(x => x.trim()).filter(x => x.length));
+      }
+    }
+    return data;
   }
 
   /* -------------------------------------------- */

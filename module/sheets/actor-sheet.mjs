@@ -33,7 +33,9 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       forfeitAdvantage: HolyLandsActorSheet.#onForfeitAdvantage,
       declareRetreat: HolyLandsActorSheet.#onDeclareRetreat,
       npcSkillAdd: HolyLandsActorSheet.#onNpcSkillAdd,
-      npcSkillDelete: HolyLandsActorSheet.#onNpcSkillDelete
+      npcSkillDelete: HolyLandsActorSheet.#onNpcSkillDelete,
+      levelUp: HolyLandsActorSheet.#onLevelUp,
+      rollStartingLifeFaith: HolyLandsActorSheet.#onRollStartingLifeFaith
     }
   };
 
@@ -126,6 +128,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
   /** Selection choices for character sheets. */
   #prepareCharacterContext(context) {
+    context.classItem = this.actor.classItem;
     context.statures = {
       weeFolk: "WeeFolk",
       dwarfolk: "Dwarfolk",
@@ -140,6 +143,15 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     const allClasses = HolyLandsActorSheet.CLASSES;
     const allowed = HolyLandsActorSheet.STATURE_CLASSES[this.actor.system.stature]
       ?? Object.keys(allClasses);
+
+    // A dropped Class item is authoritative: warn if the current Stature
+    // isn't in the item's statures list (Ch7 per-class lists).
+    const clsItem = context.classItem;
+    if (clsItem) {
+      const okStatures = clsItem.system.statures ?? [];
+      context.classStatureInvalid = okStatures.length
+        && !okStatures.includes(this.actor.system.stature);
+    }
     context.classes = {};
     for (const key of allowed) context.classes[key] = allClasses[key];
     const current = this.actor.system.class;
@@ -214,13 +226,33 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     event.dataTransfer.setData("text/plain", JSON.stringify(item.toDragData()));
   }
 
+  /** @override Enforce a single Class item and sync the class key on drop. */
+  async _onDropItem(event, item) {
+    if ((item?.type === "class") && (this.actor.type === "character")) {
+      const existing = this.actor.items.filter(i => i.type === "class");
+      if (existing.length) await this.actor.deleteEmbeddedDocuments("Item", existing.map(i => i.id));
+      const [created] = await this.actor.createEmbeddedDocuments("Item", [item.toObject()]);
+      const key = created.system.key;
+      if (key) await this.actor.update({ "system.class": key });
+
+      const rollNow = await DialogV2.confirm({
+        window: { title: created.name },
+        content: `<p><strong>${created.name}</strong> assigned. Roll starting Life and Faith from the class formulas now? (Overwrites current values - intended for new characters.)</p>`,
+        rejectClose: false
+      });
+      if (rollNow) await this.actor.rollStartingLifeFaith();
+      return created;
+    }
+    return super._onDropItem(event, item);
+  }
+
   /* -------------------------------------------- */
   /*  Action Handlers                             */
   /* -------------------------------------------- */
 
   /** Retrieve the Item document for the row containing the action target. */
   #getItemForTarget(target) {
-    const itemId = target.closest(".item")?.dataset.itemId;
+    const itemId = target.closest("[data-item-id]")?.dataset.itemId;
     return itemId ? this.actor.items.get(itemId) : null;
   }
 
@@ -324,6 +356,26 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     const skills = foundry.utils.deepClone(this.actor.system.skills ?? []);
     skills.push({ name: "", value: 0 });
     return this.actor.update({ "system.skills": skills });
+  }
+
+  static async #onLevelUp(event, target) {
+    const proceed = await DialogV2.confirm({
+      window: { title: "Level Up" },
+      content: `<p>Advance <strong>${this.actor.name}</strong> to Level ${(this.actor.system.level || 1) + 1}? This rolls the class Life and Faith dice and applies them.</p>`,
+      rejectClose: false
+    });
+    if (!proceed) return;
+    return this.actor.levelUp();
+  }
+
+  static async #onRollStartingLifeFaith(event, target) {
+    const proceed = await DialogV2.confirm({
+      window: { title: "Roll Starting Life & Faith" },
+      content: `<p>Roll starting Life and Faith for <strong>${this.actor.name}</strong> from the class formulas? This overwrites current and maximum Life/Faith.</p>`,
+      rejectClose: false
+    });
+    if (!proceed) return;
+    return this.actor.rollStartingLifeFaith();
   }
 
   static async #onNpcSkillDelete(event, target) {

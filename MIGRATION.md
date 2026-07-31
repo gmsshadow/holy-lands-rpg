@@ -319,3 +319,18 @@ These are deliberate changes, flagged for review:
 - **Rule of Halves on Saves** (p.55, threshold +3) is now checked in
   derived data: a warning appears under the Saving Throws header when the
   second-highest Bonus is below half the highest.
+
+## v2.7.1
+
+- Fixed: class Attribute requirement warnings were only shown for
+  characters whose attributes were rolled through the Step 2 button
+  (attributes rolled before v2.5.0 or entered manually never flagged).
+  Warnings now show whenever a class item's requirements are unmet; the
+  Step 2A Reroll button still requires the Step 2 lock (with a hint
+  otherwise, since 2A needs a completed Step 2 roll to modify).
+- Dropping a class whose requirements are unmet now offers the Step 2A
+  reroll dialog immediately (before the starting Life/Faith offer, since
+  Life depends on STR/END which a reroll may change); if Step 2 hasn't
+  been rolled yet a notification explains the order.
+- Drop handling made defensive against receiving raw drag data instead of
+  an Item document (resolved via fromDropData).

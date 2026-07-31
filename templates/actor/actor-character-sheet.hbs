@@ -32,9 +32,13 @@
         {{#each unmetRequirements}}
         <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{this.label}} AV {{this.current}} below the required {{this.min}}</p>
         {{/each}}
+        {{#if attributesLocked}}
         <button type="button" data-action="rollStep2A" title="Reroll unmet class Attributes with the Stature dice until requirements are met (p.53)">
           <i class="fas fa-rotate"></i> Step 2A Reroll
         </button>
+        {{else}}
+        <p class="hint">Roll Attributes (Step 2) first, then Step 2A rerolls become available.</p>
+        {{/if}}
         {{/if}}
         {{else}}
         <select name="system.class">

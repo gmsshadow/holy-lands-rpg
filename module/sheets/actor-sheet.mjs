@@ -136,7 +136,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     context.classItem = this.actor.classItem;
     context.isGM = game.user.isGM;
     context.attributesLocked = !!this.actor.system.creation?.attributesRolled;
-    context.unmetRequirements = context.attributesLocked ? this.actor.getUnmetClassRequirements() : [];
+    context.unmetRequirements = this.actor.getUnmetClassRequirements();
     context.saveBonusChosen = !!this.actor.system.creation?.saveBonusChosen;
     context.statures = {
       weeFolk: "WeeFolk",
@@ -237,12 +237,39 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
   /** @override Enforce a single Class item and sync the class key on drop. */
   async _onDropItem(event, item) {
-    if ((item?.type === "class") && (this.actor.type === "character")) {
+    // Depending on core version/path this may be an Item document or raw
+    // drag data - resolve defensively.
+    let doc = item;
+    if (doc && !(doc instanceof Item) && (doc.uuid || doc.type === "Item")) {
+      doc = await Item.implementation.fromDropData(doc);
+    }
+
+    if ((doc?.type === "class") && (this.actor.type === "character")) {
       const existing = this.actor.items.filter(i => i.type === "class");
       if (existing.length) await this.actor.deleteEmbeddedDocuments("Item", existing.map(i => i.id));
-      const [created] = await this.actor.createEmbeddedDocuments("Item", [item.toObject()]);
+      const [created] = await this.actor.createEmbeddedDocuments("Item", [doc.toObject()]);
       const key = created.system.key;
       if (key) await this.actor.update({ "system.class": key });
+
+      // Step 2A first: if attribute requirements are unmet, offer the
+      // reroll immediately (before Life/Faith, which depend on STR/END).
+      const unmet = this.actor.getUnmetClassRequirements();
+      if (unmet.length) {
+        if (this.actor.system.creation?.attributesRolled) {
+          const list = unmet.map(r => `<li>${r.label}: AV ${r.current}, requires ${r.min}</li>`).join("");
+          const reroll = await DialogV2.confirm({
+            window: { title: `${created.name} - Step 2A` },
+            content: `<p><strong>${created.name}</strong> has Attribute requirements this character does not meet:</p>
+              <ul>${list}</ul>
+              <p><em>Reroll each with the Stature dice until met (p.53, Step 2A)?</em></p>`,
+            rejectClose: false
+          });
+          if (reroll) await this.actor.rollStep2ARerolls();
+        }
+        else {
+          ui.notifications.warn(`${created.name}: attribute requirements not met (${unmet.map(r => `${r.label} ${r.current}/${r.min}`).join(", ")}). Roll Attributes (Step 2), then use Step 2A Reroll.`);
+        }
+      }
 
       const rollNow = await DialogV2.confirm({
         window: { title: created.name },

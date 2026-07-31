@@ -476,3 +476,21 @@ These are deliberate changes, flagged for review:
   skill list" for Talent/Craft picks isn't stored as structured data (it
   couldn't be reliably extracted), so those picks are player-chosen from
   the full Skills compendium rather than restricted per class.
+
+## v2.13.0 — Step 10: Attribute Bonuses (AV 12+)
+
+- New Attribute Bonuses panel on the Attributes tab. For each Attribute at
+  an even value >= 12, the character earns one bonus per threshold
+  (12, 14, 16... - e.g. STR 15 = 2, STR 16 = 3), per p.60. Each row shows
+  the Attribute, its effect, an applied/earned counter, and an Apply button
+  while bonuses remain; a pending count shows in the header.
+- Effects are applied correctly per Attribute: STR +1 Damage, SPD +1 Dodge,
+  AGI +1 AtR (choose the Weapon Skill), PAT/END +1d4(GE) Faith/Life,
+  BTY/CHA +2d4 x 50g, WIL +1 to a chosen Save, INT/WIS/MEM +1 PF to a
+  chosen Craft/Gift/Talent, VIR remove a chosen Sin. Dice effects roll with
+  the Grace Effect and post to chat; choice effects prompt a picker.
+- Applied counts are tracked per Attribute (creation.attrBonusApplied), so
+  the panel always shows what remains - this also covers the level-up case,
+  since raising an Attribute past a new even threshold surfaces a new
+  pending bonus. Rule-of-Halves-flagged choices (Craft/Gift/Talent/Save)
+  are noted in the effect text; the existing RoH warnings still apply.

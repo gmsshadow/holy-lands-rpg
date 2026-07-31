@@ -89,7 +89,9 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
         startingRolled: new fields.BooleanField({ required: true, initial: false }),
         lifeDieResult: new fields.NumberField({ required: true, integer: true, initial: 0 }),
         faithDieResult: new fields.NumberField({ required: true, integer: true, initial: 0 }),
-        giftsGranted: new fields.BooleanField({ required: true, initial: false })
+        giftsGranted: new fields.BooleanField({ required: true, initial: false }),
+        // How many Attribute Bonuses (Step 10) have been applied per attribute.
+        attrBonusApplied: new fields.ObjectField({ required: true, initial: {} })
       })
     };
   }
@@ -116,6 +118,22 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
     dwarfolk:   { int: "3d4", wis: "3d4", pat: "2d4", will: "4d4", mem: "3d4", str: "4d4", agi: "3d4", spd: "2d4", end: "4d4", bty: "3d4", cha: "2d4", vir: "3d4" },
     commonFolk: { int: "3d4", wis: "3d4", pat: "3d4", will: "3d4", mem: "3d4", str: "3d4", agi: "3d4", spd: "3d4", end: "3d4", bty: "3d4", cha: "3d4", vir: "3d4" },
     giantFolk:  { int: "3d4", wis: "3d4", pat: "2d4", will: "3d4", mem: "3d4", str: "5d4", agi: "3d4", spd: "2d4", end: "4d4", bty: "2d4", cha: "2d4", vir: "3d4" }
+  };
+
+  /** Step 10 Attribute Bonus effects (p.60). */
+  static ATTR_BONUS_EFFECTS = {
+    int: "increase any Craft by +1 (RoH)",
+    wis: "increase any Gift by +1 (RoH)",
+    pat: "increase Faith by +1d4 (GE)",
+    will: "increase any Saving Throw by +1 (RoH)",
+    mem: "increase any Talent by +1 (RoH)",
+    str: "increase Damage by +1",
+    agi: "increase any AtR by +1",
+    spd: "increase Dodge by +1",
+    end: "increase Life by +1d4 (GE)",
+    bty: "add 2d4 x 50g",
+    cha: "add 2d4 x 50g",
+    vir: "lose one (1) Sin"
   };
 
   /** Height by Stature, indexed by d12-1 (Genesis p.56). */
@@ -319,6 +337,26 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
       expectedSins: this.constructor.sinPhobiaCount(this.attributes.vir?.value ?? 9),
       expectedPhobias: this.constructor.sinPhobiaCount(this.attributes.will?.value ?? 9)
     };
+
+    // Step 10 Attribute Bonuses: one bonus per even AV threshold >= 12
+    // (12, 14, 16, ...). Track earned vs applied per attribute.
+    const applied = this.creation?.attrBonusApplied ?? {};
+    const bonusRows = [];
+    let totalEarned = 0, totalApplied = 0;
+    for (const [key, attr] of Object.entries(this.attributes)) {
+      const av = attr.value || 0;
+      const earned = (av >= 12) ? Math.floor((av - 10) / 2) : 0;
+      const used = applied[key] || 0;
+      totalEarned += earned; totalApplied += used;
+      if (earned > 0) {
+        bonusRows.push({
+          key, label: attr.label, av, earned, used,
+          remaining: earned - used,
+          effect: this.constructor.ATTR_BONUS_EFFECTS[key]
+        });
+      }
+    }
+    this.attrBonusValidation = { rows: bonusRows, totalEarned, totalApplied, pending: totalEarned - totalApplied };
   }
 
   /** Ability proficiency factors, derived from attribute pairs (round up). */

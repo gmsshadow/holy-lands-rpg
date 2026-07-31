@@ -145,6 +145,24 @@
       {{/each}}
     </div>
 
+    {{#if attrBonuses.rows.length}}
+    <div class="attr-bonus-panel">
+      <h3>Attribute Bonuses <span class="hint">(Step 10, p.60 - {{attrBonuses.pending}} pending)</span></h3>
+      {{#each attrBonuses.rows}}
+      <div class="attr-bonus-row {{#if this.remaining}}has-pending{{/if}}">
+        <span class="ab-attr">{{this.label}} {{this.av}}</span>
+        <span class="ab-effect">{{this.effect}}</span>
+        <span class="ab-count">{{this.used}}/{{this.earned}}</span>
+        {{#if this.remaining}}
+        <button type="button" data-action="applyAttrBonus" data-attr="{{this.key}}" title="Apply one bonus">
+          <i class="fas fa-plus"></i> Apply
+        </button>
+        {{/if}}
+      </div>
+      {{/each}}
+    </div>
+    {{/if}}
+
     <h3>Abilities</h3>
     <div class="abilities-grid">
       {{#each system.abilities as |ability key|}}

@@ -510,6 +510,110 @@ export class HolyLandsActor extends Actor {
     return this.createEmbeddedDocuments("Item", [data]);
   }
 
+  /**
+   * Apply one Step 10 Attribute Bonus for the given attribute (p.60). The
+   * effect depends on the attribute; RoH-flagged choices (Craft/Gift/Talent/
+   * Save) prompt for which to raise. Increments the applied counter.
+   */
+  async applyAttributeBonus(attrKey, choiceKey = null) {
+    if (this.type !== "character") return;
+    const v = this.system.attrBonusValidation?.rows?.find(r => r.key === attrKey);
+    if (!v || v.remaining <= 0) {
+      ui.notifications.warn("No Attribute Bonus remaining for that Attribute.");
+      return;
+    }
+
+    const update = {};
+    const applied = foundry.utils.deepClone(this.system.creation?.attrBonusApplied ?? {});
+    applied[attrKey] = (applied[attrKey] || 0) + 1;
+    update["system.creation.attrBonusApplied"] = applied;
+
+    let effectText = "";
+    const rolls = [];
+
+    switch (attrKey) {
+      case "str":
+        update["system.combat.damageBonus"] = (this.system.combat.damageBonus || 0) + 1;
+        effectText = `Damage +1 (now +${update["system.combat.damageBonus"]})`;
+        break;
+      case "spd":
+        update["system.combat.dodgeBonus"] = (this.system.combat.dodgeBonus || 0) + 1;
+        effectText = `Dodge +1 (now +${update["system.combat.dodgeBonus"]})`;
+        break;
+      case "agi": {
+        const wsKey = choiceKey || "lightArms";
+        const ws = this.system.weaponSkills?.[wsKey];
+        if (ws) {
+          update[`system.weaponSkills.${wsKey}.atRMax`] = (ws.atRMax || 0) + 1;
+          update[`system.weaponSkills.${wsKey}.atRCurrent`] = (ws.atRCurrent || 0) + 1;
+          effectText = `${ws.label} AtR +1 (now ${update[`system.weaponSkills.${wsKey}.atRMax`]})`;
+        }
+        break;
+      }
+      case "pat": {
+        const roll = new Roll(this.constructor.graceFormula("1d4"));
+        await roll.evaluate(); rolls.push(roll);
+        update["system.faith.max"] = (this.system.faith.max || 0) + roll.total;
+        update["system.faith.value"] = (this.system.faith.value || 0) + roll.total;
+        effectText = `Faith +${roll.total} (1d4 GE)`;
+        break;
+      }
+      case "end": {
+        const roll = new Roll(this.constructor.graceFormula("1d4"));
+        await roll.evaluate(); rolls.push(roll);
+        update["system.life.max"] = (this.system.life.max || 0) + roll.total;
+        update["system.life.value"] = (this.system.life.value || 0) + roll.total;
+        effectText = `Life +${roll.total} (1d4 GE)`;
+        break;
+      }
+      case "bty":
+      case "cha": {
+        const roll = new Roll("2d4");
+        await roll.evaluate(); rolls.push(roll);
+        const gold = roll.total * 50;
+        update["system.currency.gold"] = (this.system.currency.gold || 0) + gold;
+        effectText = `+${gold}g (2d4 x 50)`;
+        break;
+      }
+      case "will": {
+        const saveKey = choiceKey;
+        const save = this.system.saves?.[saveKey];
+        if (save) {
+          update[`system.saves.${saveKey}.value`] = (save.value || 0) + 1;
+          effectText = `Save vs. ${save.label} +1 (now +${update[`system.saves.${saveKey}.value`]})`;
+        }
+        break;
+      }
+      case "int": case "wis": case "mem": {
+        // Raise a chosen skill item's PF (Craft/Gift/Talent respectively).
+        const skill = this.items.get(choiceKey);
+        if (skill && (skill.type === "skill")) {
+          await skill.update({ "system.pf": (skill.system.pf || 0) + 1 });
+          effectText = `${skill.name} PF +1 (now +${(skill.system.pf || 0) + 1})`;
+        }
+        break;
+      }
+      case "vir": {
+        const sins = foundry.utils.deepClone(this.system.sins ?? []);
+        if (choiceKey !== null && choiceKey !== undefined && sins[choiceKey] !== undefined) {
+          const removed = sins.splice(Number(choiceKey), 1);
+          update["system.sins"] = sins;
+          effectText = `lost the Sin of ${removed[0]}`;
+        } else {
+          effectText = "may lose one Sin (none selected)";
+        }
+        break;
+      }
+    }
+
+    await this.update(update);
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} - Attribute Bonus (${this.system.attributes[attrKey].label} ${this.system.attributes[attrKey].value})</strong>: ${effectText}`,
+      rolls
+    });
+  }
+
   /** Rac/GM correction: unlock the starting Life & Faith roll. */
   async unlockStartingRoll() {
     if (!game.user.isGM) {

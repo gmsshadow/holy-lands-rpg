@@ -48,7 +48,8 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       charArrayAdd: HolyLandsActorSheet.#onCharArrayAdd,
       charArrayDelete: HolyLandsActorSheet.#onCharArrayDelete,
       grantGifts: HolyLandsActorSheet.#onGrantGifts,
-      addSkill: HolyLandsActorSheet.#onAddSkill
+      addSkill: HolyLandsActorSheet.#onAddSkill,
+      applyAttrBonus: HolyLandsActorSheet.#onApplyAttrBonus
     }
   };
 
@@ -148,6 +149,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     context.saveBonusChosen = !!this.actor.system.creation?.saveBonusChosen;
     context.startingRolled = !!this.actor.system.creation?.startingRolled;
     context.giftsGranted = !!this.actor.system.creation?.giftsGranted;
+    context.attrBonuses = this.actor.system.attrBonusValidation;
     context.hasClassGifts = !!this.actor.classItem?.system.grantedGifts?.trim();
     context.statures = {
       weeFolk: "WeeFolk",
@@ -336,6 +338,52 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   }
 
   /** Open a Stature-filtered class picker fed from the compendium. */
+  static async #onApplyAttrBonus(event, target) {
+    const attrKey = target.dataset.attr;
+    let choiceKey = null;
+
+    // Attributes that require a choice: which skill, save, WS, or sin.
+    const skillSection = { int: "craft", wis: "gift", mem: "talent" }[attrKey];
+    if (skillSection) {
+      const skills = this.actor.items.filter(i => (i.type === "skill") && (i.system.skillType === skillSection));
+      if (!skills.length) { ui.notifications.warn(`No ${skillSection}s to raise - add one first.`); return; }
+      choiceKey = await this.#pickFromList(`Raise which ${skillSection}?`,
+        skills.map(sk => [sk.id, `${sk.name} (+${sk.system.pf || 0})`]));
+    }
+    else if (attrKey === "agi") {
+      choiceKey = await this.#pickFromList("Add +1 AtR to which Weapon Skill?",
+        Object.entries(this.actor.system.weaponSkills).map(([k, ws]) => [k, `${ws.label} (AtR ${ws.atRMax})`]));
+    }
+    else if (attrKey === "will") {
+      choiceKey = await this.#pickFromList("Add +1 to which Saving Throw?",
+        Object.entries(this.actor.system.saves).map(([k, sv]) => [k, `${sv.label} (+${sv.value || 0})`]));
+    }
+    else if (attrKey === "vir") {
+      const sins = this.actor.system.sins ?? [];
+      if (!sins.length) { ui.notifications.warn("No Sins to remove."); return; }
+      choiceKey = await this.#pickFromList("Lose which Sin?", sins.map((sn, i) => [String(i), sn]));
+    }
+    if (skillSection || ["agi", "will", "vir"].includes(attrKey)) {
+      if (choiceKey === null) return; // cancelled
+    }
+    return this.actor.applyAttributeBonus(attrKey, choiceKey);
+  }
+
+  /** Small single-select helper returning the chosen value or null. */
+  async #pickFromList(title, entries) {
+    const options = entries.map(([v, label]) => `<option value="${v}">${foundry.utils.escapeHTML(label)}</option>`).join("");
+    const choice = await DialogV2.wait({
+      window: { title },
+      content: `<div class="form-group"><select name="v" autofocus>${options}</select></div>`,
+      buttons: [
+        { action: "ok", label: "Apply", default: true, callback: (e, b) => b.form.elements.v.value },
+        { action: "cancel", label: "Cancel" }
+      ],
+      rejectClose: false
+    });
+    return (choice && choice !== "cancel") ? choice : null;
+  }
+
   static async #onGrantGifts(event, target) {
     const cls = this.actor.classItem;
     if (!cls) { ui.notifications.warn("Assign a Class first."); return; }

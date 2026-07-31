@@ -21,7 +21,11 @@
     ],
     "blessingsType": "",
     "grantedGifts": "Blacksmith\nBowsmith\nBuild/Construct\nCombat Abilities\nWeaponry\nWS (choice)",
-    "startingEquipment": "See class description (Genesis Ch7)"
+    "startingEquipment": "See class description (Genesis Ch7)",
+    "primaryAttribute": "",
+    "primaryMin": 0,
+    "secondaryAttribute": "",
+    "secondaryMin": 0
   },
   "effects": [],
   "folder": null,

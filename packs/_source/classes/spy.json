@@ -19,7 +19,11 @@
     ],
     "blessingsType": "Blessings of Fortune",
     "grantedGifts": "Elude Pursuit\nPick Locks\nPick Pockets\nShadow\nSneak\nWS Light Arms\nWS Paired Weapons",
-    "startingEquipment": "See class description (Genesis Ch7)"
+    "startingEquipment": "See class description (Genesis Ch7)",
+    "primaryAttribute": "agi",
+    "primaryMin": 10,
+    "secondaryAttribute": "spd",
+    "secondaryMin": 8
   },
   "effects": [],
   "folder": null,

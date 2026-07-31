@@ -21,7 +21,11 @@
     ],
     "blessingsType": "Blessings of Duty",
     "grantedGifts": "Comedy/Storytelling\nDancing\nPlay Stringed Instrument\nPlay Wind Instrument\nRead/Write nLG\nSacred Studies\nSinging",
-    "startingEquipment": "See class description (Genesis Ch7)"
+    "startingEquipment": "See class description (Genesis Ch7)",
+    "primaryAttribute": "cha",
+    "primaryMin": 10,
+    "secondaryAttribute": "int",
+    "secondaryMin": 8
   },
   "effects": [],
   "folder": null,

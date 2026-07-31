@@ -94,6 +94,13 @@ export class ClassData extends foundry.abstract.TypeDataModel {
       key: new fields.StringField({ required: true, initial: "adventurer" }),
       requirements: new fields.StringField({ required: true, initial: "" }),
 
+      // Step 2A (p.53): Primary/Secondary Attribute requirements. Empty
+      // attribute = no requirement (Adventurer, Fighter).
+      primaryAttribute: new fields.StringField({ required: true, initial: "" }),
+      primaryMin: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
+      secondaryAttribute: new fields.StringField({ required: true, initial: "" }),
+      secondaryMin: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
+
       // Creation: Life = STR + END + lifeCreationDie(GE)
       lifeCreationDie: new fields.StringField({ required: true, initial: "1d6" }),
       // Per level: add lifePerLevelDie(GE) to max and current Life

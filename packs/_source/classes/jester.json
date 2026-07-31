@@ -19,7 +19,11 @@
     ],
     "blessingsType": "Blessings of Fortune",
     "grantedGifts": "Acrobatics\nComedy/Storytelling\nImpersonate\nJuggling\nSleight of Hand\nWS Thrown",
-    "startingEquipment": "See class description (Genesis Ch7)"
+    "startingEquipment": "See class description (Genesis Ch7)",
+    "primaryAttribute": "agi",
+    "primaryMin": 10,
+    "secondaryAttribute": "cha",
+    "secondaryMin": 8
   },
   "effects": [],
   "folder": null,

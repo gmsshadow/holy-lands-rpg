@@ -108,6 +108,11 @@ export class HolyLandsItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
       };
       context.staturesCsv = (item.system.statures ?? []).join(",");
       context.faithAttrsCsv = (item.system.faithCreationAttrs ?? []).join(",");
+      context.attributeKeys = {
+        int: "Intellect", wis: "Wisdom", pat: "Patience", will: "Will",
+        mem: "Memory", str: "Strength", agi: "Agility", spd: "Speed",
+        end: "Endurance", bty: "Beauty", cha: "Charisma", vir: "Virtue"
+      };
     }
 
     return context;

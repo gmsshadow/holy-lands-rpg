@@ -37,7 +37,8 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       levelUp: HolyLandsActorSheet.#onLevelUp,
       rollStartingLifeFaith: HolyLandsActorSheet.#onRollStartingLifeFaith,
       rollCreationAttributes: HolyLandsActorSheet.#onRollCreationAttributes,
-      unlockCreationAttributes: HolyLandsActorSheet.#onUnlockCreationAttributes
+      unlockCreationAttributes: HolyLandsActorSheet.#onUnlockCreationAttributes,
+      rollStep2A: HolyLandsActorSheet.#onRollStep2A
     }
   };
 
@@ -133,6 +134,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     context.classItem = this.actor.classItem;
     context.isGM = game.user.isGM;
     context.attributesLocked = !!this.actor.system.creation?.attributesRolled;
+    context.unmetRequirements = context.attributesLocked ? this.actor.getUnmetClassRequirements() : [];
     context.statures = {
       weeFolk: "WeeFolk",
       dwarfolk: "Dwarfolk",
@@ -373,6 +375,20 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     });
     if (!proceed) return;
     return this.actor.rollCreationAttributes();
+  }
+
+  static async #onRollStep2A(event, target) {
+    const unmet = this.actor.getUnmetClassRequirements();
+    if (!unmet.length) return;
+    const list = unmet.map(r => `<li>${r.label}: AV ${r.current}, requires ${r.min}</li>`).join("");
+    const proceed = await DialogV2.confirm({
+      window: { title: "Step 2A: Class Attribute Rerolls" },
+      content: `<p><strong>${this.actor.classItem?.name}</strong> requirements not met:</p><ul>${list}</ul>
+        <p><em>Reroll each with the Stature dice until the requirement is met (p.53, Step 2A)? Other Attributes stay locked.</em></p>`,
+      rejectClose: false
+    });
+    if (!proceed) return;
+    return this.actor.rollStep2ARerolls();
   }
 
   static async #onUnlockCreationAttributes(event, target) {

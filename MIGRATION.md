@@ -290,3 +290,18 @@ These are deliberate changes, flagged for review:
   corrections; players cannot unlock.
 - Existing characters are unaffected: the flag defaults to unlocked, so
   they simply see the new button until it's used.
+
+## v2.6.0 — Step 2A: class attribute requirement rerolls
+
+- Class items now carry structured Primary/Secondary Attribute requirements
+  (attribute key + minimum AV); all 13 compendium classes populated from
+  Ch7 (Adventurer and Fighter have none). The class item sheet gains
+  editable fields for them.
+- After Step 2 locks, if the assigned class's requirements are unmet the
+  character header shows per-attribute warnings and a **Step 2A Reroll**
+  button. On confirmation each unmet Attribute is rerolled with the
+  Stature's own dice (GE) repeatedly until the requirement is met (p.53),
+  leaving all other Attributes locked; the chat card reports each
+  Attribute's old AV, final AV, and how many rolls it took (attempt cap of
+  200 guards impossible dice/requirement combinations).
+- Once requirements are met the warnings and button disappear.

@@ -22,7 +22,11 @@
     ],
     "blessingsType": "Blessings of Wisdom",
     "grantedGifts": "Demonology\nMedical\nMiracles: Clerical\nPreach\nRead/Write nLG\nSacred Studies\nWS Light Arms",
-    "startingEquipment": "See class description (Genesis Ch7)"
+    "startingEquipment": "See class description (Genesis Ch7)",
+    "primaryAttribute": "int",
+    "primaryMin": 10,
+    "secondaryAttribute": "wis",
+    "secondaryMin": 8
   },
   "effects": [],
   "folder": null,

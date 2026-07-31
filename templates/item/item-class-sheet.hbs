@@ -17,8 +17,24 @@
   </div>
 
   <div class="form-group">
-    <label>Attribute Requirements</label>
+    <label>Attribute Requirements (display text)</label>
     <input type="text" name="system.requirements" value="{{system.requirements}}" placeholder="Charisma 10, Intellect 8"/>
+  </div>
+
+  <div class="form-group">
+    <label>Primary Attribute / minimum AV</label>
+    <select name="system.primaryAttribute">
+      {{selectOptions attributeKeys selected=system.primaryAttribute blank="— none —"}}
+    </select>
+    <input type="number" name="system.primaryMin" value="{{system.primaryMin}}"/>
+  </div>
+
+  <div class="form-group">
+    <label>Secondary Attribute / minimum AV</label>
+    <select name="system.secondaryAttribute">
+      {{selectOptions attributeKeys selected=system.secondaryAttribute blank="— none —"}}
+    </select>
+    <input type="number" name="system.secondaryMin" value="{{system.secondaryMin}}"/>
   </div>
 
   <div class="form-group">

@@ -22,7 +22,11 @@
     ],
     "blessingsType": "Blessings of Duty",
     "grantedGifts": "Combat Abilities\nCS Mounted Combat\nPolitical Science\nWeaponry\nWS Heavy Arms\nWS Light Arms",
-    "startingEquipment": "See class description (Genesis Ch7)"
+    "startingEquipment": "See class description (Genesis Ch7)",
+    "primaryAttribute": "end",
+    "primaryMin": 10,
+    "secondaryAttribute": "str",
+    "secondaryMin": 8
   },
   "effects": [],
   "folder": null,

@@ -19,7 +19,11 @@
     ],
     "blessingsType": "Blessings of Fortune",
     "grantedGifts": "Appraise\nNavigation\nPolitical Science\nSeafaring\nSpeak addLG\nSwimming\nWS Light Arms",
-    "startingEquipment": "See class description (Genesis Ch7)"
+    "startingEquipment": "See class description (Genesis Ch7)",
+    "primaryAttribute": "int",
+    "primaryMin": 10,
+    "secondaryAttribute": "cha",
+    "secondaryMin": 8
   },
   "effects": [],
   "folder": null,

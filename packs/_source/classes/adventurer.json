@@ -21,7 +21,11 @@
     ],
     "blessingsType": "",
     "grantedGifts": "Choose skills freely with a PF of +2 (see p.65)",
-    "startingEquipment": "See class description (Genesis Ch7)"
+    "startingEquipment": "See class description (Genesis Ch7)",
+    "primaryAttribute": "",
+    "primaryMin": 0,
+    "secondaryAttribute": "",
+    "secondaryMin": 0
   },
   "effects": [],
   "folder": null,

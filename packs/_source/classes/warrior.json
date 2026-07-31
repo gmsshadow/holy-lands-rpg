@@ -20,7 +20,11 @@
     ],
     "blessingsType": "Blessings of Duty",
     "grantedGifts": "Combat Abilities\nCS Ground Fight\nCS Tackling\nWeaponry\nWS Hand to Hand\nWS Heavy Arms\nWS Light Arms",
-    "startingEquipment": "See class description (Genesis Ch7)"
+    "startingEquipment": "See class description (Genesis Ch7)",
+    "primaryAttribute": "str",
+    "primaryMin": 10,
+    "secondaryAttribute": "end",
+    "secondaryMin": 8
   },
   "effects": [],
   "folder": null,

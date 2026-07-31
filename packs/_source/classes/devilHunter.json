@@ -21,7 +21,11 @@
     ],
     "blessingsType": "Blessings of Duty",
     "grantedGifts": "Combat Abilities\nCreatures and Beasts\nLight Sleep\nSpeak Ancient Languages\nWS Light Arms\nWS Missiles",
-    "startingEquipment": "See class description (Genesis Ch7)"
+    "startingEquipment": "See class description (Genesis Ch7)",
+    "primaryAttribute": "will",
+    "primaryMin": 10,
+    "secondaryAttribute": "int",
+    "secondaryMin": 8
   },
   "effects": [],
   "folder": null,

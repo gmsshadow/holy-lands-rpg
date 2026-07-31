@@ -19,7 +19,11 @@
     ],
     "blessingsType": "Blessings of Fortune",
     "grantedGifts": "Camp\nEarth Science\nSneak\nTrack\nWS Missiles\nWS Thrown",
-    "startingEquipment": "See class description (Genesis Ch7)"
+    "startingEquipment": "See class description (Genesis Ch7)",
+    "primaryAttribute": "wis",
+    "primaryMin": 10,
+    "secondaryAttribute": "agi",
+    "secondaryMin": 8
   },
   "effects": [],
   "folder": null,

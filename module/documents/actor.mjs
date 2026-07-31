@@ -193,6 +193,74 @@ export class HolyLandsActor extends Actor {
     });
   }
 
+  /**
+   * Class Attribute requirements not currently met (Step 2A).
+   * @returns {Array<{key: string, label: string, min: number, current: number}>}
+   */
+  getUnmetClassRequirements() {
+    const cls = this.classItem;
+    if (!cls || (this.type !== "character")) return [];
+    const unmet = [];
+    for (const [attrKey, minKey] of [["primaryAttribute", "primaryMin"], ["secondaryAttribute", "secondaryMin"]]) {
+      const key = cls.system[attrKey];
+      const min = cls.system[minKey] || 0;
+      if (!key || (min <= 0)) continue;
+      const attr = this.system.attributes[key];
+      if (attr && (attr.value < min)) {
+        unmet.push({ key, label: attr.label, min, current: attr.value });
+      }
+    }
+    return unmet;
+  }
+
+  /**
+   * Step 2A (p.53): reroll the class's unmet Primary/Secondary Attributes,
+   * using the Stature's dice, repeatedly until each requirement is met.
+   */
+  async rollStep2ARerolls() {
+    if (!this.system.creation?.attributesRolled) {
+      ui.notifications.warn("Roll attributes (Step 2) before applying Step 2A rerolls.");
+      return;
+    }
+    const unmet = this.getUnmetClassRequirements();
+    if (!unmet.length) {
+      ui.notifications.info("All class Attribute requirements are already met.");
+      return;
+    }
+    const table = this.system.constructor.STATURE_ATTRIBUTE_DICE?.[this.system.stature];
+    if (!table) return;
+
+    const update = {};
+    const rolls = [];
+    const lines = [];
+    const CAP = 200;
+    for (const req of unmet) {
+      const dice = table[req.key];
+      let attempts = 0;
+      let finalRoll = null;
+      do {
+        finalRoll = new Roll(this.constructor.graceFormula(dice));
+        await finalRoll.evaluate();
+        attempts++;
+      } while ((finalRoll.total < req.min) && (attempts < CAP));
+
+      if (finalRoll.total < req.min) {
+        lines.push(`${req.label}: could not reach ${req.min} with ${dice} - kept ${req.current}`);
+        continue;
+      }
+      rolls.push(finalRoll);
+      update[`system.attributes.${req.key}.value`] = finalRoll.total;
+      lines.push(`${req.label}: ${req.current} → <strong>${finalRoll.total}</strong> (${dice}(GE), ${attempts} roll${attempts > 1 ? "s" : ""} to meet AV ${req.min})`);
+    }
+    if (!foundry.utils.isEmpty(update)) await this.update(update);
+
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} - Step 2A: Class Attribute Rerolls (${this.classItem?.name})</strong><br>` + lines.join("<br>"),
+      rolls
+    });
+  }
+
   /** Rac/GM correction: unlock the creation attribute roll. */
   async unlockCreationAttributes() {
     if (!game.user.isGM) {

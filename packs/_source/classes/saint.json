@@ -22,7 +22,11 @@
     ],
     "blessingsType": "Blessings of Wisdom",
     "grantedGifts": "Empower Crucifix\nIntuition\nMiracles: Clerical\nMiracles: High\nRead/Write nLG\nSacred Studies",
-    "startingEquipment": "See class description (Genesis Ch7)"
+    "startingEquipment": "See class description (Genesis Ch7)",
+    "primaryAttribute": "wis",
+    "primaryMin": 10,
+    "secondaryAttribute": "pat",
+    "secondaryMin": 8
   },
   "effects": [],
   "folder": null,

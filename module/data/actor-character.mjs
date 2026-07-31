@@ -89,7 +89,10 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
 
       creation: new fields.SchemaField({
         attributesRolled: new fields.BooleanField({ required: true, initial: false }),
-        saveBonusChosen: new fields.BooleanField({ required: true, initial: false })
+        saveBonusChosen: new fields.BooleanField({ required: true, initial: false }),
+        startingRolled: new fields.BooleanField({ required: true, initial: false }),
+        lifeDieResult: new fields.NumberField({ required: true, integer: true, initial: 0 }),
+        faithDieResult: new fields.NumberField({ required: true, integer: true, initial: 0 })
       })
     };
   }
@@ -117,6 +120,12 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
     dwarfolk:   { int: "3d4", wis: "3d4", pat: "2d4", will: "4d4", mem: "3d4", str: "4d4", agi: "3d4", spd: "2d4", end: "4d4", bty: "3d4", cha: "2d4", vir: "3d4" },
     commonFolk: { int: "3d4", wis: "3d4", pat: "3d4", will: "3d4", mem: "3d4", str: "3d4", agi: "3d4", spd: "3d4", end: "3d4", bty: "3d4", cha: "3d4", vir: "3d4" },
     giantFolk:  { int: "3d4", wis: "3d4", pat: "2d4", will: "3d4", mem: "3d4", str: "5d4", agi: "3d4", spd: "2d4", end: "4d4", bty: "2d4", cha: "2d4", vir: "3d4" }
+  };
+
+  /** Faith creation attributes by class (Ch7), fallback when no class item. */
+  static CLASS_FAITH_ATTRS = {
+    bard: ["pat"], cleric: ["pat", "vir"], devilHunter: ["pat"],
+    knight: ["pat"], saint: ["pat", "vir"]
   };
 
   /**

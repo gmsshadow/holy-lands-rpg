@@ -354,3 +354,21 @@ These are deliberate changes, flagged for review:
     class-item-only template branch, so they display for dropdown classes
     too. Step 2A rerolls work without a class item (chat names the
     dropdown class).
+
+## v2.7.4 — Creation ordering: Life & Faith protected from attribute changes
+
+- Starting Life & Faith can no longer be rolled before Attributes (Step 2)
+  are rolled and locked - the Start button shows a "roll Attributes first"
+  hint, the class-drop offer is suppressed with a notification, and the
+  actor method refuses with a warning.
+- The starting roll now **locks after use** (`creation.startingRolled`),
+  storing the rolled Life and Faith die results; GMs get an "unlock start"
+  link. Level Up is unaffected.
+- **Step 2A rerolls recompute Life & Faith with the original dice**: if the
+  starting roll already happened and a 2A reroll changes STR/END or the
+  class Faith attributes (PAT/VIR), Life and Faith max/current are
+  recalculated as new attributes + the stored die results - the creation
+  roll itself is never re-rolled. The 2A chat card reports the
+  recalculation. Faith attributes come from the class item, with a built-in
+  Ch7 fallback for dropdown classes.
+- Existing characters default to unlocked and simply see the new gating.

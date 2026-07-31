@@ -287,6 +287,30 @@ export class HolyLandsActor extends Actor {
     }
     if (!foundry.utils.isEmpty(update)) await this.update(update);
 
+    // If starting Life/Faith were already rolled, recompute them from the
+    // SAME stored die results with the new attribute values - the creation
+    // roll itself is preserved; only the attribute portion updates.
+    if (this.system.creation?.startingRolled) {
+      const attrs = this.system.attributes;
+      const cls = this.classItem;
+      const lifeDie = this.system.creation.lifeDieResult || 0;
+      const faithDie = this.system.creation.faithDieResult || 0;
+      const faithAttrKeys = cls
+        ? (cls.system.faithCreationAttrs ?? [])
+        : (this.system.constructor.CLASS_FAITH_ATTRS?.[this.system.class] ?? []);
+      const newLife = (attrs.str?.value || 0) + (attrs.end?.value || 0) + lifeDie;
+      const newFaith = faithAttrKeys.reduce((sum, k) => sum + (attrs[k]?.value || 0), 0) + faithDie;
+      const lifeChanged = newLife !== this.system.life.max;
+      const faithChanged = newFaith !== this.system.faith.max;
+      if (lifeChanged || faithChanged) {
+        await this.update({
+          "system.life.max": newLife, "system.life.value": newLife,
+          "system.faith.max": newFaith, "system.faith.value": newFaith
+        });
+        lines.push(`<em>Starting Life/Faith recalculated with the original dice (Life die ${lifeDie}, Faith die ${faithDie}): Life <strong>${newLife}</strong>, Faith <strong>${newFaith}</strong></em>`);
+      }
+    }
+
     return ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
       flavor: `<strong>${this.name} - Step 2A: Class Attribute Rerolls (${this.classItem?.name ?? this.system.class})</strong><br>` + lines.join("<br>"),
@@ -314,6 +338,16 @@ export class HolyLandsActor extends Actor {
       flavor: `<strong>${this.name}</strong> adds +1 to <strong>Save vs. ${save.label}</strong> (now +${(save.value || 0) + 1})`
         + (creation ? " <em>- Step 4 creation Bonus (locked)</em>" : " <em>- level-up Bonus</em>")
     });
+  }
+
+  /** Rac/GM correction: unlock the starting Life & Faith roll. */
+  async unlockStartingRoll() {
+    if (!game.user.isGM) {
+      ui.notifications.warn("Only the Rac (GM) can unlock the starting Life & Faith roll.");
+      return;
+    }
+    await this.update({ "system.creation.startingRolled": false });
+    ui.notifications.info(`${this.name}: starting Life & Faith roll unlocked.`);
   }
 
   /** Rac/GM correction: unlock the creation Step 4 save choice. */
@@ -346,6 +380,14 @@ export class HolyLandsActor extends Actor {
       ui.notifications.warn("No Class item on this character.");
       return;
     }
+    if (!this.system.creation?.attributesRolled) {
+      ui.notifications.warn("Roll Attributes (Step 2) before rolling starting Life and Faith - the formulas use STR, END, and the class Faith attributes.");
+      return;
+    }
+    if (this.system.creation?.startingRolled) {
+      ui.notifications.warn("Starting Life and Faith have already been rolled for this character.");
+      return;
+    }
     const attrs = this.system.attributes;
 
     const lifeRoll = new Roll(this.constructor.graceFormula(cls.system.lifeCreationDie || "1d6"));
@@ -360,7 +402,10 @@ export class HolyLandsActor extends Actor {
 
     await this.update({
       "system.life.max": lifeMax, "system.life.value": lifeMax,
-      "system.faith.max": faithMax, "system.faith.value": faithMax
+      "system.faith.max": faithMax, "system.faith.value": faithMax,
+      "system.creation.startingRolled": true,
+      "system.creation.lifeDieResult": lifeRoll.total,
+      "system.creation.faithDieResult": faithRoll.total
     });
 
     const faithAttrText = faithAttrs.length

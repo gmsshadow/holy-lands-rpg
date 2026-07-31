@@ -40,7 +40,8 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       unlockCreationAttributes: HolyLandsActorSheet.#onUnlockCreationAttributes,
       rollStep2A: HolyLandsActorSheet.#onRollStep2A,
       chooseSaveBonus: HolyLandsActorSheet.#onChooseSaveBonus,
-      unlockSaveBonus: HolyLandsActorSheet.#onUnlockSaveBonus
+      unlockSaveBonus: HolyLandsActorSheet.#onUnlockSaveBonus,
+      unlockStartingRoll: HolyLandsActorSheet.#onUnlockStartingRoll
     }
   };
 
@@ -138,6 +139,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     context.attributesLocked = !!this.actor.system.creation?.attributesRolled;
     context.unmetRequirements = this.actor.getUnmetClassRequirements();
     context.saveBonusChosen = !!this.actor.system.creation?.saveBonusChosen;
+    context.startingRolled = !!this.actor.system.creation?.startingRolled;
     context.statures = {
       weeFolk: "WeeFolk",
       dwarfolk: "Dwarfolk",
@@ -291,12 +293,17 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
         }
       }
 
-      const rollNow = await DialogV2.confirm({
-        window: { title: created.name },
-        content: `<p><strong>${created.name}</strong> assigned. Roll starting Life and Faith from the class formulas now? (Overwrites current values - intended for new characters.)</p>`,
-        rejectClose: false
-      });
-      if (rollNow) await this.actor.rollStartingLifeFaith();
+      if (this.actor.system.creation?.attributesRolled && !this.actor.system.creation?.startingRolled) {
+        const rollNow = await DialogV2.confirm({
+          window: { title: created.name },
+          content: `<p><strong>${created.name}</strong> assigned. Roll starting Life and Faith from the class formulas now? (Locks after rolling.)</p>`,
+          rejectClose: false
+        });
+        if (rollNow) await this.actor.rollStartingLifeFaith();
+      }
+      else if (!this.actor.system.creation?.attributesRolled) {
+        ui.notifications.info(`${created.name} assigned. Roll Attributes (Step 2) first, then use the Start button for Life & Faith.`);
+      }
       return created;
     }
     return super._onDropItem(event, item);
@@ -456,6 +463,16 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     const saveKey = await this.#promptSaveChoice("Step 4: Creation Saving Throw Bonus");
     if (!saveKey) return;
     return this.actor.applySaveBonus(saveKey, { creation: true });
+  }
+
+  static async #onUnlockStartingRoll(event, target) {
+    const proceed = await DialogV2.confirm({
+      window: { title: "Unlock Starting Life & Faith" },
+      content: `<p>Rac override: unlock the starting Life &amp; Faith roll for <strong>${this.actor.name}</strong>, allowing a fresh roll? (Current values are kept until re-rolled.)</p>`,
+      rejectClose: false
+    });
+    if (!proceed) return;
+    return this.actor.unlockStartingRoll();
   }
 
   static async #onUnlockSaveBonus(event, target) {

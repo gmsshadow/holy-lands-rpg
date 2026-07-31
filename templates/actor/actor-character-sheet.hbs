@@ -69,9 +69,19 @@
         <button type="button" data-action="levelUp" title="Roll class Life/Faith dice and advance a level">
           <i class="fas fa-arrow-up"></i> Level Up
         </button>
-        <button type="button" data-action="rollStartingLifeFaith" title="Roll starting Life and Faith (new characters)">
+        {{#unless startingRolled}}
+        {{#if attributesLocked}}
+        <button type="button" data-action="rollStartingLifeFaith" title="Roll starting Life and Faith from the class formulas (locks after rolling)">
           <i class="fas fa-dice"></i> Start
         </button>
+        {{else}}
+        <span class="hint" title="Roll Attributes (Step 2) first">Start: roll Attributes first</span>
+        {{/if}}
+        {{else}}
+        {{#if isGM}}
+        <a class="hint" data-action="unlockStartingRoll" title="Rac override: allow a fresh starting Life &amp; Faith roll"><i class="fas fa-lock-open"></i> unlock start</a>
+        {{/if}}
+        {{/unless}}
         {{/if}}
       </div>
       <div class="info-group">

@@ -116,17 +116,19 @@ function registerHandlebarsHelpers() {
 
 Hooks.on("combatStart", async (combat, updateData) => {
   console.log("Holy Lands RPG | Combat started");
-  // Reset all AtR at combat start
+  // Reset all AtR and round-scoped combat flags at combat start
   for (const combatant of combat.combatants) {
     if (combatant.actor?.resetAtRPersisted) await combatant.actor.resetAtRPersisted();
+    if (combatant.actor?.clearRoundCombatFlags) await combatant.actor.clearRoundCombatFlags();
   }
 });
 
 Hooks.on("combatRound", async (combat, updateData, updateOptions) => {
   console.log("Holy Lands RPG | New combat round");
-  // Reset all AtR at start of each round
+  // Reset all AtR and round-scoped combat flags at the start of each round
   for (const combatant of combat.combatants) {
     if (combatant.actor?.resetAtRPersisted) await combatant.actor.resetAtRPersisted();
+    if (combatant.actor?.clearRoundCombatFlags) await combatant.actor.clearRoundCombatFlags();
   }
 });
 

@@ -28,8 +28,23 @@ export class HolyLandsCombat extends Combat {
         initiative: roll.total
       });
 
+      // Natural 20 / Natural 1 Advantage effects (Genesis Ch5, "Advantage")
+      let natNote = "";
+      let natRoll = null;
+      for (const term of roll.terms) {
+        if (term.results?.length) { natRoll = term.results[0].result; break; }
+      }
+      if (natRoll === 20) {
+        await combatant.actor.setCombatFlag?.("advNat20", true);
+        natNote = " <strong>Natural 20!</strong> +3 to Attack, Critical, and Special until end of Round or they take Damage.";
+      }
+      else if (natRoll === 1) {
+        await combatant.actor.setCombatFlag?.("advNat1", true);
+        natNote = " <strong>Natural 1!</strong> -3 to all defensive actions until end of Round or they land a hit.";
+      }
+
       // Create chat message for the roll
-      const flavor = `<strong>${combatant.name}</strong> rolls Advantage!`;
+      const flavor = `<strong>${combatant.name}</strong> rolls Advantage!${natNote}`;
       const messageData = foundry.utils.mergeObject(
         {
           speaker: ChatMessage.getSpeaker({
@@ -65,9 +80,10 @@ export class HolyLandsCombat extends Combat {
 
   /** @override */
   async resetAll() {
-    // Reset all combatant initiatives and reset AtR
+    // Reset all combatant initiatives, AtR, and round-scoped combat flags
     for (const c of this.combatants) {
       if (c.actor?.resetAtRPersisted) await c.actor.resetAtRPersisted();
+      if (c.actor?.clearRoundCombatFlags) await c.actor.clearRoundCombatFlags();
     }
     const updates = this.combatants.map(c => ({ _id: c.id, initiative: null }));
     await this.updateEmbeddedDocuments("Combatant", updates);
@@ -76,9 +92,10 @@ export class HolyLandsCombat extends Combat {
 
   /** @override */
   async nextRound() {
-    // At the start of each new round, reset everyone's AtR
+    // At the start of each new round, reset AtR and round-scoped combat flags
     for (const combatant of this.combatants) {
       if (combatant.actor?.resetAtRPersisted) await combatant.actor.resetAtRPersisted();
+      if (combatant.actor?.clearRoundCombatFlags) await combatant.actor.clearRoundCombatFlags();
     }
     
     return super.nextRound();

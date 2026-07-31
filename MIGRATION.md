@@ -147,3 +147,39 @@ These are deliberate changes, flagged for review:
   updates the available classes. If the stored class is illegal for the new
   Stature it remains selectable, flagged "(invalid for Stature)", so no data
   is silently rewritten.
+
+## v2.1.0 — Combat core automation
+
+- **Advantage Natural 20/1** (Ch5): rolling initiative now detects natural
+  20s and 1s. Nat 20 grants +3 to Attack/Critical/Special until the end of
+  the Round or the actor takes Damage; Nat 1 imposes −3 on Dodge/Defend
+  until the end of the Round or the actor lands a hit. Both are tracked as
+  actor flags, announced in chat, and cleared automatically.
+- **Forfeit Advantage**: new Combat-tab button; the next Dodge/Defend this
+  Round rolls with double Bonus (consumed on use, cleared each Round).
+- **Retreat**: new Combat-tab button. Forfeits Advantage (2× Dodge) and all
+  attacks; the defender is forced to Dodge, and a successful Dodge of the
+  initial Attack breaks away for the Round. Characters with the Sins of
+  Pride, Control, or Strife get a chat reminder of the required Save vs. Sin.
+- **Return attacks** (Ch5): after a successful Dodge/Defend, the defender is
+  prompted to strike back immediately with their equipped weapon if they
+  have AtR remaining (normal attack, all rules apply).
+- **Natural 20 defense free counter-attack**: now automated - no AtR cost,
+  and exempt from all Natural 20/1 riders on both sides per "it is either
+  successful or unsuccessful" (which also prevents counter-chains).
+- **Critical strikes** (Advanced Combat): the attack dialog offers Critical
+  ×2..×N up to the weapon skill's current AtR. Rolls with the Critical
+  Bonus (capped at the Attack Bonus with a warning, per the rule), spends
+  AtR equal to the multiplier, and Damage is (dice + Damage Bonus) × N -
+  the one bonus-before-multiply exception.
+- **Special attacks (basic)**: rolls with the Special Bonus; the named
+  maneuvers (Simultaneous, Knock-out, Stunning Strike, Sweeping) remain
+  manual for now.
+- **Situational modifier** input on the attack dialog covers Flanking
+  (+1 per participating ally) and Rac-awarded bonuses.
+- **Natural 20 attacks auto-hit** through the defense comparison unless the
+  defender also rolls a Natural 20 (ties go to the defender).
+- The defense prompt now surfaces active state (forfeited Advantage, Nat 1
+  Advantage penalty, pending Half Roll) so the defender can see what will
+  apply before rolling.
+- AGI initiative tie-break was already present in `_sortCombatants`.

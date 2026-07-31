@@ -75,6 +75,73 @@ export class HolyLandsActor extends Actor {
   }
 
   /* -------------------------------------------- */
+  /*  Combat State Flags                          */
+  /* -------------------------------------------- */
+
+  /**
+   * Round-scoped combat state, stored as flags:
+   * - advNat20:  +3 to Attack/Critical/Special (Natural 20 Advantage) until
+   *              end of Round or this actor takes Damage.
+   * - advNat1:   -3 to Dodge/Defend (Natural 1 Advantage) until end of Round
+   *              or this actor successfully hits an opponent.
+   * - forfeitAdvantage: next defensive action this Round rolls double Bonus.
+   * - retreating: declared Retreat - must Dodge; success ends the threat for
+   *              the Round.
+   * (Genesis Ch5: "Advantage", "Retreat")
+   */
+  getCombatFlag(key) {
+    return this.getFlag("holy-lands-rpg", key) ?? false;
+  }
+
+  async setCombatFlag(key, value) {
+    if (value) return this.setFlag("holy-lands-rpg", key, true);
+    if (this.getFlag("holy-lands-rpg", key) !== undefined) {
+      return this.unsetFlag("holy-lands-rpg", key);
+    }
+  }
+
+  /** Clear all round-scoped combat flags (start of each Round). */
+  async clearRoundCombatFlags() {
+    for (const key of ["advNat20", "advNat1", "forfeitAdvantage", "retreating"]) {
+      await this.setCombatFlag(key, false);
+    }
+  }
+
+  /** Forfeit Advantage: double the next Dodge/Defend Bonus this Round. */
+  async forfeitAdvantage() {
+    await this.setCombatFlag("forfeitAdvantage", true);
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} forfeits Advantage</strong> to better prepare - their next Dodge or Defend this Round rolls with double Bonus.`
+    });
+  }
+
+  /**
+   * Declare a Retreat: forfeit Advantage (2x Dodge) and any attacks this
+   * Round; a successful Dodge of the initial Attack puts the character out
+   * of harm's way. Pride/Control/Strife characters must first Save vs. Sin.
+   */
+  async declareRetreat() {
+    const sins = this.system.sins ?? [];
+    const blocking = sins.filter(x => /pride|control|strife/i.test(String(x)));
+    let sinNote = "";
+    if (blocking.length) {
+      sinNote = `<br><em>Has the Sin${blocking.length > 1 ? "s" : ""} of ${blocking.join(", ")}: must first Save vs. Sin (DF ${this.system.saves?.sin?.df ?? 10}), and if successful, Retreats at Half Rolls.</em>`;
+    }
+    await this.setCombatFlag("forfeitAdvantage", true);
+    await this.setCombatFlag("retreating", true);
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} declares a Retreat!</strong> They forfeit Advantage and all attacks this Round (2x Dodge Bonus), and must successfully Dodge the initial Attack to break away.${sinNote}`
+    });
+  }
+
+  /** The first equipped weapon (used for return attacks and counters). */
+  getEquippedWeapon() {
+    return this.items.find(i => (i.type === "weapon") && i.system.equipped) ?? null;
+  }
+
+  /* -------------------------------------------- */
   /*  Checks & Saves                              */
   /* -------------------------------------------- */
 
@@ -199,8 +266,20 @@ export class HolyLandsActor extends Actor {
   /*  Attack Pipeline                             */
   /* -------------------------------------------- */
 
-  /** Roll an attack against a target. */
-  async rollAttack(weapon, targetActor = null) {
+  /**
+   * Roll an attack against a target.
+   * @param {Item|null} weapon      The weapon used (null = unarmed).
+   * @param {Actor|null} targetActor
+   * @param {object} [options]
+   * @param {"attack"|"critical"|"special"} [options.mode="attack"]
+   * @param {number} [options.multiplier=1]  Critical Damage multiplier (= AtR spent).
+   * @param {number} [options.modifier=0]    Situational modifier (Flanking, Rac bonuses).
+   * @param {boolean} [options.free=false]   Free attack: costs no AtR and is exempt
+   *                                         from all Natural 20/1 riders (Ch5).
+   */
+  async rollAttack(weapon, targetActor = null, options = {}) {
+    const { mode = "attack", multiplier = 1, modifier = 0, free = false } = options;
+
     const weaponSkill = weapon?.system?.weaponSkill || "lightArms";
     const ws = this.system.weaponSkills?.[weaponSkill];
     if (!ws) {
@@ -208,75 +287,114 @@ export class HolyLandsActor extends Actor {
       return;
     }
 
-    // Check AtR
-    const atr = this.getAtR(weaponSkill);
-    if (atr.current < 1) {
-      ui.notifications.warn(`No AtR remaining for ${ws.label}`);
+    if (this.getCombatFlag("retreating")) {
+      ui.notifications.warn(`${this.name} has declared a Retreat and forfeits all attacks this Round.`);
       return;
     }
 
+    // AtR cost: Critical strikes spend AtR equal to their multiplier (Ch5).
+    const atrCost = free ? 0 : (mode === "critical" ? Math.max(2, multiplier) : 1);
+    const atr = this.getAtR(weaponSkill);
+    if (!free && (atr.current < atrCost)) {
+      ui.notifications.warn(`Not enough AtR for ${ws.label} (${atrCost} needed, ${atr.current} remaining)`);
+      return;
+    }
+
+    // Select the attack-action Bonus by mode. The Critical Bonus can never
+    // exceed the Attack Bonus of the same Weapon Skill (Ch5).
     const attackBonus = ws.attackBonus || 0;
-    const roll = new Roll("1d20 + @bonus", { bonus: attackBonus });
+    let actionBonus = attackBonus;
+    let modeLabel = "";
+    if (mode === "critical") {
+      actionBonus = Math.min(ws.criticalBonus || 0, attackBonus);
+      if ((ws.criticalBonus || 0) > attackBonus) {
+        ui.notifications.warn(`${ws.label}: Critical Bonus capped at the Attack Bonus (${attackBonus}).`);
+      }
+      modeLabel = ` (Critical x${multiplier})`;
+    }
+    else if (mode === "special") {
+      actionBonus = ws.specialBonus || 0;
+      modeLabel = " (Special)";
+    }
+
+    // Natural 20 Advantage: +3 to Attack, Critical, and Special this Round.
+    const advBonus = this.getCombatFlag("advNat20") ? 3 : 0;
+    const totalBonus = actionBonus + advBonus + (modifier || 0);
+
+    const roll = new Roll("1d20 + @bonus", { bonus: totalBonus });
     await roll.evaluate();
 
     const attackTotal = roll.total;
-    // Extract natural roll from dice terms
     let natRoll = null;
     for (const term of roll.terms) {
-      if (term.results && term.results.length > 0) {
-        natRoll = term.results[0].result;
-        break;
-      }
+      if (term.results?.length) { natRoll = term.results[0].result; break; }
     }
-    const isNat20 = natRoll === 20;
+    const isNat20 = !free && (natRoll === 20);
     const isNat1 = natRoll === 1;
 
-    // Nat 1: automatic failure, set halfDefenseFlag
+    const bonusNote = advBonus ? " [+3 Advantage]" : "";
+    const weaponName = weapon?.name || "Unarmed";
+
+    // Natural 1: never successful. Outside free attacks, the attacker is off
+    // balance: next defensive action is a Half Roll (Ch5).
     if (isNat1) {
-      await this.update({ "system.combat.halfDefenseFlag": true });
-      await this.consumeAtR(weaponSkill, 1);
+      if (!free) {
+        await this.update({ "system.combat.halfDefenseFlag": true });
+        await this.consumeAtR(weaponSkill, atrCost);
+      }
       return ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: this }),
-        flavor: `${weapon?.name || "Unarmed"} Attack: <strong>Natural 1 - Automatic Failure!</strong>`,
+        flavor: `${weaponName}${modeLabel} Attack: <strong>Natural 1 - Automatic Failure!</strong>${free ? "" : " Next defensive action is a Half Roll."}`,
         rolls: [roll]
       });
     }
 
-    // No target: just show the attack roll
+    // No target: just show the attack roll.
     if (!targetActor) {
-      await this.consumeAtR(weaponSkill, 1);
+      await this.consumeAtR(weaponSkill, atrCost);
       return ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: this }),
-        flavor: `${weapon?.name || "Unarmed"} Attack: ${attackTotal}${isNat20 ? " (Natural 20!)" : ""}`,
+        flavor: `${weaponName}${modeLabel} Attack: ${attackTotal}${bonusNote}${isNat20 ? " (Natural 20!)" : ""}`,
         rolls: [roll]
       });
     }
 
-    // Get defender's tDEF
+    // GATE A: the attack must exceed the defender's tDEF.
     const defenderTDEF = targetActor.system?.defense?.tDEF || 4;
-
-    // GATE A: does the attack fail immediately?
-    if (attackTotal <= defenderTDEF) {
-      await this.consumeAtR(weaponSkill, 1);
+    if (!isNat20 && (attackTotal <= defenderTDEF)) {
+      await this.consumeAtR(weaponSkill, atrCost);
       return ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: this }),
-        flavor: `${weapon?.name || "Unarmed"} Attack: ${attackTotal} vs tDEF ${defenderTDEF} - <strong>Attack Failed (Gate A)</strong>`,
+        flavor: `${weaponName}${modeLabel} Attack: ${attackTotal}${bonusNote} vs tDEF ${defenderTDEF} - <strong>Attack Failed (armor holds)</strong>`,
         rolls: [roll]
       });
     }
 
-    // Attack passed Gate A - prompt defender for Dodge or Defend
-    if (targetActor.isOwner) {
-      const defenseChoice = await this._promptDefenseChoice(targetActor);
+    await ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `${weaponName}${modeLabel} Attack: ${attackTotal}${bonusNote}${isNat20 ? " <strong>(Natural 20!)</strong>" : ""} vs tDEF ${defenderTDEF} - beats armor, ${targetActor.name} must Dodge or Defend!`,
+      rolls: [roll]
+    });
+
+    const attackContext = {
+      attackTotal, isNat20, mode, multiplier, free,
+      atrCost, weaponSkill
+    };
+
+    // Prompt defender for Dodge or Defend (forced Dodge while Retreating).
+    let defenseChoice = "defend";
+    if (targetActor.getCombatFlag("retreating")) {
+      defenseChoice = "dodge";
+    }
+    else if (targetActor.isOwner) {
+      defenseChoice = await this._promptDefenseChoice(targetActor);
       if (!defenseChoice) {
-        await this.consumeAtR(weaponSkill, 1);
+        await this.consumeAtR(weaponSkill, atrCost);
         return;
       }
-      return this._resolveDefense(weapon, targetActor, attackTotal, isNat20, defenseChoice);
     }
 
-    // NPC or non-owned actor - auto-choose defend
-    return this._resolveDefense(weapon, targetActor, attackTotal, isNat20, "defend");
+    return this._resolveDefense(weapon, targetActor, attackContext, defenseChoice);
   }
 
   /**
@@ -284,12 +402,19 @@ export class HolyLandsActor extends Actor {
    * @returns {Promise<string|null>} "dodge", "defend", or null if cancelled.
    */
   async _promptDefenseChoice(defender) {
+    const notes = [];
+    if (defender.getCombatFlag("forfeitAdvantage")) notes.push("Forfeited Advantage: this defense rolls DOUBLE Bonus");
+    if (defender.getCombatFlag("advNat1")) notes.push("Natural 1 Advantage: -3 to this defense");
+    if (defender.system.combat?.halfDefenseFlag) notes.push("Off balance: this defense is a Half Roll");
+    const noteHtml = notes.length ? `<p><em>${notes.join("<br>")}</em></p>` : "";
+
     const content = `
+      ${noteHtml}
       <div class="form-group">
         <label>Choose your defense:</label>
         <select name="defenseType" autofocus>
-          <option value="dodge">Dodge (${defender.system.combat?.dodgeBonus || 0} bonus)</option>
-          <option value="defend">Defend (${defender.system.combat?.defendBonus || 0} bonus)</option>
+          <option value="dodge">Dodge (+${defender.system.combat?.dodgeBonus || 0})</option>
+          <option value="defend">Defend (+${defender.system.combat?.defendBonus || 0})</option>
         </select>
       </div>`;
 
@@ -303,10 +428,7 @@ export class HolyLandsActor extends Actor {
           default: true,
           callback: (event, button) => button.form.elements.defenseType.value
         },
-        {
-          action: "cancel",
-          label: "Cancel"
-        }
+        { action: "cancel", label: "Cancel" }
       ],
       rejectClose: false
     });
@@ -315,74 +437,76 @@ export class HolyLandsActor extends Actor {
   }
 
   /** Resolve defense roll and determine hit/miss. */
-  async _resolveDefense(weapon, defender, attackTotal, isNat20Attack, defenseType) {
-    const defenderBonus = defenseType === "dodge"
+  async _resolveDefense(weapon, defender, attackContext, defenseType) {
+    const { attackTotal, isNat20: isNat20Attack, free, atrCost, weaponSkill } = attackContext;
+
+    // Assemble the defender's Bonus:
+    // base -> x2 if Advantage was forfeited -> -3 if Natural 1 Advantage.
+    let defenderBonus = defenseType === "dodge"
       ? (defender.system.combat?.dodgeBonus || 0)
       : (defender.system.combat?.defendBonus || 0);
+    const notes = [];
+    if (defender.getCombatFlag("forfeitAdvantage")) {
+      defenderBonus *= 2;
+      notes.push("2x Bonus (forfeited Advantage)");
+      await defender.setCombatFlag("forfeitAdvantage", false);
+    }
+    if (defender.getCombatFlag("advNat1")) {
+      defenderBonus -= 3;
+      notes.push("-3 (Natural 1 Advantage)");
+    }
 
     const defenseRoll = new Roll("1d20 + @bonus", { bonus: defenderBonus });
     await defenseRoll.evaluate();
 
-    const defenseTotal = defenseRoll.total;
-    // Extract natural roll from dice terms
     let natRollDefense = null;
     for (const term of defenseRoll.terms) {
-      if (term.results && term.results.length > 0) {
-        natRollDefense = term.results[0].result;
-        break;
-      }
+      if (term.results?.length) { natRollDefense = term.results[0].result; break; }
     }
-    const isNat20Defense = natRollDefense === 20;
-    const isNat1Defense = natRollDefense === 1;
+    // Free attacks are exempt from all Natural 20/1 riders on BOTH sides (Ch5).
+    const isNat20Defense = !free && (natRollDefense === 20);
+    const isNat1Defense = !free && (natRollDefense === 1);
 
-    // Apply halfDefenseFlag if set. Half Rolls halve the NATURAL die roll
-    // (rounding halves up) BEFORE adding Bonuses (Genesis Ch1, "Half Rolls").
-    let finalDefenseTotal = defenseTotal;
-    let halfRollApplied = false;
+    // Half Roll: halve the NATURAL die (round up) before adding Bonuses (Ch1).
+    let finalDefenseTotal = defenseRoll.total;
     if (defender.system.combat?.halfDefenseFlag) {
-      const halvedDie = Math.ceil((natRollDefense ?? 0) / 2);
-      finalDefenseTotal = halvedDie + defenderBonus;
-      halfRollApplied = true;
+      finalDefenseTotal = Math.ceil((natRollDefense ?? 0) / 2) + defenderBonus;
+      notes.push("Half Roll");
       await defender.update({ "system.combat.halfDefenseFlag": false });
     }
+    const noteText = notes.length ? ` (${notes.join(", ")})` : "";
 
-    const weaponSkill = weapon?.system?.weaponSkill || "lightArms";
-
-    // Nat 20 Defense: automatic success + free attack
+    // Natural 20 Defense: always successful + a free counter-attack that
+    // costs no AtR and is exempt from further Benefit/Penalty riders.
     if (isNat20Defense) {
-      await this.consumeAtR(weaponSkill, 1);
+      await this.consumeAtR(weaponSkill, atrCost);
       await ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: defender }),
-        flavor: `${defender.name} rolled <strong>Natural 20 Defense!</strong> Attack blocked. Free counter-attack granted.`,
+        flavor: `${defender.name} rolled a <strong>Natural 20 ${defenseType.capitalize()}!</strong> The attack is stopped and ${defender.name} gains a free counter-attack (no AtR).`,
         rolls: [defenseRoll]
       });
-      // TODO: Trigger free attack (would need to be handled by combat system)
-      return;
+      return this._offerCounterAttack(defender, this, { free: true });
     }
 
-    // Nat 1 Defense: automatic failure, 1.5x damage
+    // Natural 1 Defense: automatic failure, 1.5x Damage.
     if (isNat1Defense) {
-      await this.consumeAtR(weaponSkill, 1);
+      await this.consumeAtR(weaponSkill, atrCost);
       await ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: defender }),
-        flavor: `${defender.name} rolled <strong>Natural 1 Defense!</strong> Automatic failure. Damage will be ×1.5.`,
+        flavor: `${defender.name} rolled a <strong>Natural 1 ${defenseType.capitalize()}!</strong> Automatic failure - Damage will be x1.5.`,
         rolls: [defenseRoll]
       });
-      return this._resolveDamage(weapon, defender, attackTotal, isNat20Attack, true, true);
+      return this._resolveDamage(weapon, defender, { ...attackContext, isNat1Defense: true });
     }
 
-    // Normal defense resolution: ties go to defender
-    const attackHits = finalDefenseTotal < attackTotal;
-    await this.consumeAtR(weaponSkill, 1);
+    // Normal resolution: ALL ties go to the defender (Ch5). A Natural 20
+    // Attack is always successful unless the defender also rolled a Natural
+    // 20 (handled above - the tie goes to the defender).
+    const attackHits = attackContext.isNat20 || (finalDefenseTotal < attackTotal);
+    await this.consumeAtR(weaponSkill, atrCost);
 
-    let flavor = `${weapon?.name || "Unarmed"} Attack: ${attackTotal} vs ${defenseType.capitalize()} ${finalDefenseTotal}`;
-    if (halfRollApplied) flavor += " (Half Roll)";
+    let flavor = `${weapon?.name || "Unarmed"} Attack ${attackTotal} vs ${defenseType.capitalize()} ${finalDefenseTotal}${noteText}`;
     flavor += attackHits ? " - <strong>Hit!</strong>" : " - <strong>Defended!</strong>";
-    if (!attackHits) {
-      // AtR is only lost by attacking or by taking Damage - a successful
-      // defense costs the defender nothing (Genesis Ch5, "AtR").
-      flavor += `<br><em>${defender.name} may make a return attack if they have AtR remaining.</em>`;
-    }
 
     await ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
@@ -390,37 +514,102 @@ export class HolyLandsActor extends Actor {
       rolls: [defenseRoll]
     });
 
-    if (attackHits) {
-      return this._resolveDamage(weapon, defender, attackTotal, isNat20Attack, false, false);
+    // Retreat: a successful Dodge of the initial Attack breaks away.
+    if (!attackHits && defender.getCombatFlag("retreating") && (defenseType === "dodge")) {
+      await defender.setCombatFlag("retreating", false);
+      await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: defender }),
+        flavor: `<strong>${defender.name} successfully Retreats</strong> - out of harm's way from ${this.name} for the Round.`
+      });
+      return;
     }
+
+    if (attackHits) {
+      return this._resolveDamage(weapon, defender, attackContext);
+    }
+
+    // Successful defense costs nothing - and the defender may return attack
+    // immediately if they have AtR remaining (Ch5, "Return Attack").
+    if (!free) return this._offerCounterAttack(defender, this, { free: false });
+  }
+
+  /**
+   * Offer the defender a counter/return attack against the attacker.
+   * @param {Actor} defender  The successful defender who may strike back.
+   * @param {Actor} attacker  The original attacker (now the target).
+   * @param {object} options  { free } - free counters cost no AtR and carry
+   *                          no Natural riders; return attacks are normal.
+   */
+  async _offerCounterAttack(defender, attacker, { free = false } = {}) {
+    const counterWeapon = defender.getEquippedWeapon();
+    const wsKey = counterWeapon?.system?.weaponSkill || "lightArms";
+
+    // Return attacks (not free) require AtR remaining.
+    if (!free) {
+      const atr = defender.getAtR(wsKey);
+      if (!defender.system.weaponSkills || (atr.current < 1)) {
+        return ChatMessage.create({
+          speaker: ChatMessage.getSpeaker({ actor: defender }),
+          flavor: `${defender.name} has no AtR remaining for a return attack.`
+        });
+      }
+    }
+
+    const kind = free ? "free counter-attack" : "return attack";
+    if (!defender.isOwner || !defender.system.weaponSkills) {
+      return ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: defender }),
+        flavor: `${defender.name} may make a ${kind} against ${attacker.name}${free ? " (no AtR cost)" : ""}.`
+      });
+    }
+
+    const proceed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: `${defender.name} - ${kind.capitalize()}` },
+      content: `<p>Make a ${kind} against <strong>${attacker.name}</strong> with <strong>${counterWeapon?.name || "Unarmed"}</strong>${free ? " (no AtR cost, no critical effects)" : ""}?</p>`,
+      rejectClose: false
+    });
+    if (!proceed) return;
+
+    return defender.rollAttack(counterWeapon, attacker, { free });
   }
 
   /** Resolve damage and apply armor degradation. */
-  async _resolveDamage(weapon, defender, attackTotal, isNat20Attack, isNat1Defense, isNat20Defense) {
+  async _resolveDamage(weapon, defender, attackContext) {
+    const { isNat20Attack = false, isNat1Defense = false, mode = "attack", multiplier = 1 } = {
+      isNat20Attack: attackContext.isNat20,
+      isNat1Defense: attackContext.isNat1Defense ?? false,
+      mode: attackContext.mode,
+      multiplier: attackContext.multiplier
+    };
     const damageFormula = weapon?.system?.damage || "1d4";
     const damageBonus = this.system.combat?.damageBonus || 0;
 
-    // Roll damage dice
     const damageRoll = new Roll(damageFormula);
     await damageRoll.evaluate();
 
-    let finalDamage = damageRoll.total;
-
-    // Apply multipliers BEFORE adding bonus
-    if (isNat20Attack && !isNat20Defense) {
-      finalDamage = finalDamage * 2;
+    let finalDamage;
+    const parts = [`${damageRoll.total}`];
+    if (mode === "critical") {
+      // Critical strikes are the ONE exception: add the Damage Bonus BEFORE
+      // multiplying (Ch5, "Critical" / "Modifying Damage").
+      finalDamage = (damageRoll.total + damageBonus) * Math.max(2, multiplier);
+      parts.length = 0;
+      parts.push(`(${damageRoll.total}${damageBonus ? ` + ${damageBonus}` : ""}) x${Math.max(2, multiplier)}`);
     }
-    if (isNat1Defense) {
-      finalDamage = Math.floor(finalDamage * 1.5);
+    else {
+      finalDamage = damageRoll.total;
+      if (isNat20Attack) { finalDamage *= 2; parts.push("x2 (Nat 20)"); }
+      if (isNat1Defense) { finalDamage = Math.floor(finalDamage * 1.5); parts.push("x1.5 (Nat 1 defense)"); }
+      finalDamage += damageBonus;
+      if (damageBonus) parts.push(`+ ${damageBonus}`);
     }
 
-    // Add damage bonus AFTER multiplication
-    finalDamage += damageBonus;
+    // Landing a hit clears this actor's Natural 1 Advantage penalty (Ch5).
+    if (this.getCombatFlag("advNat1")) await this.setCombatFlag("advNat1", false);
 
     // Determine hit location (default: chest)
-    const hitAP = "chest"; // Could be randomized or chosen
+    const hitAP = "chest";
 
-    // Apply armor degradation
     await this._applyArmorDegradation(defender, hitAP, finalDamage);
 
     // Apply damage to life. Life can go negative down to the character's
@@ -436,18 +625,15 @@ export class HolyLandsActor extends Actor {
       });
     }
 
-    // Consume AtR from damage
-    if (defender && typeof defender._consumeAtRFromDamage === "function") {
+    // Taking Damage costs the defender 1 AtR and ends their Nat 20 Advantage.
+    if (typeof defender._consumeAtRFromDamage === "function") {
       await defender._consumeAtRFromDamage();
     }
-
-    const flavor = `${weapon?.name || "Unarmed"} Damage: ${finalDamage} (${damageRoll.total}`
-      + `${isNat20Attack ? " ×2" : ""}${isNat1Defense ? " ×1.5" : ""}`
-      + `${damageBonus > 0 ? ` + ${damageBonus}` : ""})`;
+    if (defender.getCombatFlag("advNat20")) await defender.setCombatFlag("advNat20", false);
 
     return ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor,
+      flavor: `${weapon?.name || "Unarmed"} Damage: <strong>${finalDamage}</strong> (${parts.join(" ")})`,
       rolls: [damageRoll]
     });
   }

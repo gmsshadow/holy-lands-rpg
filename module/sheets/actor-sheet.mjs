@@ -29,7 +29,9 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       rollAttack: HolyLandsActorSheet.#onRollAttack,
       rollDamage: HolyLandsActorSheet.#onRollDamage,
       castMiracle: HolyLandsActorSheet.#onCastMiracle,
-      useBlessing: HolyLandsActorSheet.#onUseBlessing
+      useBlessing: HolyLandsActorSheet.#onUseBlessing,
+      forfeitAdvantage: HolyLandsActorSheet.#onForfeitAdvantage,
+      declareRetreat: HolyLandsActorSheet.#onDeclareRetreat
     }
   };
 
@@ -272,9 +274,19 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
   static async #onRollAttack(event, target) {
     const weapon = this.#getItemForTarget(target);
+    const options = await this.#promptAttackOptions(weapon);
+    if (!options) return;
     const targetActor = await this.#selectTarget();
     if (!targetActor) return;
-    return this.actor.rollAttack(weapon, targetActor);
+    return this.actor.rollAttack(weapon, targetActor, options);
+  }
+
+  static async #onForfeitAdvantage(event, target) {
+    return this.actor.forfeitAdvantage();
+  }
+
+  static async #onDeclareRetreat(event, target) {
+    return this.actor.declareRetreat();
   }
 
   static async #onRollDamage(event, target) {
@@ -296,6 +308,55 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   /* -------------------------------------------- */
   /*  Dialogs                                     */
   /* -------------------------------------------- */
+
+  /**
+   * Prompt for attack options: type (Attack / Critical xN / Special) and a
+   * situational modifier (Flanking +1 per ally, Rac bonuses, etc).
+   * @returns {Promise<object|null>} { mode, multiplier, modifier } or null.
+   */
+  async #promptAttackOptions(weapon) {
+    const wsKey = weapon?.system?.weaponSkill || "lightArms";
+    const ws = this.actor.system.weaponSkills?.[wsKey];
+    if (!ws) return { mode: "attack", multiplier: 1, modifier: 0 };
+
+    const atrCurrent = ws.atRCurrent ?? 1;
+    let modes = `<option value="attack">Attack (+${ws.attackBonus || 0}, 1 AtR)</option>`;
+    const effectiveCrit = Math.min(ws.criticalBonus || 0, ws.attackBonus || 0);
+    for (let n = 2; n <= atrCurrent; n++) {
+      modes += `<option value="critical:${n}">Critical x${n} Damage (+${effectiveCrit}, ${n} AtR)</option>`;
+    }
+    modes += `<option value="special">Special (+${ws.specialBonus || 0}, 1 AtR)</option>`;
+
+    const result = await DialogV2.wait({
+      window: { title: `${weapon?.name || "Unarmed"} - Attack Options (${ws.label}, AtR ${atrCurrent})` },
+      content: `
+        <div class="form-group">
+          <label>Attack type:</label>
+          <select name="mode" autofocus>${modes}</select>
+        </div>
+        <div class="form-group">
+          <label>Situational modifier (Flanking +1/ally, etc):</label>
+          <input type="number" name="modifier" value="0"/>
+        </div>`,
+      buttons: [
+        {
+          action: "roll",
+          label: "Roll Attack",
+          default: true,
+          callback: (event, button) => ({
+            mode: button.form.elements.mode.value,
+            modifier: Number(button.form.elements.modifier.value) || 0
+          })
+        },
+        { action: "cancel", label: "Cancel" }
+      ],
+      rejectClose: false
+    });
+
+    if (!result || (result === "cancel")) return null;
+    const [mode, mult] = String(result.mode).split(":");
+    return { mode, multiplier: Number(mult) || 1, modifier: result.modifier };
+  }
 
   /**
    * Ask the user for a Difficulty Factor.

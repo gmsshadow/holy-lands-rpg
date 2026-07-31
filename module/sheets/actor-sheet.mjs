@@ -35,7 +35,9 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       npcSkillAdd: HolyLandsActorSheet.#onNpcSkillAdd,
       npcSkillDelete: HolyLandsActorSheet.#onNpcSkillDelete,
       levelUp: HolyLandsActorSheet.#onLevelUp,
-      rollStartingLifeFaith: HolyLandsActorSheet.#onRollStartingLifeFaith
+      rollStartingLifeFaith: HolyLandsActorSheet.#onRollStartingLifeFaith,
+      rollCreationAttributes: HolyLandsActorSheet.#onRollCreationAttributes,
+      unlockCreationAttributes: HolyLandsActorSheet.#onUnlockCreationAttributes
     }
   };
 
@@ -129,6 +131,8 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   /** Selection choices for character sheets. */
   #prepareCharacterContext(context) {
     context.classItem = this.actor.classItem;
+    context.isGM = game.user.isGM;
+    context.attributesLocked = !!this.actor.system.creation?.attributesRolled;
     context.statures = {
       weeFolk: "WeeFolk",
       dwarfolk: "Dwarfolk",
@@ -356,6 +360,29 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     const skills = foundry.utils.deepClone(this.actor.system.skills ?? []);
     skills.push({ name: "", value: 0 });
     return this.actor.update({ "system.skills": skills });
+  }
+
+  static async #onRollCreationAttributes(event, target) {
+    const stature = this.actor.system.stature;
+    const statures = { weeFolk: "WeeFolk", dwarfolk: "Dwarfolk", commonFolk: "CommonFolk", giantFolk: "GiantFolk" };
+    const proceed = await DialogV2.confirm({
+      window: { title: "Roll Attributes (Step 2)" },
+      content: `<p>Roll all twelve Attributes for <strong>${this.actor.name}</strong> as a <strong>${statures[stature] ?? stature}</strong>?</p>
+        <p><em>This uses the p.53 dice table (Grace Effect per world setting), assigns every AV, and then <strong>locks the Stature and this roll</strong>. Confirm the Stature above is correct first.</em></p>`,
+      rejectClose: false
+    });
+    if (!proceed) return;
+    return this.actor.rollCreationAttributes();
+  }
+
+  static async #onUnlockCreationAttributes(event, target) {
+    const proceed = await DialogV2.confirm({
+      window: { title: "Unlock Attribute Generation" },
+      content: `<p>Rac override: unlock Stature and attribute generation for <strong>${this.actor.name}</strong>, allowing a fresh Step 2 roll?</p>`,
+      rejectClose: false
+    });
+    if (!proceed) return;
+    return this.actor.unlockCreationAttributes();
   }
 
   static async #onLevelUp(event, target) {

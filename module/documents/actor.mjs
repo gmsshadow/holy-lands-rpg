@@ -153,6 +153,57 @@ export class HolyLandsActor extends Actor {
   }
 
   /**
+   * Step 2 (Genesis p.53): roll all twelve Attributes using the Stature's
+   * dice table (Grace Effect per world setting), assign the AVs, and lock
+   * creation so the roll cannot be repeated.
+   */
+  async rollCreationAttributes() {
+    if (this.type !== "character") return;
+    if (this.system.creation?.attributesRolled) {
+      ui.notifications.warn("Attributes have already been rolled for this character.");
+      return;
+    }
+    const stature = this.system.stature;
+    const table = this.system.constructor.STATURE_ATTRIBUTE_DICE?.[stature];
+    if (!table) {
+      ui.notifications.error(`No attribute dice table for stature "${stature}".`);
+      return;
+    }
+
+    const update = { "system.creation.attributesRolled": true };
+    const rolls = [];
+    const lines = [];
+    for (const [key, dice] of Object.entries(table)) {
+      const roll = new Roll(this.constructor.graceFormula(dice));
+      await roll.evaluate();
+      rolls.push(roll);
+      update[`system.attributes.${key}.value`] = roll.total;
+      const label = this.system.attributes[key]?.label ?? key;
+      lines.push(`${label}: ${dice}(GE) = <strong>${roll.total}</strong>`);
+    }
+    await this.update(update);
+
+    const statureLabel = stature.charAt(0).toUpperCase() + stature.slice(1);
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} - Attribute Generation (${statureLabel})</strong><br>`
+        + lines.join("<br>")
+        + `<br><em>Step 2A: if the class's Primary/Secondary Attribute requirements are not met, the Rac may allow rerolling those Attributes until they are. Stature and this roll are now locked.</em>`,
+      rolls
+    });
+  }
+
+  /** Rac/GM correction: unlock the creation attribute roll. */
+  async unlockCreationAttributes() {
+    if (!game.user.isGM) {
+      ui.notifications.warn("Only the Rac (GM) can unlock attribute generation.");
+      return;
+    }
+    await this.update({ "system.creation.attributesRolled": false });
+    ui.notifications.info(`${this.name}: attribute generation unlocked.`);
+  }
+
+  /**
    * Roll starting Life and Faith from the Class item (Genesis Ch7):
    * Life = STR + END + class die (GE); Faith = (class attributes) + die (GE).
    */

@@ -85,7 +85,11 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
       }),
 
       sins: new fields.ArrayField(new fields.StringField()),
-      phobias: new fields.ArrayField(new fields.StringField())
+      phobias: new fields.ArrayField(new fields.StringField()),
+
+      creation: new fields.SchemaField({
+        attributesRolled: new fields.BooleanField({ required: true, initial: false })
+      })
     };
   }
 
@@ -103,6 +107,16 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
     if (this.life.value > this.life.max) this.life.value = this.life.max;
     if (this.faith.value > this.faith.max) this.faith.value = this.faith.max;
   }
+
+  /**
+   * Attribute dice per Stature (Genesis p.53, Step 2). All rolls are GE.
+   */
+  static STATURE_ATTRIBUTE_DICE = {
+    weeFolk:    { int: "3d4", wis: "3d4", pat: "3d4", will: "3d4", mem: "3d4", str: "1d4", agi: "4d4", spd: "3d4", end: "2d4", bty: "4d4", cha: "3d4", vir: "3d4" },
+    dwarfolk:   { int: "3d4", wis: "3d4", pat: "2d4", will: "4d4", mem: "3d4", str: "4d4", agi: "3d4", spd: "2d4", end: "4d4", bty: "3d4", cha: "2d4", vir: "3d4" },
+    commonFolk: { int: "3d4", wis: "3d4", pat: "3d4", will: "3d4", mem: "3d4", str: "3d4", agi: "3d4", spd: "3d4", end: "3d4", bty: "3d4", cha: "3d4", vir: "3d4" },
+    giantFolk:  { int: "3d4", wis: "3d4", pat: "2d4", will: "3d4", mem: "3d4", str: "5d4", agi: "3d4", spd: "2d4", end: "4d4", bty: "2d4", cha: "2d4", vir: "3d4" }
+  };
 
   /** Skill-name patterns for combat point budgets (Steps 7-8, Genesis p.59). */
   static COMBAT_ABILITIES_PATTERN = /combat\s*abilit/i;

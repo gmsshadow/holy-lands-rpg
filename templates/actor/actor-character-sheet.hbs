@@ -37,9 +37,18 @@
       </div>
       <div class="info-group">
         <label>Stature</label>
-        <select name="system.stature">
+        <select name="system.stature" {{#if attributesLocked}}disabled{{/if}}>
           {{selectOptions statures selected=system.stature}}
         </select>
+        {{#unless attributesLocked}}
+        <button type="button" data-action="rollCreationAttributes" title="Roll all twelve Attributes from the p.53 Stature table, then lock">
+          <i class="fas fa-dice"></i> Roll Attributes
+        </button>
+        {{else}}
+        {{#if isGM}}
+        <a class="hint" data-action="unlockCreationAttributes" title="Rac override: allow a fresh Step 2 roll"><i class="fas fa-lock-open"></i> unlock</a>
+        {{/if}}
+        {{/unless}}
       </div>
       <div class="info-group">
         <label>Level</label>

@@ -271,3 +271,22 @@ These are deliberate changes, flagged for review:
 - A **Start** button re-rolls starting Life & Faith for new characters.
 - Without a class item the old dropdown remains, so nothing breaks for
   existing characters; the sheet hints at dropping a compendium class.
+
+## v2.5.0 — Creation Step 2: Stature attribute rolling with lock-out
+
+- The character header gains a **Roll Attributes** button next to Stature.
+  After a confirmation naming the chosen Stature, it rolls all twelve
+  Attributes from the p.53 dice table (WeeFolk 1d4 STR / 4d4 AGI & BTY;
+  Dwarfolk 4d4 WIL/STR/END, 2d4 PAT/SPD/CHA; CommonFolk 3d4 across;
+  GiantFolk 5d4 STR, 4d4 END, 2d4 PAT/SPD/BTY/CHA), honouring the Grace
+  Effect world setting (rr1), assigns every AV, and posts a chat card with
+  each roll.
+- The roll then **locks**: the Stature dropdown disables, the button
+  disappears, and rolling again is refused (`system.creation.attributesRolled`).
+  The chat card notes the Step 2A allowance - rerolling class
+  Primary/Secondary Attributes until requirements are met, at the Rac's
+  discretion.
+- GMs see a small **unlock** link (with confirmation) to reset the lock for
+  corrections; players cannot unlock.
+- Existing characters are unaffected: the flag defaults to unlocked, so
+  they simply see the new button until it's used.

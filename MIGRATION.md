@@ -200,3 +200,26 @@ These are deliberate changes, flagged for review:
   the skill schema. Any values stored in the old second box are stripped by
   schema cleaning and no longer contribute to rolls. (Ability and Weapon
   Skill bonus fields are unrelated and unchanged.)
+
+## v2.2.0 — NPC & Monster stat-block sheet
+
+- NPCs rebuilt around the two stat-block layouts (Human NPC / Monster),
+  selected with a new `npcKind` field; one sheet serves both.
+- **Creature category** (Christian / Non-Christian / Demon) drives every
+  save's DF from the three-column table on Genesis pp.24-27 (e.g. Sin
+  10 [19 | 21], Using Magic 21 [3 | 0], Holy Item 7 [13 | 15]); each save
+  also has an optional per-save DF override, plus its bonus and roll button.
+- **CS (Notable Skills and Abilities)**: add/remove name +value rows with a
+  d20 roll button each (stored as an ArrayField; edits rebuild the array to
+  avoid unreliable numeric-key form merges).
+- **WS**: NPCs now have the full seven weapon skills (ATT/CRI/SPC, AtR
+  current/max) - the same schema as characters, so NPC attacks route
+  through the complete combat automation (Criticals, counters, AtR).
+- **tDEF override + source** on the shared defense schema, for natural
+  armor like "hardened muscle and flesh [15]"; leave blank to use nDEF +
+  equipped armor as before.
+- Monster-only fields (shown when Kind = Monster): Life range, size, EXP
+  value/range, and a Features text block.
+- Weapons and Armor item lists (with attack/damage buttons) on the NPC
+  sheet; the embedded-skill-items context key was renamed to `skillItems`
+  to avoid clashing with the new CS array.

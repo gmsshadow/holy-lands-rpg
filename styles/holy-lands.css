@@ -559,3 +559,12 @@
 /* Skills: single +PF box per the official sheet */
 .holy-lands-rpg .skill .skill-pf { width: 48px; text-align: center; }
 .holy-lands-rpg .skill .skill-pf-plus { font-weight: bold; margin: 0 2px; }
+
+/* NPC / Monster stat-block sheet */
+.holy-lands-rpg .npc-combat-line { display: flex; gap: 10px; flex-wrap: wrap; }
+.holy-lands-rpg .npc-tdef-override { display: flex; gap: 6px; align-items: center; margin: 4px 0 8px; }
+.holy-lands-rpg .npc-tdef-override input[type="number"] { width: 55px; }
+.holy-lands-rpg .npc-cs-list .skill input[type="text"] { flex: 1; }
+.holy-lands-rpg .hint { font-size: 0.8em; opacity: 0.7; font-weight: normal; }
+.holy-lands-rpg .saves-grid .save input[type="number"] { width: 48px; }
+.holy-lands-rpg textarea { width: 100%; }

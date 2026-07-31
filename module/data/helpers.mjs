@@ -119,7 +119,9 @@ export function defenseSchema() {
     }),
     aDEFTotal: new fields.NumberField({ required: true, integer: true, initial: 0 }),
     tDEF: new fields.NumberField({ required: true, integer: true, initial: 4 }),
-    armorPenaltyTotal: new fields.NumberField({ required: true, integer: true, initial: 0 })
+    armorPenaltyTotal: new fields.NumberField({ required: true, integer: true, initial: 0 }),
+    tDEFOverride: new fields.NumberField({ required: false, integer: true, nullable: true, initial: null }),
+    tDEFSource: new fields.StringField({ required: true, initial: "" })
   });
 }
 
@@ -149,6 +151,11 @@ export function calculateDefense(systemData, actor) {
 
   defense.aDEFTotal = Object.values(defense.aDEFByAP).reduce((sum, v) => sum + v, 0);
   defense.tDEF = (defense.nDEF || 4) + defense.aDEFTotal;
+  // Direct tDEF override (e.g. a monster's natural armor: "hardened muscle
+  // and flesh [15]") takes precedence over the computed value.
+  if (Number.isFinite(defense.tDEFOverride) && (defense.tDEFOverride > 0)) {
+    defense.tDEF = defense.tDEFOverride;
+  }
   defense.armorPenaltyTotal = equippedArmor.reduce((sum, a) => {
     const pen = (a.system.currentPEN !== undefined) ? a.system.currentPEN : a.system.PEN;
     return sum + (pen || 0);

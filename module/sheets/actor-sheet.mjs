@@ -31,7 +31,9 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       castMiracle: HolyLandsActorSheet.#onCastMiracle,
       useBlessing: HolyLandsActorSheet.#onUseBlessing,
       forfeitAdvantage: HolyLandsActorSheet.#onForfeitAdvantage,
-      declareRetreat: HolyLandsActorSheet.#onDeclareRetreat
+      declareRetreat: HolyLandsActorSheet.#onDeclareRetreat,
+      npcSkillAdd: HolyLandsActorSheet.#onNpcSkillAdd,
+      npcSkillDelete: HolyLandsActorSheet.#onNpcSkillDelete
     }
   };
 
@@ -81,6 +83,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     context.tabs = this.#prepareTabs();
 
     if (actor.type === "character") this.#prepareCharacterContext(context);
+    if (actor.type === "npc") this.#prepareNpcContext(context);
     this.#prepareItems(context);
 
     return context;
@@ -145,6 +148,17 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     }
   }
 
+  /** Selection choices for NPC/Monster sheets. */
+  #prepareNpcContext(context) {
+    context.npcKinds = { human: "Human NPC", monster: "Monster" };
+    context.categories = {
+      christian: "Christian",
+      nonChristian: "Non-Christian",
+      demon: "Demon"
+    };
+    context.isMonster = this.actor.system.npcKind === "monster";
+  }
+
   /** Organize embedded items for the sheet. */
   #prepareItems(context) {
     const buckets = { weapon: [], armor: [], equipment: [], miracle: [], blessing: [], skill: [] };
@@ -159,7 +173,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     context.equipment = buckets.equipment;
     context.miracles = buckets.miracle;
     context.blessings = buckets.blessing;
-    context.skills = buckets.skill;
+    context.skillItems = buckets.skill;
   }
 
   /** @override */
@@ -173,6 +187,23 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
         li.addEventListener("dragstart", this.#onDragItemStart.bind(this));
       }
     }
+
+    // NPC CS skills are an ArrayField: nameless inputs, rebuilt on change
+    // (numeric-key form paths don't merge reliably into arrays).
+    for (const input of this.element.querySelectorAll(".npc-skill-field")) {
+      input.addEventListener("change", this.#onNpcSkillChange.bind(this));
+    }
+  }
+
+  /** Persist an edit to one CS skill row. */
+  async #onNpcSkillChange(event) {
+    const input = event.currentTarget;
+    const index = Number(input.dataset.index);
+    const field = input.dataset.field;
+    const skills = foundry.utils.deepClone(this.actor.system.skills ?? []);
+    if (!skills[index]) return;
+    skills[index][field] = (field === "value") ? (Number(input.value) || 0) : input.value;
+    await this.actor.update({ "system.skills": skills });
   }
 
   /** Provide standard Item drag data. */
@@ -287,6 +318,19 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
   static async #onDeclareRetreat(event, target) {
     return this.actor.declareRetreat();
+  }
+
+  static async #onNpcSkillAdd(event, target) {
+    const skills = foundry.utils.deepClone(this.actor.system.skills ?? []);
+    skills.push({ name: "", value: 0 });
+    return this.actor.update({ "system.skills": skills });
+  }
+
+  static async #onNpcSkillDelete(event, target) {
+    const index = Number(target.dataset.index);
+    const skills = foundry.utils.deepClone(this.actor.system.skills ?? []);
+    skills.splice(index, 1);
+    return this.actor.update({ "system.skills": skills });
   }
 
   static async #onRollDamage(event, target) {

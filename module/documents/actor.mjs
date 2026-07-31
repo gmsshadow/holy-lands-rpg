@@ -7,6 +7,11 @@
  */
 export class HolyLandsActor extends Actor {
 
+  /** Whether the optional Critical Rolls rule is enabled (world setting). */
+  get criticalRollsEnabled() {
+    return game.settings.get("holy-lands-rpg", "criticalRolls");
+  }
+
   /* -------------------------------------------- */
   /*  Attacks-per-Round (AtR)                     */
   /* -------------------------------------------- */
@@ -82,8 +87,9 @@ export class HolyLandsActor extends Actor {
     await roll.evaluate();
 
     const success = roll.total <= attr.value;
-    const critSuccess = roll.total === 1;
-    const critFail = roll.total === 12;
+    const crits = this.criticalRollsEnabled;
+    const critSuccess = crits && (roll.total === 1);
+    const critFail = crits && (roll.total === 12);
 
     let flavor = `${attr.label} Check (AV ${attr.value})`;
     if (critSuccess) flavor += " - <strong>Critical Success!</strong>";
@@ -107,8 +113,9 @@ export class HolyLandsActor extends Actor {
     await roll.evaluate();
 
     const success = roll.total >= df;
-    const critSuccess = roll.terms[0].results?.some(r => r.result === 20);
-    const critFail = roll.terms[0].results?.some(r => r.result === 1);
+    const crits = this.criticalRollsEnabled;
+    const critSuccess = crits && roll.terms[0].results?.some(r => r.result === 20);
+    const critFail = crits && roll.terms[0].results?.some(r => r.result === 1);
 
     let flavor = `${ability.label} (DF ${df})`;
     if (critSuccess) flavor += " - <strong>Critical Success!</strong>";
@@ -135,8 +142,9 @@ export class HolyLandsActor extends Actor {
     await roll.evaluate();
 
     const success = roll.total >= df;
-    const critSuccess = roll.terms[0].results?.some(r => r.result === 20);
-    const critFail = roll.terms[0].results?.some(r => r.result === 1);
+    const crits = this.criticalRollsEnabled;
+    const critSuccess = crits && roll.terms[0].results?.some(r => r.result === 20);
+    const critFail = crits && roll.terms[0].results?.some(r => r.result === 1);
 
     const skillName = skill.name || skill.label;
     let flavor = `${skillName} (DF ${df})`;
@@ -162,8 +170,9 @@ export class HolyLandsActor extends Actor {
     await roll.evaluate();
 
     const success = roll.total >= resolvedDf;
-    const critSuccess = roll.terms[0].results?.some(r => r.result === 20);
-    const critFail = roll.terms[0].results?.some(r => r.result === 1);
+    const crits = this.criticalRollsEnabled;
+    const critSuccess = crits && roll.terms[0].results?.some(r => r.result === 20);
+    const critFail = crits && roll.terms[0].results?.some(r => r.result === 1);
 
     let flavor = `${save.label} Save (DF ${resolvedDf})`;
     if (critSuccess) flavor += " - <strong>Critical Success!</strong>";
@@ -326,10 +335,14 @@ export class HolyLandsActor extends Actor {
     const isNat20Defense = natRollDefense === 20;
     const isNat1Defense = natRollDefense === 1;
 
-    // Apply halfDefenseFlag if set
+    // Apply halfDefenseFlag if set. Half Rolls halve the NATURAL die roll
+    // (rounding halves up) BEFORE adding Bonuses (Genesis Ch1, "Half Rolls").
     let finalDefenseTotal = defenseTotal;
+    let halfRollApplied = false;
     if (defender.system.combat?.halfDefenseFlag) {
-      finalDefenseTotal = Math.floor(defenseTotal / 2);
+      const halvedDie = Math.ceil((natRollDefense ?? 0) / 2);
+      finalDefenseTotal = halvedDie + defenderBonus;
+      halfRollApplied = true;
       await defender.update({ "system.combat.halfDefenseFlag": false });
     }
 
@@ -363,7 +376,13 @@ export class HolyLandsActor extends Actor {
     await this.consumeAtR(weaponSkill, 1);
 
     let flavor = `${weapon?.name || "Unarmed"} Attack: ${attackTotal} vs ${defenseType.capitalize()} ${finalDefenseTotal}`;
+    if (halfRollApplied) flavor += " (Half Roll)";
     flavor += attackHits ? " - <strong>Hit!</strong>" : " - <strong>Defended!</strong>";
+    if (!attackHits) {
+      // AtR is only lost by attacking or by taking Damage - a successful
+      // defense costs the defender nothing (Genesis Ch5, "AtR").
+      flavor += `<br><em>${defender.name} may make a return attack if they have AtR remaining.</em>`;
+    }
 
     await ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
@@ -373,12 +392,6 @@ export class HolyLandsActor extends Actor {
 
     if (attackHits) {
       return this._resolveDamage(weapon, defender, attackTotal, isNat20Attack, false, false);
-    }
-
-    // Successful defense - defender still loses 1 AtR from the exchange
-    const atr = this.getAtR(weaponSkill);
-    if (atr.current > 0) {
-      await defender._consumeAtRFromDamage();
     }
   }
 
@@ -410,9 +423,18 @@ export class HolyLandsActor extends Actor {
     // Apply armor degradation
     await this._applyArmorDegradation(defender, hitAP, finalDamage);
 
-    // Apply damage to life
+    // Apply damage to life. Life can go negative down to the character's
+    // negative maximum (coma range - Genesis Ch3, "Death and Comas").
     const currentLife = defender.system.life?.value || 0;
-    await defender.update({ "system.life.value": Math.max(0, currentLife - finalDamage) });
+    const maxLife = defender.system.life?.max || 0;
+    const newLife = Math.max(-maxLife, currentLife - finalDamage);
+    await defender.update({ "system.life.value": newLife });
+    if ((newLife <= 0) && (currentLife > 0)) {
+      await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: defender }),
+        flavor: `<strong>${defender.name} has fallen to ${newLife} Life!</strong> Roll a Save vs. Death (DF ${defender.system.saves?.death?.df ?? 11}) - success means a coma (lose 1 Life/hour to -${maxLife}), failure means death.`
+      });
+    }
 
     // Consume AtR from damage
     if (defender && typeof defender._consumeAtRFromDamage === "function") {
@@ -444,15 +466,14 @@ export class HolyLandsActor extends Actor {
     const cap = armor.system.CAP || 0;
     if (cap <= 0 || damageAmount < cap) return;
 
-    const reductionSteps = Math.floor(damageAmount / cap);
+    // CAP is how much Damage the piece can take FROM A SINGLE BLOW before its
+    // aDEF is reduced by one (-1); once aDEF is +0, further qualifying blows
+    // reduce PEN by one instead (Genesis Ch9). One step per blow.
     let currentADEF = (armor.system.currentADEF !== undefined) ? armor.system.currentADEF : armor.system.aDEF;
     let currentPEN = (armor.system.currentPEN !== undefined) ? armor.system.currentPEN : armor.system.PEN;
 
-    for (let i = 0; i < reductionSteps; i++) {
-      if (currentADEF > 0) currentADEF -= 1;
-      else if (currentPEN > 0) currentPEN -= 1;
-      else break; // Armor fully degraded
-    }
+    if (currentADEF > 0) currentADEF -= 1;
+    else if (currentPEN > 0) currentPEN -= 1;
 
     await armor.update({
       "system.currentADEF": currentADEF,
@@ -461,13 +482,19 @@ export class HolyLandsActor extends Actor {
     // Defense totals recompute automatically in prepareDerivedData after the update.
   }
 
-  /** Roll damage (manual damage rolls from the sheet). */
-  async rollDamage(weapon, isCritical = false) {
+  /**
+   * Roll damage (manual damage rolls from the sheet).
+   * Shift-click = Natural-20 Double Damage: per the general rule (Genesis
+   * Ch5, "Modifying Damage") the Natural dice are multiplied FIRST and
+   * Damage Bonuses added after. (The Advanced-Combat Critical strike, which
+   * adds the Bonus before multiplying and spends multiple AtR, is a separate
+   * action and not this button.)
+   */
+  async rollDamage(weapon, isDouble = false) {
     let damageFormula = weapon?.system?.damage || "1d4";
     const damageBonus = this.system.combat?.damageBonus || 0;
 
-    // For critical, multiply dice first, then add bonus
-    if (isCritical) {
+    if (isDouble) {
       damageFormula = `(${damageFormula}) * 2`;
     }
     damageFormula += ` + ${damageBonus}`;
@@ -477,7 +504,7 @@ export class HolyLandsActor extends Actor {
 
     return ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: `${weapon?.name || "Unarmed"} Damage${isCritical ? " (Critical)" : ""}`,
+      flavor: `${weapon?.name || "Unarmed"} Damage${isDouble ? " (Double Damage - Nat 20)" : ""}`,
       rolls: [roll]
     });
   }

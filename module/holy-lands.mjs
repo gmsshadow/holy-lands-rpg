@@ -137,6 +137,7 @@ Hooks.on("combatRound", async (combat, updateData, updateOptions) => {
 Hooks.on("renderChatMessageHTML", (message, html, context) => {
   // Add roll type classes (html is an HTMLElement in v13+)
   if (!message.isRoll) return;
+  if (!game.settings.get("holy-lands-rpg", "criticalRolls")) return;
   const roll = message.rolls[0];
   const term = roll?.terms?.[0];
   if (term?.faces !== 20) return;
@@ -154,26 +155,19 @@ Hooks.on("renderChatMessageHTML", (message, html, context) => {
 
 export class HolyLandsDice {
   /**
-   * Roll attributes with Grace Effect option
+   * Roll attributes with the Grace Effect option.
+   * The Grace Effect rerolls only the individual dice that show a Natural 1,
+   * repeatedly, until each is above one (Genesis Ch6, Step 2) - implemented
+   * with the recursive reroll modifier (e.g. 3d4 becomes 3d4rr1) so each die
+   * rerolls independently and the chat card shows the discarded rolls.
    */
   static async rollAttribute(formula, graceEffect = true) {
-    let roll = new Roll(formula);
-    await roll.evaluate();
-
-    // Apply Grace Effect - reroll natural 1s
+    let rollFormula = formula;
     if (graceEffect && game.settings.get("holy-lands-rpg", "graceEffect")) {
-      for (let term of roll.terms) {
-        if (term.results) {
-          // Keep rerolling until no 1s
-          while (term.results.some(r => r.result === 1)) {
-            roll = new Roll(formula);
-            await roll.evaluate();
-            term = roll.terms[0];
-          }
-        }
-      }
+      rollFormula = formula.replace(/(\d*)d(\d+)/gi, "$&rr1");
     }
-
+    const roll = new Roll(rollFormula);
+    await roll.evaluate();
     return roll;
   }
 

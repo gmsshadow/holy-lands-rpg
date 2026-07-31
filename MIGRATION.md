@@ -103,3 +103,32 @@ These are deliberate changes, flagged for review:
 - NPC attacks still route through character-style `weaponSkills` (NPCs have
   `combat.attack`/`combat.damage` fields that the attack pipeline ignores),
   same as v1.x.
+
+## v2.0.2 — Rules-fidelity fixes (verified against Genesis)
+
+1. Save vs Using Magic DF corrected 19 → 21 (Ch3).
+2. Half Rolls now halve the natural die (rounding up) before adding Bonuses
+   (Ch1); previously the post-bonus total was halved.
+3. A successful Dodge/Defend no longer costs the defender an AtR — AtR is
+   lost only by attacking or taking Damage (Ch5). Chat now notes the
+   defender's return-attack opportunity.
+4. Blessings now cost 5 Faith to perform, with an insufficient-Faith check
+   (Ch11).
+5. The sheet's shift-click damage button is explicitly Natural-20 Double
+   Damage (dice ×2, then Bonus — the correct order for that case); flavor
+   text updated. The Advanced-Combat Critical strike remains unimplemented.
+6. Armor degradation is one step per qualifying blow (damage ≥ CAP → −1
+   aDEF, or −1 PEN once aDEF is 0), not floor(damage/CAP) steps (Ch9).
+7. Grace Effect rerolls only the individual dice showing 1 (via the
+   recursive reroll modifier, e.g. 3d4rr1), not the whole pool (Ch6).
+8. The "Use Critical Rolls" world setting is now honoured: it gates the
+   crit annotations on attribute/ability/skill/save rolls and the chat-card
+   highlighting. Combat-pipeline natural 20/1 effects are mandated by Ch5
+   and remain always on.
+9. Life and Faith maxima are stored, editable values again (creation is
+   STR + END + class die; level-ups add a rolled die — Ch6), no longer
+   derived from classData averages. Current values still clamp to max.
+10. Life can go negative down to the character's negative maximum (coma
+    range); dropping to 0 or below posts a Save vs. Death prompt in chat
+    (Ch3, "Death and Comas").
+11. Miracle default Faith Cost is now 7 (all Level 1 Miracles are Fc 7).

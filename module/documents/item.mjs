@@ -132,13 +132,22 @@ export class HolyLandsItem extends Item {
       return;
     }
 
-    // Blessings don't cost faith, but may have other requirements
+    // Every Blessing costs five (5) Faith to cast (Genesis Ch11, "Blessings")
+    const BLESSING_FAITH_COST = 5;
+    const currentFaith = actor.system.faith.value;
+    if (currentFaith < BLESSING_FAITH_COST) {
+      ui.notifications.warn("Not enough Faith to perform this Blessing (costs 5 Faith)!");
+      return;
+    }
+    await actor.update({ "system.faith.value": currentFaith - BLESSING_FAITH_COST });
+
     const chatData = {
       speaker: ChatMessage.getSpeaker({ actor }),
       flavor: `Blessing: ${this.name}`,
       content: `
         <div class="holy-lands-blessing">
           <h3>${this.name}</h3>
+          <p><strong>Faith Cost:</strong> ${BLESSING_FAITH_COST}</p>
           <p><strong>Duration:</strong> ${this.system.duration || 'Varies'}</p>
           <hr>
           <p>${this.system.description}</p>

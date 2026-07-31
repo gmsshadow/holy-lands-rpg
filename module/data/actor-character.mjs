@@ -37,7 +37,7 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
       }),
 
       saves: new fields.SchemaField({
-        usingMagic: saveField("Using Magic", 19),
+        usingMagic: saveField("Using Magic", 21),
         curse: saveField("Curse", 18),
         spell: saveField("Spell", 17),
         disease: saveField("Disease", 16),
@@ -96,8 +96,11 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
   /** @override */
   prepareBaseData() {
     this.#calculateAbilities();
-    this.#calculateLife();
-    this.#calculateFaith();
+    // Life and Faith maxima are stored values per the rulebook (STR + END +
+    // class die at Level 1, plus a rolled die per level), not derived numbers.
+    // Clamp current values to the stored maximum.
+    if (this.life.value > this.life.max) this.life.value = this.life.max;
+    if (this.faith.value > this.faith.max) this.faith.value = this.faith.max;
   }
 
   /** @override */
@@ -125,21 +128,4 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
     }
   }
 
-  /** Maximum Life from class data and level. */
-  #calculateLife() {
-    const level = this.level || 1;
-    const baseLife = this.classData.baseLife || 10;
-    const avgRoll = Math.ceil((this.classData.lifePerLevel || 6) / 2);
-    this.life.max = baseLife + (avgRoll * (level - 1));
-    if (this.life.value > this.life.max) this.life.value = this.life.max;
-  }
-
-  /** Maximum Faith from class data and level. */
-  #calculateFaith() {
-    const level = this.level || 1;
-    const baseFaith = this.classData.baseFaith || 5;
-    const avgRoll = Math.ceil((this.classData.faithPerLevel || 4) / 2);
-    this.faith.max = baseFaith + (avgRoll * (level - 1));
-    if (this.faith.value > this.faith.max) this.faith.value = this.faith.max;
-  }
 }

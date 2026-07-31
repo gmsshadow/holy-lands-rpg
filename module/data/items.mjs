@@ -55,7 +55,7 @@ export class MiracleData extends foundry.abstract.TypeDataModel {
     return {
       ...baseItemSchema(),
       level: new fields.NumberField({ required: true, integer: true, initial: 1, min: 1 }),
-      faithCost: new fields.NumberField({ required: true, integer: true, initial: 1, min: 0 }),
+      faithCost: new fields.NumberField({ required: true, integer: true, initial: 7, min: 0 }),
       range: new fields.StringField({ required: true, initial: "Touch" }),
       duration: new fields.StringField({ required: true, initial: "Instantaneous" }),
       target: new fields.StringField({ required: true, initial: "Single" }),

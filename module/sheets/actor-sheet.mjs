@@ -41,7 +41,8 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       rollStep2A: HolyLandsActorSheet.#onRollStep2A,
       chooseSaveBonus: HolyLandsActorSheet.#onChooseSaveBonus,
       unlockSaveBonus: HolyLandsActorSheet.#onUnlockSaveBonus,
-      unlockStartingRoll: HolyLandsActorSheet.#onUnlockStartingRoll
+      unlockStartingRoll: HolyLandsActorSheet.#onUnlockStartingRoll,
+      chooseClass: HolyLandsActorSheet.#onChooseClass
     }
   };
 
@@ -147,14 +148,6 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       giantFolk: "GiantFolk"
     };
 
-    // Limit class choices to those the current Stature can be. If the
-    // stored class is not valid for the Stature (e.g. the Stature was just
-    // changed), keep it selectable but flagged, so re-rendering the sheet
-    // never silently rewrites the character's class.
-    const allClasses = HolyLandsActorSheet.CLASSES;
-    const allowed = HolyLandsActorSheet.STATURE_CLASSES[this.actor.system.stature]
-      ?? Object.keys(allClasses);
-
     // A dropped Class item is authoritative: warn if the current Stature
     // isn't in the item's statures list (Ch7 per-class lists).
     const clsItem = context.classItem;
@@ -163,12 +156,11 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       context.classStatureInvalid = okStatures.length
         && !okStatures.includes(this.actor.system.stature);
     }
-    context.classes = {};
-    for (const key of allowed) context.classes[key] = allClasses[key];
-    const current = this.actor.system.class;
-    if (current && !(current in context.classes)) {
-      context.classes[current] = `${allClasses[current] ?? current} (invalid for Stature)`;
-    }
+
+    // Legacy display: characters with only the old class key show its label.
+    context.legacyClassLabel = (!clsItem && this.actor.system.class)
+      ? (HolyLandsActorSheet.CLASSES[this.actor.system.class] ?? this.actor.system.class)
+      : null;
   }
 
   /** Selection choices for NPC/Monster sheets. */
@@ -247,66 +239,120 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     }
 
     if ((doc?.type === "class") && (this.actor.type === "character")) {
-      // Stature legality gate (Ch7): confirm before assigning an illegal
-      // class - cancelling leaves the character unchanged.
-      const statureLabels = { weeFolk: "WeeFolk", dwarfolk: "Dwarfolk", commonFolk: "CommonFolk", giantFolk: "GiantFolk" };
-      const okStatures = doc.system.statures ?? [];
-      const stature = this.actor.system.stature;
-      if (okStatures.length && !okStatures.includes(stature)) {
-        const legal = okStatures.map(k => statureLabels[k] ?? k).join(", ");
-        const proceed = await DialogV2.confirm({
-          window: { title: `${doc.name} - Stature Restriction` },
-          content: `<p><strong>${doc.name}</strong> cannot be a <strong>${statureLabels[stature] ?? stature}</strong> (Ch7 - legal Statures: ${legal}).</p>
-            <p><em>Assign anyway? (Rac override - the sheet will keep showing a warning.)</em></p>`,
-          no: { default: true },
-          rejectClose: false
-        });
-        if (!proceed) {
-          ui.notifications.info(`${doc.name} was not assigned.`);
-          return;
-        }
-      }
-
-      const existing = this.actor.items.filter(i => i.type === "class");
-      if (existing.length) await this.actor.deleteEmbeddedDocuments("Item", existing.map(i => i.id));
-      const [created] = await this.actor.createEmbeddedDocuments("Item", [doc.toObject()]);
-      const key = created.system.key;
-      if (key) await this.actor.update({ "system.class": key });
-
-      // Step 2A first: if attribute requirements are unmet, offer the
-      // reroll immediately (before Life/Faith, which depend on STR/END).
-      const unmet = this.actor.getUnmetClassRequirements();
-      if (unmet.length) {
-        if (this.actor.system.creation?.attributesRolled) {
-          const list = unmet.map(r => `<li>${r.label}: AV ${r.current}, requires ${r.min}</li>`).join("");
-          const reroll = await DialogV2.confirm({
-            window: { title: `${created.name} - Step 2A` },
-            content: `<p><strong>${created.name}</strong> has Attribute requirements this character does not meet:</p>
-              <ul>${list}</ul>
-              <p><em>Reroll each with the Stature dice until met (p.53, Step 2A)?</em></p>`,
-            rejectClose: false
-          });
-          if (reroll) await this.actor.rollStep2ARerolls();
-        }
-        else {
-          ui.notifications.warn(`${created.name}: attribute requirements not met (${unmet.map(r => `${r.label} ${r.current}/${r.min}`).join(", ")}). Roll Attributes (Step 2), then use Step 2A Reroll.`);
-        }
-      }
-
-      if (this.actor.system.creation?.attributesRolled && !this.actor.system.creation?.startingRolled) {
-        const rollNow = await DialogV2.confirm({
-          window: { title: created.name },
-          content: `<p><strong>${created.name}</strong> assigned. Roll starting Life and Faith from the class formulas now? (Locks after rolling.)</p>`,
-          rejectClose: false
-        });
-        if (rollNow) await this.actor.rollStartingLifeFaith();
-      }
-      else if (!this.actor.system.creation?.attributesRolled) {
-        ui.notifications.info(`${created.name} assigned. Roll Attributes (Step 2) first, then use the Start button for Life & Faith.`);
-      }
-      return created;
+      return this.#assignClassItem(doc);
     }
     return super._onDropItem(event, item);
+  }
+
+  /**
+   * Shared class assignment pipeline: stature gate, single-class
+   * enforcement, key sync, Step 2A offer, then the starting-roll offer.
+   */
+  async #assignClassItem(doc, { skipStatureGate = false } = {}) {
+    const statureLabels = { weeFolk: "WeeFolk", dwarfolk: "Dwarfolk", commonFolk: "CommonFolk", giantFolk: "GiantFolk" };
+    const okStatures = doc.system.statures ?? [];
+    const stature = this.actor.system.stature;
+    if (!skipStatureGate && okStatures.length && !okStatures.includes(stature)) {
+      const legal = okStatures.map(k => statureLabels[k] ?? k).join(", ");
+      const proceed = await DialogV2.confirm({
+        window: { title: `${doc.name} - Stature Restriction` },
+        content: `<p><strong>${doc.name}</strong> cannot be a <strong>${statureLabels[stature] ?? stature}</strong> (Ch7 - legal Statures: ${legal}).</p>
+          <p><em>Assign anyway? (Rac override - the sheet will keep showing a warning.)</em></p>`,
+        no: { default: true },
+        rejectClose: false
+      });
+      if (!proceed) {
+        ui.notifications.info(`${doc.name} was not assigned.`);
+        return;
+      }
+    }
+
+    const existing = this.actor.items.filter(i => i.type === "class");
+    if (existing.length) await this.actor.deleteEmbeddedDocuments("Item", existing.map(i => i.id));
+    const [created] = await this.actor.createEmbeddedDocuments("Item", [doc.toObject()]);
+    const key = created.system.key;
+    if (key) await this.actor.update({ "system.class": key });
+
+    // Step 2A first: if attribute requirements are unmet, offer the
+    // reroll immediately (before Life/Faith, which depend on STR/END).
+    const unmet = this.actor.getUnmetClassRequirements();
+    if (unmet.length) {
+      if (this.actor.system.creation?.attributesRolled) {
+        const list = unmet.map(r => `<li>${r.label}: AV ${r.current}, requires ${r.min}</li>`).join("");
+        const reroll = await DialogV2.confirm({
+          window: { title: `${created.name} - Step 2A` },
+          content: `<p><strong>${created.name}</strong> has Attribute requirements this character does not meet:</p>
+            <ul>${list}</ul>
+            <p><em>Reroll each with the Stature dice until met (p.53, Step 2A)?</em></p>`,
+          rejectClose: false
+        });
+        if (reroll) await this.actor.rollStep2ARerolls();
+      }
+      else {
+        ui.notifications.warn(`${created.name}: attribute requirements not met (${unmet.map(r => `${r.label} ${r.current}/${r.min}`).join(", ")}). Roll Attributes (Step 2), then use Step 2A Reroll.`);
+      }
+    }
+
+    if (this.actor.system.creation?.attributesRolled && !this.actor.system.creation?.startingRolled) {
+      const rollNow = await DialogV2.confirm({
+        window: { title: created.name },
+        content: `<p><strong>${created.name}</strong> assigned. Roll starting Life and Faith from the class formulas now? (Locks after rolling.)</p>`,
+        rejectClose: false
+      });
+      if (rollNow) await this.actor.rollStartingLifeFaith();
+    }
+    else if (!this.actor.system.creation?.attributesRolled) {
+      ui.notifications.info(`${created.name} assigned. Roll Attributes (Step 2) first, then use the Start button for Life & Faith.`);
+    }
+    return created;
+  }
+
+  /** Open a Stature-filtered class picker fed from the compendium. */
+  static async #onChooseClass(event, target) {
+    const pack = game.packs.get("holy-lands-rpg.classes");
+    if (!pack) {
+      ui.notifications.error("The Character Classes compendium was not found.");
+      return;
+    }
+    const docs = await pack.getDocuments();
+    const stature = this.actor.system.stature;
+    const legal = docs.filter(d => {
+      const st = d.system.statures ?? [];
+      return !st.length || st.includes(stature);
+    }).sort((a, b) => a.name.localeCompare(b.name));
+    if (!legal.length) {
+      ui.notifications.warn("No classes in the compendium are legal for this Stature.");
+      return;
+    }
+    const excluded = docs.length - legal.length;
+
+    const options = legal.map(d => {
+      const req = d.system.requirements ? ` - requires ${d.system.requirements}` : "";
+      return `<option value="${d.id}">${foundry.utils.escapeHTML(d.name)}${foundry.utils.escapeHTML(req)}</option>`;
+    }).join("");
+    const chosenId = await DialogV2.wait({
+      window: { title: "Choose Class (Step 1)" },
+      content: `
+        <div class="form-group">
+          <label>Classes legal for this Stature (p.53):</label>
+          <select name="classId" autofocus>${options}</select>
+        </div>
+        ${excluded ? `<p class="hint">${excluded} class${excluded > 1 ? "es are" : " is"} hidden by the current Stature.</p>` : ""}`,
+      buttons: [
+        {
+          action: "choose", label: "Assign Class", default: true,
+          callback: (event, button) => button.form.elements.classId.value
+        },
+        { action: "cancel", label: "Cancel" }
+      ],
+      rejectClose: false
+    });
+    if (!chosenId || (chosenId === "cancel")) return;
+
+    const doc = docs.find(d => d.id === chosenId);
+    if (!doc) return;
+    // Already filtered to legal statures - skip the gate.
+    return this.#assignClassItem(doc, { skipStatureGate: true });
   }
 
   /* -------------------------------------------- */

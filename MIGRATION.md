@@ -372,3 +372,20 @@ These are deliberate changes, flagged for review:
   recalculation. Faith attributes come from the class item, with a built-in
   Ch7 fallback for dropdown classes.
 - Existing characters default to unlocked and simply see the new gating.
+
+## v2.8.0 — Class dropdown removed; compendium picker
+
+- The class dropdown is gone: class items are now the single source of
+  truth. In its place, a **Choose Class** button opens a picker listing the
+  compendium classes legal for the character's current Stature (p.53
+  filtering preserved), showing each class's attribute requirements, and
+  noting how many classes the Stature hides. Assignment runs the same
+  pipeline as drag-and-drop (Step 2A offer, starting-roll offer); the
+  stature gate is skipped since the list is pre-filtered, while dragging an
+  illegal class manually still hits the confirmation gate.
+- The assignment pipeline was factored into a shared method used by both
+  the drop handler and the picker.
+- Characters with only the legacy class key display it as
+  "<Class> (legacy)" beside the Choose Class button - assigning a class
+  item upgrades them and keeps the key in sync. The built-in Ch7
+  requirement/faith-attribute fallbacks remain for such characters.

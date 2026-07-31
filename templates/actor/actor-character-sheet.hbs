@@ -29,10 +29,12 @@
         <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{classItem.name}} cannot be this Stature (Ch7)</p>
         {{/if}}
         {{else}}
-        <select name="system.class">
-          {{selectOptions classes selected=system.class}}
-        </select>
-        <p class="hint">Drop a Class from the Character Classes compendium for full automation.</p>
+        {{#if legacyClassLabel}}
+        <span class="legacy-class" title="Assigned before class items existed - choose a class item to enable full automation">{{legacyClassLabel}} <span class="hint">(legacy)</span></span>
+        {{/if}}
+        <button type="button" data-action="chooseClass" title="Pick a class legal for this Stature from the Character Classes compendium (p.53)">
+          <i class="fas fa-scroll"></i> Choose Class
+        </button>
         {{/if}}
         {{#if unmetRequirements.length}}
         {{#each unmetRequirements}}

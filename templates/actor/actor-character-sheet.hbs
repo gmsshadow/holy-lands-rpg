@@ -112,9 +112,8 @@
       {{#each system.skills.gifts as |skill key|}}
       <div class="skill">
         <input type="text" name="system.skills.gifts.{{key}}.name" value="{{skill.name}}" placeholder="Skill Name"/>
-        <input type="number" name="system.skills.gifts.{{key}}.value" value="{{skill.value}}" placeholder="0" title="Base Value"/>
-        <input type="number" name="system.skills.gifts.{{key}}.bonus" value="{{skill.bonus}}" placeholder="0" title="Bonus"/>
-        <span class="skill-total">Total: {{skill.mod}}</span>
+        <span class="skill-pf-plus">+</span>
+        <input type="number" name="system.skills.gifts.{{key}}.value" value="{{skill.value}}" placeholder="0" title="Proficiency Factor (PF)" class="skill-pf"/>
         <button type="button" data-action="rollSkill" data-skill="gifts.{{key}}">
           <i class="fas fa-dice-d20"></i>
         </button>
@@ -127,9 +126,8 @@
       {{#each system.skills.talents as |skill key|}}
       <div class="skill">
         <input type="text" name="system.skills.talents.{{key}}.name" value="{{skill.name}}" placeholder="Skill Name"/>
-        <input type="number" name="system.skills.talents.{{key}}.value" value="{{skill.value}}" placeholder="0" title="Base Value"/>
-        <input type="number" name="system.skills.talents.{{key}}.bonus" value="{{skill.bonus}}" placeholder="0" title="Bonus"/>
-        <span class="skill-total">Total: {{skill.mod}}</span>
+        <span class="skill-pf-plus">+</span>
+        <input type="number" name="system.skills.talents.{{key}}.value" value="{{skill.value}}" placeholder="0" title="Proficiency Factor (PF)" class="skill-pf"/>
         <button type="button" data-action="rollSkill" data-skill="talents.{{key}}">
           <i class="fas fa-dice-d20"></i>
         </button>
@@ -142,9 +140,8 @@
       {{#each system.skills.crafts as |skill key|}}
       <div class="skill">
         <input type="text" name="system.skills.crafts.{{key}}.name" value="{{skill.name}}" placeholder="Skill Name"/>
-        <input type="number" name="system.skills.crafts.{{key}}.value" value="{{skill.value}}" placeholder="0" title="Base Value"/>
-        <input type="number" name="system.skills.crafts.{{key}}.bonus" value="{{skill.bonus}}" placeholder="0" title="Bonus"/>
-        <span class="skill-total">Total: {{skill.mod}}</span>
+        <span class="skill-pf-plus">+</span>
+        <input type="number" name="system.skills.crafts.{{key}}.value" value="{{skill.value}}" placeholder="0" title="Proficiency Factor (PF)" class="skill-pf"/>
         <button type="button" data-action="rollSkill" data-skill="crafts.{{key}}">
           <i class="fas fa-dice-d20"></i>
         </button>

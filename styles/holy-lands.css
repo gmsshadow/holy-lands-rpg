@@ -555,3 +555,7 @@
   min-height: 0;
   overflow: hidden;
 }
+
+/* Skills: single +PF box per the official sheet */
+.holy-lands-rpg .skill .skill-pf { width: 48px; text-align: center; }
+.holy-lands-rpg .skill .skill-pf-plus { font-weight: bold; margin: 0 2px; }

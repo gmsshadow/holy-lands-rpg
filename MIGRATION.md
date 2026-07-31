@@ -183,3 +183,12 @@ These are deliberate changes, flagged for review:
   Advantage penalty, pending Half Roll) so the defender can see what will
   apply before rolling.
 - AGI initiative tie-break was already present in `_sortCombatants`.
+
+## v2.1.1
+
+- Gifts/Talents/Crafts fixed: skill PF totals (`mod`) are now computed in
+  data preparation, so entered PFs actually add to skill rolls (previously
+  `mod` was never calculated and rolls added +0). The sheet now shows a
+  single "+ PF" box per skill matching the official character sheet; the
+  `bonus` field remains in the schema (hidden, default 0) so existing world
+  data and any stored bonuses stay valid and still count.

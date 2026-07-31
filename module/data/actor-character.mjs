@@ -96,6 +96,7 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
   /** @override */
   prepareBaseData() {
     this.#calculateAbilities();
+    this.#calculateSkillMods();
     // Life and Faith maxima are stored values per the rulebook (STR + END +
     // class die at Level 1, plus a rolled die per level), not derived numbers.
     // Clamp current values to the stored maximum.
@@ -107,6 +108,15 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
   prepareDerivedData() {
     // Requires embedded items, so it runs in derived prep.
     calculateDefense(this, this.parent);
+  }
+
+  /** Skill PF totals: mod = value (the PF written on the sheet) + any bonus. */
+  #calculateSkillMods() {
+    for (const group of Object.values(this.skills)) {
+      for (const skill of Object.values(group)) {
+        skill.mod = (skill.value || 0) + (skill.bonus || 0);
+      }
+    }
   }
 
   /** Ability proficiency factors, derived from attribute pairs (round up). */

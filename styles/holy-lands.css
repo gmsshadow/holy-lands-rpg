@@ -546,3 +546,12 @@
 .holy-lands-rpg button[data-action] {
   cursor: pointer;
 }
+
+/* Single root wrapper required by HandlebarsApplicationMixin parts */
+.holy-lands-rpg .sheet-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}

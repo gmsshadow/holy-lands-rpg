@@ -435,6 +435,81 @@ export class HolyLandsActor extends Actor {
     });
   }
 
+  /**
+   * Step 6 (p.58): grant the class's listed Gifts as skill items at +3 PF
+   * (or +2 for Adventurer/Fighter, whose skills all start at +2). Matches
+   * names against the Skills compendium so Weapon Skill / Combat Abilities
+   * links come across; unmatched names are created as plain skills.
+   */
+  async grantClassGifts() {
+    if (this.type !== "character") return;
+    const cls = this.classItem;
+    if (!cls) {
+      ui.notifications.warn("Assign a Class before granting Gifts.");
+      return;
+    }
+    if (this.system.creation?.giftsGranted) {
+      ui.notifications.warn("Class Gifts have already been granted.");
+      return;
+    }
+
+    const names = (cls.system.grantedGifts || "")
+      .split("\n").map(x => x.trim()).filter(x => x.length);
+    if (!names.length) {
+      ui.notifications.warn(`${cls.name} has no Gifts listed to grant.`);
+      return;
+    }
+
+    // Adventurer and Fighter: all Skills start at +2 (p.58).
+    const basic = ["adventurer", "fighter"].includes(cls.system.key);
+    const giftPF = basic ? 2 : 3;
+
+    const pack = game.packs.get("holy-lands-rpg.skills");
+    const packDocs = pack ? await pack.getDocuments() : [];
+    const findInPack = name => packDocs.find(d => d.name.toLowerCase() === name.toLowerCase());
+
+    const existing = new Set(this.items.filter(i => i.type === "skill").map(i => i.name.toLowerCase()));
+    const toCreate = [];
+    const skipped = [];
+    for (const name of names) {
+      if (existing.has(name.toLowerCase())) { skipped.push(name); continue; }
+      const match = findInPack(name);
+      const data = match
+        ? foundry.utils.mergeObject(match.toObject(), { system: { skillType: "gift", pf: giftPF } })
+        : { name, type: "skill", img: "icons/svg/book.svg", system: { skillType: "gift", pf: giftPF, weaponSkillKey: /^ws\s/i.test(name) ? "" : "", combatAbilities: /combat\s*abilit/i.test(name), isCombatSkill: /^cs\s/i.test(name) } };
+      delete data._id;
+      toCreate.push(data);
+    }
+
+    if (toCreate.length) await this.createEmbeddedDocuments("Item", toCreate);
+    await this.update({ "system.creation.giftsGranted": true });
+
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} - Step 6: Class Gifts (${cls.name})</strong><br>`
+        + `Granted at +${giftPF} PF: ${toCreate.map(t => t.name).join(", ") || "(none new)"}`
+        + (skipped.length ? `<br><em>Already present: ${skipped.join(", ")}</em>` : "")
+        + (basic ? `<br><em>${cls.name}: all Skills start at +2 (choose 7 Gifts, 5 Talents, 3 Crafts).</em>` : `<br><em>Now choose 5 Talents (+2) and 3 Crafts (+1) from the class's Skill list.</em>`),
+      whisper: []
+    });
+  }
+
+  /**
+   * Add a skill from the Skills compendium into a given section at a set PF.
+   * @param {string} compendiumSkillId
+   * @param {"gift"|"talent"|"craft"} section
+   * @param {number} pf
+   */
+  async addSkillFromCompendium(compendiumSkillId, section, pf) {
+    const pack = game.packs.get("holy-lands-rpg.skills");
+    if (!pack) return;
+    const doc = await pack.getDocument(compendiumSkillId);
+    if (!doc) return;
+    const data = foundry.utils.mergeObject(doc.toObject(), { system: { skillType: section, pf } });
+    delete data._id;
+    return this.createEmbeddedDocuments("Item", [data]);
+  }
+
   /** Rac/GM correction: unlock the starting Life & Faith roll. */
   async unlockStartingRoll() {
     if (!game.user.isGM) {

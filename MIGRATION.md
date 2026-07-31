@@ -457,3 +457,22 @@ These are deliberate changes, flagged for review:
   folder in the sidebar.
 - Skills default to the Craft section; drag onto a character and move to
   Gifts/Talents as needed (Step 6 auto-population is the next piece).
+
+## v2.12.0 — Step 6: skill auto-population
+
+- **Grant Class Gifts** button appears on the Skills tab when a class with a
+  Gift list is assigned (and Gifts haven't been granted yet). It adds the
+  class's listed Gifts as skill items at +3 PF - or +2 for Adventurer and
+  Fighter, whose Skills all start at +2 (p.58) - matching names against the
+  Skills compendium so Weapon Skill / Combat Abilities links carry across,
+  and creating plain skills for any unmatched names. Skips skills the
+  character already has, then locks (creation.giftsGranted), and the chat
+  card lists what was granted plus the Talent/Craft next steps.
+- The per-column **Add buttons** now open a Skills-compendium picker into
+  that section, defaulting to the step PF (Gift +3, Talent +2, Craft +1)
+  and flagging skills already held - the guided way to pick the 5 Talents
+  and 3 Crafts. Manual drag-and-drop still works.
+- Note: the class item's Gift list is auto-granted, but the wider "class
+  skill list" for Talent/Craft picks isn't stored as structured data (it
+  couldn't be reliably extracted), so those picks are player-chosen from
+  the full Skills compendium rather than restricted per class.

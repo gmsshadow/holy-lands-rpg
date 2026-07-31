@@ -46,7 +46,9 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       rollDetails: HolyLandsActorSheet.#onRollDetails,
       rollSinsPhobias: HolyLandsActorSheet.#onRollSinsPhobias,
       charArrayAdd: HolyLandsActorSheet.#onCharArrayAdd,
-      charArrayDelete: HolyLandsActorSheet.#onCharArrayDelete
+      charArrayDelete: HolyLandsActorSheet.#onCharArrayDelete,
+      grantGifts: HolyLandsActorSheet.#onGrantGifts,
+      addSkill: HolyLandsActorSheet.#onAddSkill
     }
   };
 
@@ -145,6 +147,8 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     context.unmetRequirements = this.actor.getUnmetClassRequirements();
     context.saveBonusChosen = !!this.actor.system.creation?.saveBonusChosen;
     context.startingRolled = !!this.actor.system.creation?.startingRolled;
+    context.giftsGranted = !!this.actor.system.creation?.giftsGranted;
+    context.hasClassGifts = !!this.actor.classItem?.system.grantedGifts?.trim();
     context.statures = {
       weeFolk: "WeeFolk",
       dwarfolk: "Dwarfolk",
@@ -332,6 +336,56 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   }
 
   /** Open a Stature-filtered class picker fed from the compendium. */
+  static async #onGrantGifts(event, target) {
+    const cls = this.actor.classItem;
+    if (!cls) { ui.notifications.warn("Assign a Class first."); return; }
+    const proceed = await DialogV2.confirm({
+      window: { title: "Step 6: Grant Class Gifts" },
+      content: `<p>Add <strong>${cls.name}</strong>'s listed Gifts to <strong>${this.actor.name}</strong> as skill items (Gifts at +3, or +2 for Adventurer/Fighter)?</p>
+        <p><em>Skips any the character already has; you then choose Talents and Crafts.</em></p>`,
+      rejectClose: false
+    });
+    if (!proceed) return;
+    return this.actor.grantClassGifts();
+  }
+
+  /** Add a skill from the compendium into a chosen section at the step PF. */
+  static async #onAddSkill(event, target) {
+    const section = target.dataset.section; // gift/talent/craft
+    const pack = game.packs.get("holy-lands-rpg.skills");
+    if (!pack) { ui.notifications.error("Skills compendium not found."); return; }
+    const docs = (await pack.getDocuments()).sort((a, b) => a.name.localeCompare(b.name));
+
+    const sectionLabels = { gift: "Gift", talent: "Talent", craft: "Craft" };
+    const defaultPF = { gift: 3, talent: 2, craft: 1 };
+    const have = new Set(this.actor.items.filter(i => i.type === "skill").map(i => i.name.toLowerCase()));
+    const options = docs.map(d => {
+      const dis = have.has(d.name.toLowerCase()) ? " (already have)" : "";
+      return `<option value="${d.id}">${foundry.utils.escapeHTML(d.name)}${dis}</option>`;
+    }).join("");
+
+    const result = await DialogV2.wait({
+      window: { title: `Add ${sectionLabels[section]} from Skills` },
+      content: `
+        <div class="form-group">
+          <label>Skill:</label>
+          <select name="skillId" autofocus>${options}</select>
+        </div>
+        <div class="form-group">
+          <label>PF:</label>
+          <input type="number" name="pf" value="${defaultPF[section] ?? 0}"/>
+        </div>`,
+      buttons: [
+        { action: "add", label: "Add", default: true,
+          callback: (event, button) => ({ id: button.form.elements.skillId.value, pf: Number(button.form.elements.pf.value) || 0 }) },
+        { action: "cancel", label: "Cancel" }
+      ],
+      rejectClose: false
+    });
+    if (!result || result === "cancel") return;
+    return this.actor.addSkillFromCompendium(result.id, section, result.pf);
+  }
+
   static async #onRollDetails(event, target) {
     const proceed = await DialogV2.confirm({
       window: { title: "Step 5: Roll Details" },

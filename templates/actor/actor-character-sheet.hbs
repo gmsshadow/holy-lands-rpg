@@ -189,7 +189,17 @@
   </div>
 
   <div class="tab skills {{tabs.skills.cssClass}}" data-group="primary" data-tab="skills">
-    <p class="hint">Drag skills from a compendium, or add them manually. Gifts, Talents, and Crafts each hold their own skills; open a skill to set its PF and links.</p>
+    <p class="hint">Drag skills from a compendium, or use the Add buttons. Open a skill to set its PF and links.</p>
+    {{#if hasClassGifts}}
+    {{#unless giftsGranted}}
+    <div class="step6-banner">
+      <span>Step 6: grant this class's Gifts automatically?</span>
+      <button type="button" data-action="grantGifts" title="Add the class's listed Gifts as skill items at +3 (+2 for Adventurer/Fighter)">
+        <i class="fas fa-gift"></i> Grant Class Gifts
+      </button>
+    </div>
+    {{/unless}}
+    {{/if}}
     <div class="skills-columns">
       <div class="skill-column">
         <div class="skill-col-header"><h3>Gifts</h3><span class="pf-label">PF</span></div>
@@ -204,7 +214,7 @@
           </li>
           {{/each}}
         </ol>
-        <a class="item-control skill-add" data-action="itemCreate" data-type="skill" data-skill-type="gift" title="Add Gift"><i class="fas fa-plus"></i> Add</a>
+        <a class="item-control skill-add" data-action="addSkill" data-section="gift" title="Add Gift"><i class="fas fa-plus"></i> Add</a>
       </div>
       <div class="skill-column">
         <div class="skill-col-header"><h3>Talents</h3><span class="pf-label">PF</span></div>
@@ -219,7 +229,7 @@
           </li>
           {{/each}}
         </ol>
-        <a class="item-control skill-add" data-action="itemCreate" data-type="skill" data-skill-type="talent" title="Add Talent"><i class="fas fa-plus"></i> Add</a>
+        <a class="item-control skill-add" data-action="addSkill" data-section="talent" title="Add Talent"><i class="fas fa-plus"></i> Add</a>
       </div>
       <div class="skill-column">
         <div class="skill-col-header"><h3>Crafts</h3><span class="pf-label">PF</span></div>
@@ -234,7 +244,7 @@
           </li>
           {{/each}}
         </ol>
-        <a class="item-control skill-add" data-action="itemCreate" data-type="skill" data-skill-type="craft" title="Add Craft"><i class="fas fa-plus"></i> Add</a>
+        <a class="item-control skill-add" data-action="addSkill" data-section="craft" title="Add Craft"><i class="fas fa-plus"></i> Add</a>
       </div>
     </div>
   </div>

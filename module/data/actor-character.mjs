@@ -88,7 +88,8 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
         saveBonusChosen: new fields.BooleanField({ required: true, initial: false }),
         startingRolled: new fields.BooleanField({ required: true, initial: false }),
         lifeDieResult: new fields.NumberField({ required: true, integer: true, initial: 0 }),
-        faithDieResult: new fields.NumberField({ required: true, integer: true, initial: 0 })
+        faithDieResult: new fields.NumberField({ required: true, integer: true, initial: 0 }),
+        giftsGranted: new fields.BooleanField({ required: true, initial: false })
       })
     };
   }

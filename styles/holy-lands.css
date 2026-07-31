@@ -604,3 +604,11 @@
 .holy-lands-rpg .skill-row .skill-name { flex: 1; cursor: pointer; }
 .holy-lands-rpg .skill-row .skill-pf-val { min-width: 20px; text-align: center; font-weight: bold; }
 .holy-lands-rpg .skill-add { display: inline-block; margin-top: 4px; cursor: pointer; }
+
+/* Step 6 gift-grant banner */
+.holy-lands-rpg .step6-banner {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 10px; margin: 4px 0;
+  background: rgba(107, 52, 16, 0.08);
+  border-left: 3px solid #6b3410; border-radius: 3px;
+}

@@ -192,3 +192,11 @@ These are deliberate changes, flagged for review:
   single "+ PF" box per skill matching the official character sheet; the
   `bonus` field remains in the schema (hidden, default 0) so existing world
   data and any stored bonuses stay valid and still count.
+
+## v2.1.2
+
+- Gifts/Talents/Crafts now use ONLY the single visible PF box: `mod` mirrors
+  `value` exactly, and the legacy hidden `bonus` field has been removed from
+  the skill schema. Any values stored in the old second box are stripped by
+  schema cleaning and no longer contribute to rolls. (Ability and Weapon
+  Skill bonus fields are unrelated and unchanged.)

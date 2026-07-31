@@ -110,11 +110,11 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
     calculateDefense(this, this.parent);
   }
 
-  /** Skill PF totals: mod = value (the PF written on the sheet) + any bonus. */
+  /** Skill PF totals: mod mirrors the single visible PF box. */
   #calculateSkillMods() {
     for (const group of Object.values(this.skills)) {
       for (const skill of Object.values(group)) {
-        skill.mod = (skill.value || 0) + (skill.bonus || 0);
+        skill.mod = skill.value || 0;
       }
     }
   }

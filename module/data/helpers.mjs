@@ -68,12 +68,16 @@ export function saveField(label, df) {
   });
 }
 
-/** A named, freely-renamable skill slot (Gifts / Talents / Crafts). */
+/**
+ * A named, freely-renamable skill slot (Gifts / Talents / Crafts).
+ * The single visible PF box is `value`; `mod` mirrors it in data prep.
+ * (The legacy `bonus` field was removed in v2.1.2 - stored values are
+ * stripped by schema cleaning and never contribute to rolls.)
+ */
 export function skillField(label) {
   return new fields.SchemaField({
     name: new fields.StringField({ required: true, initial: "" }),
     value: new fields.NumberField({ required: true, integer: true, initial: 0 }),
-    bonus: new fields.NumberField({ required: true, integer: true, initial: 0 }),
     mod: new fields.NumberField({ required: true, integer: true, initial: 0 }),
     label: new fields.StringField({ required: true, initial: label })
   });

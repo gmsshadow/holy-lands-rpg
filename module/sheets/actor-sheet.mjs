@@ -245,6 +245,26 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     }
 
     if ((doc?.type === "class") && (this.actor.type === "character")) {
+      // Stature legality gate (Ch7): confirm before assigning an illegal
+      // class - cancelling leaves the character unchanged.
+      const statureLabels = { weeFolk: "WeeFolk", dwarfolk: "Dwarfolk", commonFolk: "CommonFolk", giantFolk: "GiantFolk" };
+      const okStatures = doc.system.statures ?? [];
+      const stature = this.actor.system.stature;
+      if (okStatures.length && !okStatures.includes(stature)) {
+        const legal = okStatures.map(k => statureLabels[k] ?? k).join(", ");
+        const proceed = await DialogV2.confirm({
+          window: { title: `${doc.name} - Stature Restriction` },
+          content: `<p><strong>${doc.name}</strong> cannot be a <strong>${statureLabels[stature] ?? stature}</strong> (Ch7 - legal Statures: ${legal}).</p>
+            <p><em>Assign anyway? (Rac override - the sheet will keep showing a warning.)</em></p>`,
+          no: { default: true },
+          rejectClose: false
+        });
+        if (!proceed) {
+          ui.notifications.info(`${doc.name} was not assigned.`);
+          return;
+        }
+      }
+
       const existing = this.actor.items.filter(i => i.type === "class");
       if (existing.length) await this.actor.deleteEmbeddedDocuments("Item", existing.map(i => i.id));
       const [created] = await this.actor.createEmbeddedDocuments("Item", [doc.toObject()]);

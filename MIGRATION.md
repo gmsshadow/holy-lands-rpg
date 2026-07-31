@@ -334,3 +334,10 @@ These are deliberate changes, flagged for review:
   been rolled yet a notification explains the order.
 - Drop handling made defensive against receiving raw drag data instead of
   an Item document (resolved via fromDropData).
+
+## v2.7.2
+
+- Dropping a class whose Ch7 Stature list excludes the character's Stature
+  now asks for confirmation first, naming the legal Statures. Cancelling
+  (the default button) leaves the character's existing class untouched;
+  confirming is a Rac override and the persistent header warning remains.

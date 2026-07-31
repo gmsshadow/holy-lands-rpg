@@ -104,10 +104,99 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
     if (this.faith.value > this.faith.max) this.faith.value = this.faith.max;
   }
 
+  /** Skill-name patterns for combat point budgets (Steps 7-8, Genesis p.59). */
+  static COMBAT_ABILITIES_PATTERN = /combat\s*abilit/i;
+
+  static WS_PATTERNS = {
+    handToHand: /hand\s*to\s*hand/i,
+    lightArms: /light\s*arms?/i,
+    heavyArms: /heavy\s*arms?/i,
+    pairedWeapons: /paired\s*weapons?/i,
+    missile: /\bmissiles?\b/i,
+    thrown: /\bthrown\b/i,
+    kickAttack: /kick/i
+  };
+
   /** @override */
   prepareDerivedData() {
     // Requires embedded items, so it runs in derived prep.
     calculateDefense(this, this.parent);
+    this.#prepareCombatValidation();
+  }
+
+  /**
+   * Combat point budgets and rule validation (Genesis Ch6, Steps 7-8):
+   * - "Combat Abilities" skill PF = +1s to distribute across ADV/DOD/DEF/DAM,
+   *   with the Rule of Halves on the group (p.55).
+   * - Each "WS <name>" skill PF = +1s across that Weapon Skill's ATT/CRI/SPC,
+   *   with ATT >= CRI and ATT >= SPC.
+   * - Having a WS skill grants +1 AtR over the base (2 for Hand to Hand and
+   *   Paired Weapons, 1 for the rest).
+   * Soft validation only - the Rac may award extra Bonuses (e.g. AGI 12+
+   * grants AtR), so nothing is blocked, just flagged.
+   */
+  #prepareCombatValidation() {
+    const cls = this.constructor;
+
+    // Gather every named skill slot with its PF
+    const slots = [];
+    for (const group of Object.values(this.skills)) {
+      for (const skill of Object.values(group)) {
+        if (skill.name) slots.push({ name: skill.name, pf: skill.mod || 0 });
+      }
+    }
+
+    // --- Step 7: Combat Abilities budget + Rule of Halves ---
+    const caBudget = slots
+      .filter(x => cls.COMBAT_ABILITIES_PATTERN.test(x.name))
+      .reduce((sum, x) => sum + x.pf, 0);
+    const c = this.combat;
+    const caValues = [c.advantageBonus || 0, c.dodgeBonus || 0, c.defendBonus || 0, c.damageBonus || 0];
+    const caSpent = caValues.reduce((a, b) => a + b, 0);
+    const sorted = [...caValues].sort((a, b) => b - a);
+    const halvesViolation = (sorted[0] > 7) && (sorted[1] < Math.ceil(sorted[0] / 2));
+
+    const ca = {
+      budget: caBudget,
+      spent: caSpent,
+      hasSkill: caBudget > 0 || slots.some(x => cls.COMBAT_ABILITIES_PATTERN.test(x.name)),
+      over: caSpent > caBudget,
+      halvesViolation,
+      warnings: []
+    };
+    if (ca.over) ca.warnings.push(`${caSpent} points spent but only ${caBudget} granted by the Combat Abilities skill`);
+    if (!ca.hasSkill && caSpent > 0) ca.warnings.push("No Combat Abilities skill found in Gifts/Talents/Crafts");
+    if (halvesViolation) ca.warnings.push(`Rule of Halves: with a +${sorted[0]} Bonus the second highest must be at least +${Math.ceil(sorted[0] / 2)}`);
+
+    // --- Step 8: per-Weapon-Skill budgets, ATT >= CRI/SPC, AtR ---
+    const ws = {};
+    for (const [key, skill] of Object.entries(this.weaponSkills)) {
+      const matches = slots.filter(x => cls.WS_PATTERNS[key]?.test(x.name));
+      const budget = matches.reduce((sum, x) => sum + x.pf, 0);
+      const hasSkill = matches.length > 0;
+      const att = skill.attackBonus || 0;
+      const cri = skill.criticalBonus || 0;
+      const spc = skill.specialBonus || 0;
+      const spent = att + cri + spc;
+      const baseAtR = ["handToHand", "pairedWeapons"].includes(key) ? 2 : 1;
+      const expectedAtR = baseAtR + (hasSkill ? 1 : 0);
+
+      const v = {
+        budget, spent, hasSkill, expectedAtR,
+        over: spent > budget,
+        criOverAtt: cri > att,
+        spcOverAtt: spc > att,
+        atrMismatch: (skill.atRMax || 0) !== expectedAtR,
+        warnings: []
+      };
+      if (v.over) v.warnings.push(`${spent} points spent but only ${budget} granted by the ${skill.label} skill`);
+      if (v.criOverAtt) v.warnings.push("Critical Bonus cannot exceed the Attack Bonus");
+      if (v.spcOverAtt) v.warnings.push("Special Bonus cannot exceed the Attack Bonus");
+      if (v.atrMismatch) v.warnings.push(`Expected ${expectedAtR} AtR (${baseAtR} base${hasSkill ? " +1 for having the skill" : ""}; Rac awards such as AGI 12+ may differ)`);
+      ws[key] = v;
+    }
+
+    this.combatValidation = { ca, ws };
   }
 
   /** Skill PF totals: mod mirrors the single visible PF box. */

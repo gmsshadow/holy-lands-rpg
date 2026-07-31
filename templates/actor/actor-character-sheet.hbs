@@ -180,7 +180,17 @@
       </button>
     </div>
 
-    <h3>Combat Bonuses</h3>
+    <h3>Combat Bonuses
+      <span class="budget {{#if system.combatValidation.ca.over}}over{{/if}}">
+        {{system.combatValidation.ca.spent}} / {{system.combatValidation.ca.budget}} pts
+      </span>
+    </h3>
+    {{#each system.combatValidation.ca.warnings}}
+    <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{this}}</p>
+    {{/each}}
+    {{#unless system.combatValidation.ca.hasSkill}}
+    <p class="hint">Add the "Combat Abilities" skill to your Gifts, Talents, or Crafts to gain +1 points to distribute here (Step 7, p.59).</p>
+    {{/unless}}
     <div class="combat-stats">
       <div class="stat">
         <label>Advantage Bonus</label>
@@ -201,9 +211,17 @@
     </div>
 
     <h3>Weapon Skills</h3>
+    <p class="hint">Each "WS &lt;name&gt;" skill in your Gifts/Talents/Crafts grants its PF in +1s for that Weapon Skill's ATT/CRI/SPC, and +1 AtR (Step 8, p.59).</p>
     {{#each system.weaponSkills as |ws key|}}
+    {{#with (lookup ../system.combatValidation.ws key) as |v|}}
     <div class="weapon-skill">
-      <h4>{{ws.label}}</h4>
+      <h4>{{ws.label}}
+        <span class="budget {{#if v.over}}over{{/if}}">{{v.spent}} / {{v.budget}} pts</span>
+        <span class="budget {{#if v.atrMismatch}}over{{/if}}" title="Expected AtR">AtR {{ws.atRMax}} (exp {{v.expectedAtR}})</span>
+      </h4>
+      {{#each v.warnings}}
+      <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{this}}</p>
+      {{/each}}
       <div class="ws-stats">
         <div class="ws-stat">
           <label>Attack Bonus</label>
@@ -225,6 +243,7 @@
         </div>
       </div>
     </div>
+    {{/with}}
     {{/each}}
   </div>
 

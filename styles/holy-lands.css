@@ -568,3 +568,22 @@
 .holy-lands-rpg .hint { font-size: 0.8em; opacity: 0.7; font-weight: normal; }
 .holy-lands-rpg .saves-grid .save input[type="number"] { width: 48px; }
 .holy-lands-rpg textarea { width: 100%; }
+
+/* Combat point budgets and rule warnings (Steps 7-8) */
+.holy-lands-rpg .budget {
+  font-size: 0.8em;
+  font-weight: normal;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: rgba(0, 128, 0, 0.15);
+  margin-left: 8px;
+}
+.holy-lands-rpg .budget.over {
+  background: rgba(200, 0, 0, 0.2);
+  font-weight: bold;
+}
+.holy-lands-rpg .rules-warning {
+  color: #a33;
+  font-size: 0.85em;
+  margin: 2px 0;
+}

@@ -223,3 +223,23 @@ These are deliberate changes, flagged for review:
 - Weapons and Armor item lists (with attack/damage buttons) on the NPC
   sheet; the embedded-skill-items context key was renamed to `skillItems`
   to avoid clashing with the new CS array.
+
+## v2.3.0 — Character creation: combat point budgets (Steps 7-8)
+
+- The Combat tab now tracks point budgets granted by skills, matched by
+  name from Gifts/Talents/Crafts:
+  - **Combat Abilities** (Step 7): the skill's PF grants that many +1s to
+    distribute across ADV/DOD/DEF/DAM. A spent/budget chip shows on the
+    Combat Bonuses header (red when overspent), with a hint when the skill
+    is missing. The Rule of Halves (p.55) is checked on the group: once the
+    highest Bonus exceeds +7, the second highest must be at least half.
+  - **Weapon Skills** (Step 8): each "WS <name>" skill's PF grants +1s for
+    that Weapon Skill's ATT/CRI/SPC. Per-skill spent/budget chips, plus
+    warnings when CRI or SPC exceeds ATT.
+  - **AtR**: expected AtR shown per Weapon Skill (base 1, or 2 for Hand to
+    Hand / Paired Weapons, +1 for having the WS skill), flagged when the
+    entered maximum differs - as a warning only, since Rac awards (e.g.
+    AGI 12+) legitimately change it.
+- All validation is soft (warnings, nothing blocked), computed in derived
+  data so it updates live as skills or bonuses change. Name matching is
+  case-insensitive and tolerant ("WS Light Arms", "light arms", etc).

@@ -119,6 +119,24 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
     giantFolk:  { int: "3d4", wis: "3d4", pat: "2d4", will: "3d4", mem: "3d4", str: "5d4", agi: "3d4", spd: "2d4", end: "4d4", bty: "2d4", cha: "2d4", vir: "3d4" }
   };
 
+  /**
+   * Built-in class Attribute requirements (Genesis Ch7), used when no class
+   * item provides them (dropdown-selected classes, legacy imports).
+   */
+  static CLASS_REQUIREMENTS = {
+    bard: [["cha", 10], ["int", 8]],
+    cleric: [["int", 10], ["wis", 8]],
+    devilHunter: [["will", 10], ["int", 8]],
+    jester: [["agi", 10], ["cha", 8]],
+    knight: [["end", 10], ["str", 8]],
+    saint: [["wis", 10], ["pat", 8]],
+    saisier: [["agi", 10], ["str", 8]],
+    scout: [["wis", 10], ["agi", 8]],
+    spy: [["agi", 10], ["spd", 8]],
+    voyager: [["int", 10], ["cha", 8]],
+    warrior: [["str", 10], ["end", 8]]
+  };
+
   /** Skill-name patterns for combat point budgets (Steps 7-8, Genesis p.59). */
   static COMBAT_ABILITIES_PATTERN = /combat\s*abilit/i;
 

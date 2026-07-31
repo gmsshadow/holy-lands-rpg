@@ -28,9 +28,15 @@
         {{#if classStatureInvalid}}
         <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{classItem.name}} cannot be this Stature (Ch7)</p>
         {{/if}}
+        {{else}}
+        <select name="system.class">
+          {{selectOptions classes selected=system.class}}
+        </select>
+        <p class="hint">Drop a Class from the Character Classes compendium for full automation.</p>
+        {{/if}}
         {{#if unmetRequirements.length}}
         {{#each unmetRequirements}}
-        <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{this.label}} AV {{this.current}} below the required {{this.min}}</p>
+        <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{this.label}} AV {{this.current}} below the required {{this.min}} (Ch7)</p>
         {{/each}}
         {{#if attributesLocked}}
         <button type="button" data-action="rollStep2A" title="Reroll unmet class Attributes with the Stature dice until requirements are met (p.53)">
@@ -39,12 +45,6 @@
         {{else}}
         <p class="hint">Roll Attributes (Step 2) first, then Step 2A rerolls become available.</p>
         {{/if}}
-        {{/if}}
-        {{else}}
-        <select name="system.class">
-          {{selectOptions classes selected=system.class}}
-        </select>
-        <p class="hint">Drop a Class from the Character Classes compendium for full automation.</p>
         {{/if}}
       </div>
       <div class="info-group">

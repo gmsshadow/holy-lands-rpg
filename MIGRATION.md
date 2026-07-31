@@ -341,3 +341,16 @@ These are deliberate changes, flagged for review:
   now asks for confirmation first, naming the legal Statures. Cancelling
   (the default button) leaves the character's existing class untouched;
   confirming is a Rac override and the persistent header warning remains.
+
+## v2.7.3
+
+- Class Attribute requirement validation now works on every path:
+  - Requirements resolve from the class item's structured fields, falling
+    back to parsing its requirements display text ("Charisma 10,
+    Intellect 8"), falling back to a built-in Ch7 table keyed by the
+    dropdown class. Legacy world-imported class items (pre-v2.6.0, with
+    blank structured fields) and dropdown-only classes both validate now.
+  - The warnings and Step 2A Reroll button moved outside the
+    class-item-only template branch, so they display for dropdown classes
+    too. Step 2A rerolls work without a class item (chat names the
+    dropdown class).

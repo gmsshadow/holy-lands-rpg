@@ -194,18 +194,51 @@ export class HolyLandsActor extends Actor {
   }
 
   /**
+   * Resolve the class Attribute requirements from the best available
+   * source: (1) the class item's structured fields, (2) the class item's
+   * requirements display text, (3) the built-in Ch7 table keyed by the
+   * dropdown class. Returns [[attrKey, min], ...].
+   */
+  getClassRequirements() {
+    if (this.type !== "character") return [];
+    const cls = this.classItem;
+
+    if (cls) {
+      // (1) Structured fields
+      const structured = [];
+      for (const [attrKey, minKey] of [["primaryAttribute", "primaryMin"], ["secondaryAttribute", "secondaryMin"]]) {
+        const key = cls.system[attrKey];
+        const min = cls.system[minKey] || 0;
+        if (key && (min > 0)) structured.push([key, min]);
+      }
+      if (structured.length) return structured;
+
+      // (2) Parse the display text, e.g. "Charisma 10, Intellect 8"
+      const LABELS = {
+        intellect: "int", wisdom: "wis", patience: "pat", will: "will",
+        memory: "mem", strength: "str", agility: "agi", speed: "spd",
+        endurance: "end", beauty: "bty", charisma: "cha", virtue: "vir"
+      };
+      const parsed = [];
+      const text = cls.system.requirements || "";
+      for (const m of text.matchAll(/(intellect|wisdom|patience|will|memory|strength|agility|speed|endurance|beauty|charisma|virtue)\s*:?\s*(\d+)/gi)) {
+        parsed.push([LABELS[m[1].toLowerCase()], Number(m[2])]);
+      }
+      if (parsed.length) return parsed;
+    }
+
+    // (3) Built-in table by class key
+    return this.system.constructor.CLASS_REQUIREMENTS?.[this.system.class] ?? [];
+  }
+
+  /**
    * Class Attribute requirements not currently met (Step 2A).
    * @returns {Array<{key: string, label: string, min: number, current: number}>}
    */
   getUnmetClassRequirements() {
-    const cls = this.classItem;
-    if (!cls || (this.type !== "character")) return [];
     const unmet = [];
-    for (const [attrKey, minKey] of [["primaryAttribute", "primaryMin"], ["secondaryAttribute", "secondaryMin"]]) {
-      const key = cls.system[attrKey];
-      const min = cls.system[minKey] || 0;
-      if (!key || (min <= 0)) continue;
-      const attr = this.system.attributes[key];
+    for (const [key, min] of this.getClassRequirements()) {
+      const attr = this.system.attributes?.[key];
       if (attr && (attr.value < min)) {
         unmet.push({ key, label: attr.label, min, current: attr.value });
       }
@@ -256,7 +289,7 @@ export class HolyLandsActor extends Actor {
 
     return ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: `<strong>${this.name} - Step 2A: Class Attribute Rerolls (${this.classItem?.name})</strong><br>` + lines.join("<br>"),
+      flavor: `<strong>${this.name} - Step 2A: Class Attribute Rerolls (${this.classItem?.name ?? this.system.class})</strong><br>` + lines.join("<br>"),
       rolls
     });
   }

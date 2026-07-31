@@ -79,10 +79,22 @@ export class SkillData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
       ...baseItemSchema(),
+      // gift / talent / craft (the sheet section) - matches the paper sheet.
       skillType: new fields.StringField({ required: true, initial: "gift", choices: ["gift", "talent", "craft"] }),
-      proficiency: new fields.NumberField({ required: true, integer: true, initial: 0 }),
-      attribute1: new fields.StringField({ required: true, initial: "str" }),
-      attribute2: new fields.StringField({ required: true, initial: "agi" })
+      // Proficiency Factor: the single "+PF" number on the sheet.
+      pf: new fields.NumberField({ required: true, integer: true, initial: 0 }),
+
+      // Structured links so validation reads data, not skill names:
+      // - combatAbilities: this is the "Combat Abilities" skill (Step 7 budget)
+      // - weaponSkillKey: this is a "WS <name>" skill for the given key (Step 8)
+      combatAbilities: new fields.BooleanField({ required: true, initial: false }),
+      weaponSkillKey: new fields.StringField({ required: true, initial: "", choices: [
+        "", "handToHand", "lightArms", "heavyArms", "pairedWeapons", "missile", "thrown", "kickAttack"
+      ] }),
+
+      // Optional metadata for Chapter 4 / CS combat skills.
+      prerequisite: new fields.StringField({ required: true, initial: "" }),
+      isCombatSkill: new fields.BooleanField({ required: true, initial: false })
     };
   }
 }

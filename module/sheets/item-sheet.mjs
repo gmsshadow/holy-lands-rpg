@@ -98,6 +98,10 @@ export class HolyLandsItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
         talent: "Talent",
         craft: "Craft"
       };
+      context.weaponSkillKeys = {
+        handToHand: "Hand To Hand", lightArms: "Light Arms", heavyArms: "Heavy Arms",
+        pairedWeapons: "Paired Weapons", missile: "Missile", thrown: "Thrown", kickAttack: "Kick Attack"
+      };
     }
     if (item.type === "class") {
       context.classKeys = {

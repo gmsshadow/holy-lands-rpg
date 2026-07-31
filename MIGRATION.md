@@ -408,3 +408,26 @@ These are deliberate changes, flagged for review:
   times against the twenty-entry tables, rerolling duplicates. Rolling
   overwrites the list after confirmation; rows stay editable. This also
   finally feeds the Retreat Pride/Control/Strife check real data.
+
+## v2.10.0 — Skills as items (structural core)
+
+- The fixed Gifts/Talents/Crafts slots are replaced by embedded **skill
+  items**. The Skills tab keeps the three-column paper-sheet layout, but
+  each column is now an item list (name → opens the item, +PF shown, roll
+  and delete controls, and an Add button that creates a skill pre-set to
+  that section). Dragging skill items in works too.
+- **SkillData** extended: `pf` (the single +PF box), plus structured links
+  that replace name-matching - `combatAbilities` (Step 7 budget) and
+  `weaponSkillKey` (Step 8 budget + AtR) - and `prerequisite` /
+  `isCombatSkill` metadata. The skill item sheet exposes all of these.
+- **Combat-budget validation (Steps 7-8) now reads item data**: the
+  Combat Abilities flag and weaponSkillKey drive the budgets directly, with
+  the old name regex kept only as a fallback for hand-typed skills without
+  the links set. Validation moved to derived data (it needs the items).
+- **Skill rolls** now roll the embedded item by id (d20 + its PF).
+- **Automatic migration**: on first load as GM, any character still holding
+  legacy `system.skills` slots has them converted to skill items - section
+  preserved, old value+bonus summed into PF, "Combat Abilities" and
+  "WS <name>" recognised and linked, "CS " prefixes flagged - then the
+  legacy data is cleared so it runs once. A notification reports the count.
+- NPC "CS" notable-skills list is unaffected (separate ArrayField).

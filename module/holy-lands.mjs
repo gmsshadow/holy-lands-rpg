@@ -112,6 +112,59 @@ function registerHandlebarsHelpers() {
 }
 
 /* -------------------------------------------- */
+/*  Skill Migration (legacy fixed slots -> items) */
+/* -------------------------------------------- */
+
+Hooks.once("ready", async function() {
+  if (!game.user.isGM) return;
+  const WS_KEYS = {
+    "hand to hand": "handToHand", "light arms": "lightArms", "heavy arms": "heavyArms",
+    "paired weapons": "pairedWeapons", "missile": "missile", "missiles": "missile",
+    "thrown": "thrown", "kick attack": "kickAttack"
+  };
+
+  for (const actor of game.actors) {
+    if (actor.type !== "character") continue;
+    // Legacy data lives in the source under system.skills (no longer in schema).
+    const legacy = actor._source?.system?.skills;
+    if (!legacy) continue;
+
+    const toCreate = [];
+    const sectionMap = { gifts: "gift", talents: "talent", crafts: "craft" };
+    for (const [group, section] of Object.entries(sectionMap)) {
+      const slots = legacy[group];
+      if (!slots) continue;
+      for (const slot of Object.values(slots)) {
+        const name = (slot?.name || "").trim();
+        if (!name) continue;
+        const lower = name.toLowerCase();
+        const wsMatch = Object.keys(WS_KEYS).find(k => lower.includes(k));
+        toCreate.push({
+          name,
+          type: "skill",
+          img: "icons/svg/book.svg",
+          system: {
+            skillType: section,
+            pf: (slot.value || 0) + (slot.bonus || 0),
+            combatAbilities: /combat\s*abilit/i.test(name),
+            weaponSkillKey: wsMatch ? WS_KEYS[wsMatch] : "",
+            isCombatSkill: /^cs\s/i.test(name)
+          }
+        });
+      }
+    }
+
+    if (toCreate.length) {
+      await actor.createEmbeddedDocuments("Item", toCreate);
+      console.log(`Holy Lands RPG | Migrated ${toCreate.length} skills to items for ${actor.name}`);
+    }
+    // Clear the legacy source data so migration runs once.
+    await actor.update({ "system.skills": null }, { diff: false, recursive: false });
+    ui.notifications?.info(`Holy Lands: migrated ${toCreate.length} skills to items for ${actor.name}.`);
+  }
+});
+
+/* -------------------------------------------- */
 /*  Combat Hooks                                */
 /* -------------------------------------------- */
 

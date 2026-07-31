@@ -612,14 +612,15 @@ export class HolyLandsActor extends Actor {
   }
 
   /**
-   * Roll a skill check (d20 + total, higher is better).
-   * @param {string} skillKey  Dot-path within system.skills, e.g. "gifts.gift1"
+   * Roll a skill check (d20 + PF, higher is better).
+   * @param {string} skillId  The embedded skill item's id.
    */
-  async rollSkill(skillKey, df = 10) {
-    const skill = foundry.utils.getProperty(this.system.skills, skillKey);
-    if (!skill) return;
+  async rollSkill(skillId, df = 10) {
+    const skill = this.items.get(skillId);
+    if (!skill || (skill.type !== "skill")) return;
 
-    const roll = new Roll("1d20 + @mod", { mod: skill.mod });
+    const pf = skill.system.pf || 0;
+    const roll = new Roll("1d20 + @mod", { mod: pf });
     await roll.evaluate();
 
     const success = roll.total >= df;
@@ -627,8 +628,7 @@ export class HolyLandsActor extends Actor {
     const critSuccess = crits && roll.terms[0].results?.some(r => r.result === 20);
     const critFail = crits && roll.terms[0].results?.some(r => r.result === 1);
 
-    const skillName = skill.name || skill.label;
-    let flavor = `${skillName} (DF ${df})`;
+    let flavor = `${skill.name} (DF ${df})`;
     if (critSuccess) flavor += " - <strong>Critical Success!</strong>";
     else if (critFail) flavor += " - <strong>Critical Failure!</strong>";
     else if (success) flavor += " - Success";

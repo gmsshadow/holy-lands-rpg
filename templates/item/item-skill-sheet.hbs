@@ -10,15 +10,41 @@
 
 <section class="sheet-body">
   <div class="form-group">
-    <label>Skill Type</label>
+    <label>Section</label>
     <select name="system.skillType">
       {{selectOptions skillTypes selected=system.skillType}}
     </select>
   </div>
 
   <div class="form-group">
-    <label>Proficiency</label>
-    <input type="number" name="system.proficiency" value="{{system.proficiency}}"/>
+    <label>Proficiency Factor (PF)</label>
+    <input type="number" name="system.pf" value="{{system.pf}}"/>
+  </div>
+
+  <div class="form-group">
+    <label>
+      <input type="checkbox" name="system.combatAbilities" {{checked system.combatAbilities}}/>
+      This is the "Combat Abilities" skill (grants Step 7 combat points)
+    </label>
+  </div>
+
+  <div class="form-group">
+    <label>Weapon Skill link (grants Step 8 points &amp; +1 AtR)</label>
+    <select name="system.weaponSkillKey">
+      {{selectOptions weaponSkillKeys selected=system.weaponSkillKey blank="— none —"}}
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label>
+      <input type="checkbox" name="system.isCombatSkill" {{checked system.isCombatSkill}}/>
+      Combat Skill (CS)
+    </label>
+  </div>
+
+  <div class="form-group">
+    <label>Prerequisite</label>
+    <input type="text" name="system.prerequisite" value="{{system.prerequisite}}" placeholder="e.g. Horsemanship, WS Light Arms"/>
   </div>
 
   <div class="form-group">

@@ -1,6 +1,6 @@
 import {
   resourceField, attributesSchema, abilitiesSchema,
-  saveField, skillSlots, weaponSkillField, defenseSchema, calculateDefense
+  saveField, weaponSkillField, defenseSchema, calculateDefense
 } from "./helpers.mjs";
 
 const fields = foundry.data.fields;
@@ -54,12 +54,6 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
         holyItem: saveField("Holy Item", 7)
       }),
 
-      skills: new fields.SchemaField({
-        gifts: skillSlots("gift", "Gift", 7),
-        talents: skillSlots("talent", "Talent", 7),
-        crafts: skillSlots("craft", "Craft", 15)
-      }),
-
       weaponSkills: new fields.SchemaField({
         handToHand: weaponSkillField("Hand To Hand", 2),
         lightArms: weaponSkillField("Light Arms", 1),
@@ -106,7 +100,6 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
   /** @override */
   prepareBaseData() {
     this.#calculateAbilities();
-    this.#calculateSkillMods();
     // Life and Faith maxima are stored values per the rulebook (STR + END +
     // class die at Level 1, plus a rolled die per level), not derived numbers.
     // Clamp current values to the stored maximum.
@@ -217,6 +210,15 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
     this.#prepareCombatValidation();
   }
 
+  /** Embedded skill items grouped by section (gift/talent/craft). */
+  get skillsByType() {
+    const groups = { gift: [], talent: [], craft: [] };
+    for (const item of this.parent.items) {
+      if (item.type === "skill") (groups[item.system.skillType] ??= []).push(item);
+    }
+    return groups;
+  }
+
   /**
    * Combat point budgets and rule validation (Genesis Ch6, Steps 7-8):
    * - "Combat Abilities" skill PF = +1s to distribute across ADV/DOD/DEF/DAM,
@@ -231,17 +233,22 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
   #prepareCombatValidation() {
     const cls = this.constructor;
 
-    // Gather every named skill slot with its PF
-    const slots = [];
-    for (const group of Object.values(this.skills)) {
-      for (const skill of Object.values(group)) {
-        if (skill.name) slots.push({ name: skill.name, pf: skill.mod || 0 });
-      }
-    }
+    // Gather skill items with their PF. Prefer structured links
+    // (combatAbilities flag / weaponSkillKey); fall back to name regex for
+    // hand-typed skills that predate the structured fields.
+    const skillItems = this.parent.items.filter(i => i.type === "skill");
+    const slots = skillItems.map(i => ({
+      name: i.name,
+      pf: i.system.pf || 0,
+      combatAbilities: i.system.combatAbilities === true,
+      weaponSkillKey: i.system.weaponSkillKey || ""
+    }));
+    const isCombatAbilities = x => x.combatAbilities || cls.COMBAT_ABILITIES_PATTERN.test(x.name);
+    const matchesWS = (x, key) => (x.weaponSkillKey === key) || (!x.weaponSkillKey && cls.WS_PATTERNS[key]?.test(x.name));
 
     // --- Step 7: Combat Abilities budget + Rule of Halves ---
     const caBudget = slots
-      .filter(x => cls.COMBAT_ABILITIES_PATTERN.test(x.name))
+      .filter(isCombatAbilities)
       .reduce((sum, x) => sum + x.pf, 0);
     const c = this.combat;
     const caValues = [c.advantageBonus || 0, c.dodgeBonus || 0, c.defendBonus || 0, c.damageBonus || 0];
@@ -252,7 +259,7 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
     const ca = {
       budget: caBudget,
       spent: caSpent,
-      hasSkill: caBudget > 0 || slots.some(x => cls.COMBAT_ABILITIES_PATTERN.test(x.name)),
+      hasSkill: slots.some(isCombatAbilities),
       over: caSpent > caBudget,
       halvesViolation,
       warnings: []
@@ -264,7 +271,7 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
     // --- Step 8: per-Weapon-Skill budgets, ATT >= CRI/SPC, AtR ---
     const ws = {};
     for (const [key, skill] of Object.entries(this.weaponSkills)) {
-      const matches = slots.filter(x => cls.WS_PATTERNS[key]?.test(x.name));
+      const matches = slots.filter(x => matchesWS(x, key));
       const budget = matches.reduce((sum, x) => sum + x.pf, 0);
       const hasSkill = matches.length > 0;
       const att = skill.attackBonus || 0;
@@ -311,15 +318,6 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
       expectedSins: this.constructor.sinPhobiaCount(this.attributes.vir?.value ?? 9),
       expectedPhobias: this.constructor.sinPhobiaCount(this.attributes.will?.value ?? 9)
     };
-  }
-
-  /** Skill PF totals: mod mirrors the single visible PF box. */
-  #calculateSkillMods() {
-    for (const group of Object.values(this.skills)) {
-      for (const skill of Object.values(group)) {
-        skill.mod = skill.value || 0;
-      }
-    }
   }
 
   /** Ability proficiency factors, derived from attribute pairs (round up). */

@@ -189,46 +189,53 @@
   </div>
 
   <div class="tab skills {{tabs.skills.cssClass}}" data-group="primary" data-tab="skills">
-    <h3>Gifts</h3>
-    <div class="skills-list">
-      {{#each system.skills.gifts as |skill key|}}
-      <div class="skill">
-        <input type="text" name="system.skills.gifts.{{key}}.name" value="{{skill.name}}" placeholder="Skill Name"/>
-        <span class="skill-pf-plus">+</span>
-        <input type="number" name="system.skills.gifts.{{key}}.value" value="{{skill.value}}" placeholder="0" title="Proficiency Factor (PF)" class="skill-pf"/>
-        <button type="button" data-action="rollSkill" data-skill="gifts.{{key}}">
-          <i class="fas fa-dice-d20"></i>
-        </button>
+    <p class="hint">Drag skills from a compendium, or add them manually. Gifts, Talents, and Crafts each hold their own skills; open a skill to set its PF and links.</p>
+    <div class="skills-columns">
+      <div class="skill-column">
+        <div class="skill-col-header"><h3>Gifts</h3><span class="pf-label">PF</span></div>
+        <ol class="skill-item-list">
+          {{#each gifts as |item|}}
+          <li class="skill-row" data-item-id="{{item.id}}">
+            <a class="skill-name" data-action="itemEdit" title="Open skill">{{item.name}}</a>
+            <span class="skill-pf-plus">+</span>
+            <span class="skill-pf-val">{{item.system.pf}}</span>
+            <a class="item-control" data-action="rollSkill" title="Roll"><i class="fas fa-dice-d20"></i></a>
+            <a class="item-control" data-action="itemDelete" title="Delete"><i class="fas fa-trash"></i></a>
+          </li>
+          {{/each}}
+        </ol>
+        <a class="item-control skill-add" data-action="itemCreate" data-type="skill" data-skill-type="gift" title="Add Gift"><i class="fas fa-plus"></i> Add</a>
       </div>
-      {{/each}}
-    </div>
-
-    <h3>Talents</h3>
-    <div class="skills-list">
-      {{#each system.skills.talents as |skill key|}}
-      <div class="skill">
-        <input type="text" name="system.skills.talents.{{key}}.name" value="{{skill.name}}" placeholder="Skill Name"/>
-        <span class="skill-pf-plus">+</span>
-        <input type="number" name="system.skills.talents.{{key}}.value" value="{{skill.value}}" placeholder="0" title="Proficiency Factor (PF)" class="skill-pf"/>
-        <button type="button" data-action="rollSkill" data-skill="talents.{{key}}">
-          <i class="fas fa-dice-d20"></i>
-        </button>
+      <div class="skill-column">
+        <div class="skill-col-header"><h3>Talents</h3><span class="pf-label">PF</span></div>
+        <ol class="skill-item-list">
+          {{#each talents as |item|}}
+          <li class="skill-row" data-item-id="{{item.id}}">
+            <a class="skill-name" data-action="itemEdit" title="Open skill">{{item.name}}</a>
+            <span class="skill-pf-plus">+</span>
+            <span class="skill-pf-val">{{item.system.pf}}</span>
+            <a class="item-control" data-action="rollSkill" title="Roll"><i class="fas fa-dice-d20"></i></a>
+            <a class="item-control" data-action="itemDelete" title="Delete"><i class="fas fa-trash"></i></a>
+          </li>
+          {{/each}}
+        </ol>
+        <a class="item-control skill-add" data-action="itemCreate" data-type="skill" data-skill-type="talent" title="Add Talent"><i class="fas fa-plus"></i> Add</a>
       </div>
-      {{/each}}
-    </div>
-
-    <h3>Crafts</h3>
-    <div class="skills-list">
-      {{#each system.skills.crafts as |skill key|}}
-      <div class="skill">
-        <input type="text" name="system.skills.crafts.{{key}}.name" value="{{skill.name}}" placeholder="Skill Name"/>
-        <span class="skill-pf-plus">+</span>
-        <input type="number" name="system.skills.crafts.{{key}}.value" value="{{skill.value}}" placeholder="0" title="Proficiency Factor (PF)" class="skill-pf"/>
-        <button type="button" data-action="rollSkill" data-skill="crafts.{{key}}">
-          <i class="fas fa-dice-d20"></i>
-        </button>
+      <div class="skill-column">
+        <div class="skill-col-header"><h3>Crafts</h3><span class="pf-label">PF</span></div>
+        <ol class="skill-item-list">
+          {{#each crafts as |item|}}
+          <li class="skill-row" data-item-id="{{item.id}}">
+            <a class="skill-name" data-action="itemEdit" title="Open skill">{{item.name}}</a>
+            <span class="skill-pf-plus">+</span>
+            <span class="skill-pf-val">{{item.system.pf}}</span>
+            <a class="item-control" data-action="rollSkill" title="Roll"><i class="fas fa-dice-d20"></i></a>
+            <a class="item-control" data-action="itemDelete" title="Delete"><i class="fas fa-trash"></i></a>
+          </li>
+          {{/each}}
+        </ol>
+        <a class="item-control skill-add" data-action="itemCreate" data-type="skill" data-skill-type="craft" title="Add Craft"><i class="fas fa-plus"></i> Add</a>
       </div>
-      {{/each}}
     </div>
   </div>
 

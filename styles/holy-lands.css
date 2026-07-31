@@ -591,3 +591,16 @@
 /* Class item display in the header */
 .holy-lands-rpg .class-item-display { display: flex; align-items: center; gap: 6px; }
 .holy-lands-rpg .class-item-display a { cursor: pointer; }
+
+/* Skills: three columns matching the paper sheet */
+.holy-lands-rpg .skills-columns { display: flex; gap: 10px; align-items: flex-start; }
+.holy-lands-rpg .skill-column { flex: 1; border-right: 1px solid rgba(0,0,0,0.15); padding-right: 8px; }
+.holy-lands-rpg .skill-column:last-child { border-right: none; }
+.holy-lands-rpg .skill-col-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid var(--color-text-dark-primary, #191813); }
+.holy-lands-rpg .skill-col-header h3 { margin: 0; border: none; }
+.holy-lands-rpg .skill-col-header .pf-label { font-weight: bold; }
+.holy-lands-rpg .skill-item-list { list-style: none; margin: 4px 0; padding: 0; }
+.holy-lands-rpg .skill-row { display: flex; align-items: center; gap: 4px; padding: 2px 0; border-bottom: 1px solid rgba(0,0,0,0.1); }
+.holy-lands-rpg .skill-row .skill-name { flex: 1; cursor: pointer; }
+.holy-lands-rpg .skill-row .skill-pf-val { min-width: 20px; text-align: center; font-weight: bold; }
+.holy-lands-rpg .skill-add { display: inline-block; margin-top: 4px; cursor: pointer; }

@@ -192,7 +192,11 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     context.equipment = buckets.equipment;
     context.miracles = buckets.miracle;
     context.blessings = buckets.blessing;
-    context.skillItems = buckets.skill;
+
+    // Skill items grouped into the three paper-sheet sections.
+    context.gifts = buckets.skill.filter(i => i.system.skillType === "gift");
+    context.talents = buckets.skill.filter(i => i.system.skillType === "talent");
+    context.crafts = buckets.skill.filter(i => i.system.skillType === "craft");
   }
 
   /** @override */
@@ -437,10 +441,12 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
   static async #onItemCreate(event, target) {
     const type = target.dataset.type;
-    const itemData = {
-      name: `New ${type.capitalize()}`,
-      type
-    };
+    const itemData = { name: `New ${type.capitalize()}`, type };
+    if ((type === "skill") && target.dataset.skillType) {
+      itemData.system = { skillType: target.dataset.skillType };
+      const labels = { gift: "Gift", talent: "Talent", craft: "Craft" };
+      itemData.name = `New ${labels[target.dataset.skillType] ?? "Skill"}`;
+    }
     return Item.create(itemData, { parent: this.actor });
   }
 
@@ -486,9 +492,11 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   }
 
   static async #onRollSkill(event, target) {
+    const item = this.#getItemForTarget(target);
+    if (!item) return;
     const df = await this.#getDifficultyFactor();
     if (df === null) return;
-    return this.actor.rollSkill(target.dataset.skill, df);
+    return this.actor.rollSkill(item.id, df);
   }
 
   static async #onRollSave(event, target) {

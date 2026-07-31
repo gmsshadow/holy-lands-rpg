@@ -261,6 +261,38 @@ export class HolyLandsActor extends Actor {
     });
   }
 
+  /**
+   * Apply a +1 Bonus to one Saving Throw (Step 4 at creation, and one per
+   * level thereafter - p.54/p.62).
+   */
+  async applySaveBonus(saveKey, { creation = false } = {}) {
+    const save = this.system.saves?.[saveKey];
+    if (!save) return;
+    if (creation && this.system.creation?.saveBonusChosen) {
+      ui.notifications.warn("The creation Saving Throw Bonus has already been chosen.");
+      return;
+    }
+    const update = { [`system.saves.${saveKey}.value`]: (save.value || 0) + 1 };
+    if (creation) update["system.creation.saveBonusChosen"] = true;
+    await this.update(update);
+
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name}</strong> adds +1 to <strong>Save vs. ${save.label}</strong> (now +${(save.value || 0) + 1})`
+        + (creation ? " <em>- Step 4 creation Bonus (locked)</em>" : " <em>- level-up Bonus</em>")
+    });
+  }
+
+  /** Rac/GM correction: unlock the creation Step 4 save choice. */
+  async unlockCreationSaveBonus() {
+    if (!game.user.isGM) {
+      ui.notifications.warn("Only the Rac (GM) can unlock the creation Save Bonus.");
+      return;
+    }
+    await this.update({ "system.creation.saveBonusChosen": false });
+    ui.notifications.info(`${this.name}: creation Save Bonus choice unlocked.`);
+  }
+
   /** Rac/GM correction: unlock the creation attribute roll. */
   async unlockCreationAttributes() {
     if (!game.user.isGM) {

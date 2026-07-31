@@ -88,7 +88,8 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
       phobias: new fields.ArrayField(new fields.StringField()),
 
       creation: new fields.SchemaField({
-        attributesRolled: new fields.BooleanField({ required: true, initial: false })
+        attributesRolled: new fields.BooleanField({ required: true, initial: false }),
+        saveBonusChosen: new fields.BooleanField({ required: true, initial: false })
       })
     };
   }
@@ -211,6 +212,15 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
     }
 
     this.combatValidation = { ca, ws };
+
+    // Rule of Halves on Saving Throw Bonuses (p.55: takes effect at +3):
+    // the second-highest Bonus must be at least half the highest.
+    const saveValues = Object.values(this.saves).map(x => x.value || 0).sort((a, b) => b - a);
+    const savesWarnings = [];
+    if ((saveValues[0] >= 3) && (saveValues[1] < Math.ceil(saveValues[0] / 2))) {
+      savesWarnings.push(`Rule of Halves: with a +${saveValues[0]} Save Bonus the second highest must be at least +${Math.ceil(saveValues[0] / 2)}`);
+    }
+    this.savesValidation = { warnings: savesWarnings };
   }
 
   /** Skill PF totals: mod mirrors the single visible PF box. */

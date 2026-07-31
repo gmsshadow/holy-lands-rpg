@@ -305,3 +305,17 @@ These are deliberate changes, flagged for review:
   Attribute's old AV, final AV, and how many rolls it took (attempt cap of
   200 guards impossible dice/requirement combinations).
 - Once requirements are met the warnings and button disappear.
+
+## v2.7.0 — Creation Step 4: Saving Throw Bonus (+ level-up integration)
+
+- The Saving Throws header gains a **Step 4: +1 Save** button. It opens a
+  picker listing all thirteen saves with their DF and current Bonus; the
+  chosen save gains +1, the choice locks (`creation.saveBonusChosen`), and
+  a chat card records it. GMs get the usual unlock link (the +1 itself is
+  not reverted automatically).
+- **Level Up now chains the same picker**: after the class dice are rolled
+  and applied, the p.62 per-level +1 Saving Throw is offered immediately
+  (cancellable - the chat reminder still covers it if skipped).
+- **Rule of Halves on Saves** (p.55, threshold +3) is now checked in
+  derived data: a warning appears under the Saving Throws header when the
+  second-highest Bonus is below half the highest.

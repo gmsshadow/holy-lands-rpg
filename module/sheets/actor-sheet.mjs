@@ -38,7 +38,9 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       rollStartingLifeFaith: HolyLandsActorSheet.#onRollStartingLifeFaith,
       rollCreationAttributes: HolyLandsActorSheet.#onRollCreationAttributes,
       unlockCreationAttributes: HolyLandsActorSheet.#onUnlockCreationAttributes,
-      rollStep2A: HolyLandsActorSheet.#onRollStep2A
+      rollStep2A: HolyLandsActorSheet.#onRollStep2A,
+      chooseSaveBonus: HolyLandsActorSheet.#onChooseSaveBonus,
+      unlockSaveBonus: HolyLandsActorSheet.#onUnlockSaveBonus
     }
   };
 
@@ -135,6 +137,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     context.isGM = game.user.isGM;
     context.attributesLocked = !!this.actor.system.creation?.attributesRolled;
     context.unmetRequirements = context.attributesLocked ? this.actor.getUnmetClassRequirements() : [];
+    context.saveBonusChosen = !!this.actor.system.creation?.saveBonusChosen;
     context.statures = {
       weeFolk: "WeeFolk",
       dwarfolk: "Dwarfolk",
@@ -377,6 +380,47 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     return this.actor.rollCreationAttributes();
   }
 
+  /** Prompt for one Saving Throw to receive a +1 Bonus. */
+  async #promptSaveChoice(title) {
+    const options = Object.entries(this.actor.system.saves)
+      .map(([key, save]) => `<option value="${key}">${save.label} (DF ${save.df}, currently +${save.value || 0})</option>`)
+      .join("");
+    const choice = await DialogV2.wait({
+      window: { title },
+      content: `
+        <div class="form-group">
+          <label>Add +1 to which Saving Throw?</label>
+          <select name="saveKey" autofocus>${options}</select>
+        </div>`,
+      buttons: [
+        {
+          action: "apply", label: "Apply +1", default: true,
+          callback: (event, button) => button.form.elements.saveKey.value
+        },
+        { action: "cancel", label: "Cancel" }
+      ],
+      rejectClose: false
+    });
+    return (choice && choice !== "cancel") ? choice : null;
+  }
+
+  static async #onChooseSaveBonus(event, target) {
+    if (this.actor.system.creation?.saveBonusChosen) return;
+    const saveKey = await this.#promptSaveChoice("Step 4: Creation Saving Throw Bonus");
+    if (!saveKey) return;
+    return this.actor.applySaveBonus(saveKey, { creation: true });
+  }
+
+  static async #onUnlockSaveBonus(event, target) {
+    const proceed = await DialogV2.confirm({
+      window: { title: "Unlock Creation Save Bonus" },
+      content: `<p>Rac override: unlock the Step 4 Save Bonus choice for <strong>${this.actor.name}</strong>? (Does not remove the +1 already applied - adjust the save manually if needed.)</p>`,
+      rejectClose: false
+    });
+    if (!proceed) return;
+    return this.actor.unlockCreationSaveBonus();
+  }
+
   static async #onRollStep2A(event, target) {
     const unmet = this.actor.getUnmetClassRequirements();
     if (!unmet.length) return;
@@ -408,7 +452,11 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       rejectClose: false
     });
     if (!proceed) return;
-    return this.actor.levelUp();
+    await this.actor.levelUp();
+
+    // p.62: each level grants +1 to one Saving Throw - offer the picker now.
+    const saveKey = await this.#promptSaveChoice(`Level ${this.actor.system.level}: Saving Throw Bonus`);
+    if (saveKey) await this.actor.applySaveBonus(saveKey);
   }
 
   static async #onRollStartingLifeFaith(event, target) {

@@ -128,7 +128,20 @@
       {{/each}}
     </div>
 
-    <h3>Saving Throws</h3>
+    <h3>Saving Throws
+      {{#unless saveBonusChosen}}
+      <button type="button" data-action="chooseSaveBonus" title="Step 4: choose one Saving Throw to receive the creation +1 (then locks)">
+        <i class="fas fa-plus"></i> Step 4: +1 Save
+      </button>
+      {{else}}
+      {{#if isGM}}
+      <a class="hint" data-action="unlockSaveBonus" title="Rac override: unlock the Step 4 choice"><i class="fas fa-lock-open"></i> unlock</a>
+      {{/if}}
+      {{/unless}}
+    </h3>
+    {{#each system.savesValidation.warnings}}
+    <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{this}}</p>
+    {{/each}}
     <div class="saves-grid">
       {{#each system.saves as |save key|}}
       <div class="save">

@@ -132,3 +132,18 @@ These are deliberate changes, flagged for review:
     range); dropping to 0 or below posts a Save vs. Death prompt in chat
     (Ch3, "Death and Comas").
 11. Miracle default Faith Cost is now 7 (all Level 1 Miracles are Fc 7).
+
+## v2.0.3
+
+- The character sheet's Class dropdown now only offers classes valid for the
+  selected Stature (Genesis p.53). If a Stature change leaves the stored
+  class invalid, it remains selectable, flagged "(invalid for Stature)", so
+  the sheet never silently changes a character's class.
+
+## v2.0.3
+
+- The Class dropdown is now filtered by the character's Stature per the
+  table on Genesis p.53 (Step 1). Changing Stature re-renders the sheet and
+  updates the available classes. If the stored class is illegal for the new
+  Stature it remains selectable, flagged "(invalid for Stature)", so no data
+  is silently rewritten.

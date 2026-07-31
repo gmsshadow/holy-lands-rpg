@@ -94,29 +94,53 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     }, {});
   }
 
+  /** All class keys and labels. */
+  static CLASSES = {
+    adventurer: "Adventurer",
+    bard: "Bard",
+    cleric: "Cleric",
+    devilHunter: "Devil Hunter",
+    fighter: "Fighter",
+    jester: "Jester",
+    knight: "Knight",
+    saint: "Saint",
+    saisier: "Saisier",
+    scout: "Scout",
+    spy: "Spy",
+    voyager: "Voyager",
+    warrior: "Warrior"
+  };
+
+  /** Which classes each Stature can be (Genesis p.53, Step 1). */
+  static STATURE_CLASSES = {
+    weeFolk: ["adventurer", "bard", "fighter", "jester", "saint", "scout", "spy", "voyager"],
+    dwarfolk: ["adventurer", "cleric", "devilHunter", "fighter", "knight", "warrior"],
+    commonFolk: Object.keys(HolyLandsActorSheet.CLASSES),
+    giantFolk: ["adventurer", "fighter", "knight", "warrior"]
+  };
+
   /** Selection choices for character sheets. */
   #prepareCharacterContext(context) {
-    context.classes = {
-      adventurer: "Adventurer",
-      bard: "Bard",
-      cleric: "Cleric",
-      devilHunter: "Devil Hunter",
-      fighter: "Fighter",
-      jester: "Jester",
-      knight: "Knight",
-      saint: "Saint",
-      saisier: "Saisier",
-      scout: "Scout",
-      spy: "Spy",
-      voyager: "Voyager",
-      warrior: "Warrior"
-    };
     context.statures = {
       weeFolk: "WeeFolk",
       dwarfolk: "Dwarfolk",
       commonFolk: "CommonFolk",
       giantFolk: "GiantFolk"
     };
+
+    // Limit class choices to those the current Stature can be. If the
+    // stored class is not valid for the Stature (e.g. the Stature was just
+    // changed), keep it selectable but flagged, so re-rendering the sheet
+    // never silently rewrites the character's class.
+    const allClasses = HolyLandsActorSheet.CLASSES;
+    const allowed = HolyLandsActorSheet.STATURE_CLASSES[this.actor.system.stature]
+      ?? Object.keys(allClasses);
+    context.classes = {};
+    for (const key of allowed) context.classes[key] = allClasses[key];
+    const current = this.actor.system.class;
+    if (current && !(current in context.classes)) {
+      context.classes[current] = `${allClasses[current] ?? current} (invalid for Stature)`;
+    }
   }
 
   /** Organize embedded items for the sheet. */

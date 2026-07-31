@@ -1,0 +1,29 @@
+{
+  "_id": "NMAZTLqvUH1DUMDT",
+  "_key": "!items!NMAZTLqvUH1DUMDT",
+  "name": "CS Tackling",
+  "type": "skill",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 0,
+      "silver": 0
+    },
+    "skillType": "craft",
+    "pf": 0,
+    "combatAbilities": false,
+    "weaponSkillKey": "",
+    "prerequisite": "",
+    "isCombatSkill": true
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

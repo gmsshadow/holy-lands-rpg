@@ -1,0 +1,29 @@
+{
+  "_id": "8fJHpYB4QvV3vrqK",
+  "_key": "!items!8fJHpYB4QvV3vrqK",
+  "name": "WS Hand to Hand",
+  "type": "skill",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 0,
+      "silver": 0
+    },
+    "skillType": "craft",
+    "pf": 0,
+    "combatAbilities": false,
+    "weaponSkillKey": "handToHand",
+    "prerequisite": "",
+    "isCombatSkill": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

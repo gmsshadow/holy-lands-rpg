@@ -438,3 +438,22 @@ These are deliberate changes, flagged for review:
   be a blank string"). A StringField with a choices list rejects "" even
   when it's listed; added blank:true so skills default to no Weapon Skill
   link as intended.
+
+## v2.11.0 — Skills compendium
+
+- New **Skills** compendium (packs/skills): 86 skill items covering the
+  Chapter 4 list plus the seven Weapon Skills, the CS combat skills, and
+  Combat Abilities. Built from JSON sources in packs/_source/skills via the
+  Foundry CLI.
+- Data is intentionally minimal - name, section default, prerequisite text
+  (where certain), and the mechanical links only. **No rules descriptions
+  are included**, so the compendium does not reproduce book text; players
+  reference the rulebook for what each skill does.
+- The mechanically important entries are pre-linked: each "WS <name>" skill
+  carries its weaponSkillKey (drives the Step 8 budget and +1 AtR when
+  dragged on), Combat Abilities has its combatAbilities flag (Step 7
+  budget), and CS skills are flagged with prerequisites where known.
+- Classes and Skills packs are grouped under a "Holy Lands RPG" compendium
+  folder in the sidebar.
+- Skills default to the Craft section; drag onto a character and move to
+  Gifts/Talents as needed (Step 6 auto-population is the next piece).

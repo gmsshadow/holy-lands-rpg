@@ -1,75 +1,71 @@
-<form class="{{cssClass}} flexcol" autocomplete="off">
-  <header class="sheet-header">
-    <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}" height="64" width="64"/>
-    <div class="header-fields">
-      <h1 class="charname">
-        <input name="name" type="text" value="{{item.name}}" placeholder="Armor Name"/>
-      </h1>
-    </div>
-  </header>
+<header class="sheet-header">
+  <img class="profile-img" src="{{item.img}}" data-action="editImage" data-edit="img" title="{{item.name}}" height="64" width="64"/>
+  <div class="header-fields">
+    <h1 class="charname">
+      <input name="name" type="text" value="{{item.name}}" placeholder="Armor Name"/>
+    </h1>
+  </div>
+</header>
 
-  <section class="sheet-body">
-    <div class="form-group">
-      <label>Armor Placement (AP)</label>
-      <select name="system.ap" data-dtype="String">
-        {{#select system.ap}}
-        {{#each armorPlacements as |name key|}}
-          <option value="{{key}}">{{name}}</option>
-        {{/each}}
-        {{/select}}
-      </select>
-    </div>
+<section class="sheet-body">
+  <div class="form-group">
+    <label>Armor Placement (AP)</label>
+    <select name="system.ap">
+      {{selectOptions armorPlacements selected=system.ap}}
+    </select>
+  </div>
 
-    <div class="form-group">
-      <label>Armor Defense (aDEF)</label>
-      <input type="text" name="system.aDEF" value="{{system.aDEF}}" data-dtype="Number"/>
-    </div>
+  <div class="form-group">
+    <label>Armor Defense (aDEF)</label>
+    <input type="number" name="system.aDEF" value="{{system.aDEF}}"/>
+  </div>
 
-    <div class="form-group">
-      <label>Current aDEF (for degradation)</label>
-      <input type="text" name="system.currentADEF" value="{{system.currentADEF}}" data-dtype="Number" placeholder="Leave empty to use aDEF"/>
-    </div>
+  <div class="form-group">
+    <label>Current aDEF (for degradation)</label>
+    <input type="number" name="system.currentADEF" value="{{system.currentADEF}}"/>
+  </div>
 
-    <div class="form-group">
-      <label>CAP (Critical Armor Point threshold)</label>
-      <input type="text" name="system.CAP" value="{{system.CAP}}" data-dtype="Number"/>
-    </div>
+  <div class="form-group">
+    <label>CAP (Critical Armor Point threshold)</label>
+    <input type="number" name="system.CAP" value="{{system.CAP}}"/>
+  </div>
 
-    <div class="form-group">
-      <label>PEN (Penalty value)</label>
-      <input type="text" name="system.PEN" value="{{system.PEN}}" data-dtype="Number"/>
-    </div>
+  <div class="form-group">
+    <label>PEN (Penalty value)</label>
+    <input type="number" name="system.PEN" value="{{system.PEN}}"/>
+  </div>
 
-    <div class="form-group">
-      <label>Current PEN (for degradation)</label>
-      <input type="text" name="system.currentPEN" value="{{system.currentPEN}}" data-dtype="Number" placeholder="Leave empty to use PEN"/>
-    </div>
+  <div class="form-group">
+    <label>Current PEN (for degradation)</label>
+    <input type="number" name="system.currentPEN" value="{{system.currentPEN}}"/>
+  </div>
 
-    <div class="form-group">
-      <label>Cost (Gold)</label>
-      <input type="text" name="system.cost.gold" value="{{system.cost.gold}}" data-dtype="Number"/>
-    </div>
+  <div class="form-group">
+    <label>Cost (Gold)</label>
+    <input type="number" name="system.cost.gold" value="{{system.cost.gold}}"/>
+  </div>
 
-    <div class="form-group">
-      <label>Cost (Silver)</label>
-      <input type="text" name="system.cost.silver" value="{{system.cost.silver}}" data-dtype="Number"/>
-    </div>
+  <div class="form-group">
+    <label>Cost (Silver)</label>
+    <input type="number" name="system.cost.silver" value="{{system.cost.silver}}"/>
+  </div>
 
-    <div class="form-group">
-      <label>Weight</label>
-      <input type="text" name="system.weight" value="{{system.weight}}" data-dtype="Number"/>
-    </div>
+  <div class="form-group">
+    <label>Weight</label>
+    <input type="number" name="system.weight" value="{{system.weight}}" step="any"/>
+  </div>
 
-    <div class="form-group">
-      <label>
-        <input type="checkbox" name="system.equipped" {{checked system.equipped}}/>
-        Equipped
-      </label>
-    </div>
+  <div class="form-group">
+    <label>
+      <input type="checkbox" name="system.equipped" {{checked system.equipped}}/>
+      Equipped
+    </label>
+  </div>
 
-    <div class="form-group">
-      <label>Description</label>
-      {{editor system.description target="system.description" button=true owner=owner editable=editable}}
-    </div>
-  </section>
-</form>
+  <div class="form-group">
+    <label>Description</label>
+    <prose-mirror name="system.description" value="{{system.description}}" toggled>
+      {{{enrichedDescription}}}
+    </prose-mirror>
+  </div>
+</section>

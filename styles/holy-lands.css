@@ -520,3 +520,29 @@
 .holy-lands-rpg .editor-content {
   height: 400px;
 }
+
+/* ===== ApplicationV2 layout (system v2.0+) ===== */
+.holy-lands-rpg .window-content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.holy-lands-rpg .sheet-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Safety net: only the active tab is visible */
+.holy-lands-rpg .tab:not(.active) {
+  display: none !important;
+}
+
+.holy-lands-rpg prose-mirror {
+  min-height: 150px;
+  flex: 1;
+}
+
+.holy-lands-rpg button[data-action] {
+  cursor: pointer;
+}

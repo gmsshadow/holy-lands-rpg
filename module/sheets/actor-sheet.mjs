@@ -1,52 +1,101 @@
-export class HolyLandsActorSheet extends ActorSheet {
+const { HandlebarsApplicationMixin } = foundry.applications.api;
+const { ActorSheetV2 } = foundry.applications.sheets;
+const { DialogV2 } = foundry.applications.api;
+const TextEditorImpl = foundry.applications.ux.TextEditor.implementation;
+
+/**
+ * ApplicationV2 actor sheet for Holy Lands RPG.
+ * A single class serves both actor types; the rendered template is chosen
+ * per-actor in _configureRenderParts.
+ */
+export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   /** @override */
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ["holy-lands-rpg", "sheet", "actor"],
-      width: 720,
-      height: 800,
-      tabs: [{ navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "attributes" }]
+  static DEFAULT_OPTIONS = {
+    classes: ["holy-lands-rpg", "sheet", "actor"],
+    position: { width: 720, height: 800 },
+    form: { submitOnChange: true },
+    window: { resizable: true },
+    actions: {
+      editImage: HolyLandsActorSheet.#onEditImage,
+      itemCreate: HolyLandsActorSheet.#onItemCreate,
+      itemEdit: HolyLandsActorSheet.#onItemEdit,
+      itemDelete: HolyLandsActorSheet.#onItemDelete,
+      roll: HolyLandsActorSheet.#onRoll,
+      rollAttribute: HolyLandsActorSheet.#onRollAttribute,
+      rollAbility: HolyLandsActorSheet.#onRollAbility,
+      rollSkill: HolyLandsActorSheet.#onRollSkill,
+      rollSave: HolyLandsActorSheet.#onRollSave,
+      rollAttack: HolyLandsActorSheet.#onRollAttack,
+      rollDamage: HolyLandsActorSheet.#onRollDamage,
+      castMiracle: HolyLandsActorSheet.#onCastMiracle,
+      useBlessing: HolyLandsActorSheet.#onUseBlessing
+    }
+  };
+
+  /** @override */
+  static PARTS = {
+    // Template is replaced per-actor-type in _configureRenderParts
+    body: {
+      template: "systems/holy-lands-rpg/templates/actor/actor-character-sheet.hbs",
+      scrollable: [".sheet-body"]
+    }
+  };
+
+  /** Active tab state for the primary group. */
+  tabGroups = { primary: "attributes" };
+
+  /* -------------------------------------------- */
+  /*  Rendering                                   */
+  /* -------------------------------------------- */
+
+  /** @override */
+  _configureRenderParts(options) {
+    const parts = super._configureRenderParts(options);
+    parts.body.template = `systems/holy-lands-rpg/templates/actor/actor-${this.actor.type}-sheet.hbs`;
+    return parts;
+  }
+
+  /** @override */
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
+    const actor = this.actor;
+
+    context.actor = actor;
+    context.system = actor.system;
+    context.flags = actor.flags;
+    context.editable = this.isEditable;
+    context.owner = actor.isOwner;
+    context.rollData = actor.getRollData();
+
+    // Enriched biography for the prose-mirror editor
+    context.enrichedBiography = await TextEditorImpl.enrichHTML(actor.system.biography ?? "", {
+      relativeTo: actor,
+      rollData: context.rollData,
+      secrets: actor.isOwner
     });
-  }
 
-  /** @override */
-  get template() {
-    return `systems/holy-lands-rpg/templates/actor/actor-${this.actor.type}-sheet.hbs`;
-  }
+    // Tab state (active classes on first render; changeTab handles the rest)
+    context.tabs = this.#prepareTabs();
 
-  /** @override */
-  async getData() {
-    const context = super.getData();
-    const actorData = this.actor.toObject(false);
-
-    context.system = actorData.system;
-    context.flags = actorData.flags;
-
-    // Add roll data for convenience
-    context.rollData = this.actor.getRollData();
-
-    // Prepare character data
-    if (actorData.type === 'character') {
-      this._prepareCharacterData(context);
-    }
-
-    // Prepare NPC data
-    if (actorData.type === 'npc') {
-      this._prepareNPCData(context);
-    }
-
-    // Prepare items
-    this._prepareItems(context);
+    if (actor.type === "character") this.#prepareCharacterContext(context);
+    this.#prepareItems(context);
 
     return context;
   }
 
-  /**
-   * Organize and classify Character data
-   */
-  _prepareCharacterData(context) {
-    // Character classes
+  /** Build a simple tabs context from the current tab group state. */
+  #prepareTabs() {
+    const tabIds = ["attributes", "skills", "combat", "equipment", "miracles", "biography"];
+    const active = this.tabGroups.primary;
+    return tabIds.reduce((tabs, id) => {
+      tabs[id] = { id, group: "primary", cssClass: (id === active) ? "active" : "" };
+      return tabs;
+    }, {});
+  }
+
+  /** Selection choices for character sheets. */
+  #prepareCharacterContext(context) {
     context.classes = {
       adventurer: "Adventurer",
       bard: "Bard",
@@ -62,8 +111,6 @@ export class HolyLandsActorSheet extends ActorSheet {
       voyager: "Voyager",
       warrior: "Warrior"
     };
-
-    // Statures
     context.statures = {
       weeFolk: "WeeFolk",
       dwarfolk: "Dwarfolk",
@@ -72,334 +119,215 @@ export class HolyLandsActorSheet extends ActorSheet {
     };
   }
 
-  /**
-   * Organize and classify NPC data
-   */
-  _prepareNPCData(context) {
-    // Add specific NPC data if needed
-  }
-
-  /**
-   * Organize and classify Items for the sheet
-   */
-  _prepareItems(context) {
-    const weapons = [];
-    const armor = [];
-    const equipment = [];
-    const miracles = [];
-    const blessings = [];
-    const skills = [];
-
-    // Iterate through items, allocating to containers
-    for (let i of context.items) {
-      i.img = i.img || Item.DEFAULT_ICON;
-      
-      if (i.type === 'weapon') {
-        weapons.push(i);
-      } else if (i.type === 'armor') {
-        armor.push(i);
-      } else if (i.type === 'equipment') {
-        equipment.push(i);
-      } else if (i.type === 'miracle') {
-        miracles.push(i);
-      } else if (i.type === 'blessing') {
-        blessings.push(i);
-      } else if (i.type === 'skill') {
-        skills.push(i);
-      }
+  /** Organize embedded items for the sheet. */
+  #prepareItems(context) {
+    const buckets = { weapon: [], armor: [], equipment: [], miracle: [], blessing: [], skill: [] };
+    for (const item of this.actor.items) {
+      if (buckets[item.type]) buckets[item.type].push(item);
     }
-
-    context.weapons = weapons;
-    context.armor = armor;
-    context.equipment = equipment;
-    context.miracles = miracles;
-    context.blessings = blessings;
-    context.skills = skills;
+    for (const list of Object.values(buckets)) {
+      list.sort((a, b) => (a.sort || 0) - (b.sort || 0));
+    }
+    context.weapons = buckets.weapon;
+    context.armor = buckets.armor;
+    context.equipment = buckets.equipment;
+    context.miracles = buckets.miracle;
+    context.blessings = buckets.blessing;
+    context.skills = buckets.skill;
   }
 
   /** @override */
-  activateListeners(html) {
-    super.activateListeners(html);
+  _onRender(context, options) {
+    super._onRender(context, options);
 
-    // Everything below here is only needed if the sheet is editable
-    if (!this.isEditable) return;
-
-    // Add Inventory Item
-    html.find('.item-create').click(this._onItemCreate.bind(this));
-
-    // Delete Inventory Item
-    html.find('.item-delete').click(ev => {
-      const li = $(ev.currentTarget).parents(".item");
-      const item = this.actor.items.get(li.data("itemId"));
-      item.delete();
-      li.slideUp(200, () => this.render(false));
-    });
-
-    // Rollable abilities
-    html.find('.rollable').click(this._onRoll.bind(this));
-
-    // Attribute rolls
-    html.find('.attribute-roll').click(this._onAttributeRoll.bind(this));
-
-    // Ability rolls
-    html.find('.ability-roll').click(this._onAbilityRoll.bind(this));
-
-    // Skill rolls
-    html.find('.skill-roll').click(this._onSkillRoll.bind(this));
-
-    // Save rolls
-    html.find('.save-roll').click(this._onSaveRoll.bind(this));
-
-    // Weapon/Attack rolls
-    html.find('.attack-roll').click(this._onAttackRoll.bind(this));
-    html.find('.damage-roll').click(this._onDamageRoll.bind(this));
-
-    // Miracle/Blessing activation
-    html.find('.miracle-cast').click(this._onMiracleCast.bind(this));
-    html.find('.blessing-use').click(this._onBlessingUse.bind(this));
-
-    // Drag events for macros
+    // Enable item rows to be dragged to the macro hotbar
     if (this.actor.isOwner) {
-      let handler = ev => this._onDragStart(ev);
-      html.find('li.item').each((i, li) => {
-        if (li.classList.contains("inventory-header")) return;
-        li.setAttribute("draggable", true);
-        li.addEventListener("dragstart", handler, false);
-      });
+      for (const li of this.element.querySelectorAll("li.item[data-item-id]")) {
+        li.setAttribute("draggable", "true");
+        li.addEventListener("dragstart", this.#onDragItemStart.bind(this));
+      }
     }
   }
 
-  /**
-   * Handle creating a new Owned Item for the actor
-   */
-  async _onItemCreate(event) {
-    event.preventDefault();
-    const header = event.currentTarget;
-    const type = header.dataset.type;
-    const data = duplicate(header.dataset);
-    const name = `New ${type.capitalize()}`;
-    const itemData = {
-      name: name,
-      type: type,
-      system: data
-    };
-    delete itemData.system["type"];
-
-    return await Item.create(itemData, {parent: this.actor});
+  /** Provide standard Item drag data. */
+  #onDragItemStart(event) {
+    const li = event.currentTarget;
+    const item = this.actor.items.get(li.dataset.itemId);
+    if (!item) return;
+    event.dataTransfer.setData("text/plain", JSON.stringify(item.toDragData()));
   }
 
-  /**
-   * Handle clickable rolls
-   */
-  _onRoll(event) {
-    event.preventDefault();
-    const element = event.currentTarget;
-    const dataset = element.dataset;
+  /* -------------------------------------------- */
+  /*  Action Handlers                             */
+  /* -------------------------------------------- */
 
-    if (dataset.rollType) {
-      if (dataset.rollType === 'item') {
-        const itemId = element.closest('.item').dataset.itemId;
-        const item = this.actor.items.get(itemId);
-        if (item) return item.roll();
-      }
+  /** Retrieve the Item document for the row containing the action target. */
+  #getItemForTarget(target) {
+    const itemId = target.closest(".item")?.dataset.itemId;
+    return itemId ? this.actor.items.get(itemId) : null;
+  }
+
+  static async #onEditImage(event, target) {
+    const attr = target.dataset.edit || "img";
+    const current = foundry.utils.getProperty(this.document, attr);
+    const fp = new foundry.applications.apps.FilePicker.implementation({
+      type: "image",
+      current,
+      callback: path => this.document.update({ [attr]: path })
+    });
+    return fp.browse();
+  }
+
+  static async #onItemCreate(event, target) {
+    const type = target.dataset.type;
+    const itemData = {
+      name: `New ${type.capitalize()}`,
+      type
+    };
+    return Item.create(itemData, { parent: this.actor });
+  }
+
+  static #onItemEdit(event, target) {
+    const item = this.#getItemForTarget(target);
+    item?.sheet.render(true);
+  }
+
+  static async #onItemDelete(event, target) {
+    const item = this.#getItemForTarget(target);
+    if (!item) return;
+    await item.delete();
+  }
+
+  /** Generic data-roll / item roll handler. */
+  static #onRoll(event, target) {
+    const dataset = target.dataset;
+
+    if (dataset.rollType === "item") {
+      const item = this.#getItemForTarget(target);
+      if (item) return item.roll();
     }
 
     if (dataset.roll) {
-      let label = dataset.label ? `${dataset.label}` : '';
-      let roll = new Roll(dataset.roll, this.actor.getRollData());
-      roll.toMessage({
+      const label = dataset.label ?? "";
+      const roll = new Roll(dataset.roll, this.actor.getRollData());
+      return roll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         flavor: label,
-        rollMode: game.settings.get('core', 'rollMode'),
+        rollMode: game.settings.get("core", "rollMode")
       });
-      return roll;
     }
   }
 
-  /**
-   * Handle attribute rolls (d12, roll under)
-   */
-  async _onAttributeRoll(event) {
-    event.preventDefault();
-    const attrKey = event.currentTarget.dataset.attribute;
-    return this.actor.rollAttribute(attrKey);
+  static async #onRollAttribute(event, target) {
+    return this.actor.rollAttribute(target.dataset.attribute);
   }
 
-  /**
-   * Handle ability rolls (d20 + bonus)
-   */
-  async _onAbilityRoll(event) {
-    event.preventDefault();
-    const abilityKey = event.currentTarget.dataset.ability;
-    
-    // Ask for Difficulty Factor
-    const df = await this._getDifficultyFactor();
+  static async #onRollAbility(event, target) {
+    const df = await this.#getDifficultyFactor();
     if (df === null) return;
-    
-    return this.actor.rollAbility(abilityKey, df);
+    return this.actor.rollAbility(target.dataset.ability, df);
   }
 
-  /**
-   * Handle skill rolls (d20 + bonus)
-   */
-  async _onSkillRoll(event) {
-    event.preventDefault();
-    const skillKey = event.currentTarget.dataset.skill;
-    
-    // Ask for Difficulty Factor
-    const df = await this._getDifficultyFactor();
+  static async #onRollSkill(event, target) {
+    const df = await this.#getDifficultyFactor();
     if (df === null) return;
-    
-    return this.actor.rollSkill(skillKey, df);
+    return this.actor.rollSkill(target.dataset.skill, df);
   }
 
-  /**
-   * Handle saving throw rolls
-   */
-  async _onSaveRoll(event) {
-    event.preventDefault();
-    const saveKey = event.currentTarget.dataset.save;
+  static async #onRollSave(event, target) {
+    const saveKey = target.dataset.save;
 
-    // Use automatic DF from save definition (Shift-click to override)
+    // Automatic DF from the save definition; Shift-click to override
     if (event.shiftKey) {
-      const df = await this._getDifficultyFactor();
+      const df = await this.#getDifficultyFactor();
       if (df === null) return;
       return this.actor.rollSave(saveKey, df);
     }
-
     return this.actor.rollSave(saveKey);
   }
 
+  static async #onRollAttack(event, target) {
+    const weapon = this.#getItemForTarget(target);
+    const targetActor = await this.#selectTarget();
+    if (!targetActor) return;
+    return this.actor.rollAttack(weapon, targetActor);
+  }
+
+  static async #onRollDamage(event, target) {
+    const weapon = this.#getItemForTarget(target);
+    const isCritical = event.shiftKey || false;
+    return this.actor.rollDamage(weapon, isCritical);
+  }
+
+  static async #onCastMiracle(event, target) {
+    const miracle = this.#getItemForTarget(target);
+    return miracle?.castMiracle();
+  }
+
+  static async #onUseBlessing(event, target) {
+    const blessing = this.#getItemForTarget(target);
+    return blessing?.useBlessing();
+  }
+
+  /* -------------------------------------------- */
+  /*  Dialogs                                     */
+  /* -------------------------------------------- */
+
   /**
-   * Handle attack rolls
+   * Ask the user for a Difficulty Factor.
+   * @returns {Promise<number|null>} The DF, or null if cancelled.
    */
-  async _onAttackRoll(event) {
-    event.preventDefault();
-    const itemId = event.currentTarget.closest('.item').dataset.itemId;
-    const weapon = this.actor.items.get(itemId);
-    
-    // Prompt for target selection
-    const target = await this._selectTarget();
-    if (!target) return;
-    
-    return this.actor.rollAttack(weapon, target);
+  async #getDifficultyFactor() {
+    const df = await DialogV2.prompt({
+      window: { title: "Difficulty Factor" },
+      content: `
+        <div class="form-group">
+          <label>Enter Difficulty Factor (DF):</label>
+          <input type="number" name="df" value="10" autofocus/>
+        </div>`,
+      ok: {
+        label: "Roll",
+        callback: (event, button) => Number(button.form.elements.df.value)
+      },
+      rejectClose: false
+    });
+    return (typeof df === "number" && Number.isFinite(df)) ? df : null;
   }
 
   /**
-   * Select a target actor for combat
+   * Select a target actor for combat.
+   * @returns {Promise<Actor|null>}
    */
-  async _selectTarget() {
-    const actors = game.actors.filter(a => a.id !== this.actor.id && a.type === 'character' || a.type === 'npc');
-    
+  async #selectTarget() {
+    const actors = game.actors.filter(a =>
+      (a.id !== this.actor.id) && ["character", "npc"].includes(a.type)
+    );
     if (actors.length === 0) {
       ui.notifications.warn("No valid targets found");
       return null;
     }
-    
-    return new Promise((resolve) => {
-      const options = actors.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
-      
-      new Dialog({
-        title: "Select Target",
-        content: `
-          <form>
-            <div class="form-group">
-              <label>Choose target:</label>
-              <select name="targetId" autofocus>
-                ${options}
-              </select>
-            </div>
-          </form>
-        `,
-        buttons: {
-          attack: {
-            label: "Attack",
-            callback: (html) => {
-              const targetId = html.find('[name="targetId"]').val();
-              const target = game.actors.get(targetId);
-              resolve(target);
-            }
-          },
-          cancel: {
-            label: "Cancel",
-            callback: () => resolve(null)
-          }
+
+    const options = actors.map(a => `<option value="${a.id}">${foundry.utils.escapeHTML(a.name)}</option>`).join("");
+    const targetId = await DialogV2.wait({
+      window: { title: "Select Target" },
+      content: `
+        <div class="form-group">
+          <label>Choose target:</label>
+          <select name="targetId" autofocus>${options}</select>
+        </div>`,
+      buttons: [
+        {
+          action: "attack",
+          label: "Attack",
+          default: true,
+          callback: (event, button) => button.form.elements.targetId.value
         },
-        default: "attack"
-      }).render(true);
+        { action: "cancel", label: "Cancel" }
+      ],
+      rejectClose: false
     });
-  }
 
-  /**
-   * Handle damage rolls
-   */
-  async _onDamageRoll(event) {
-    event.preventDefault();
-    const itemId = event.currentTarget.closest('.item').dataset.itemId;
-    const weapon = this.actor.items.get(itemId);
-    
-    // Ask if critical
-    const isCritical = event.shiftKey || false;
-    
-    return this.actor.rollDamage(weapon, isCritical);
-  }
-
-  /**
-   * Handle casting miracles
-   */
-  async _onMiracleCast(event) {
-    event.preventDefault();
-    const itemId = event.currentTarget.closest('.item').dataset.itemId;
-    const miracle = this.actor.items.get(itemId);
-    
-    if (miracle) {
-      return miracle.castMiracle();
-    }
-  }
-
-  /**
-   * Handle using blessings
-   */
-  async _onBlessingUse(event) {
-    event.preventDefault();
-    const itemId = event.currentTarget.closest('.item').dataset.itemId;
-    const blessing = this.actor.items.get(itemId);
-    
-    if (blessing) {
-      return blessing.useBlessing();
-    }
-  }
-
-  /**
-   * Get difficulty factor from user
-   */
-  async _getDifficultyFactor() {
-    return new Promise((resolve) => {
-      new Dialog({
-        title: "Difficulty Factor",
-        content: `
-          <form>
-            <div class="form-group">
-              <label>Enter Difficulty Factor (DF):</label>
-              <input type="number" name="df" value="10" autofocus/>
-            </div>
-          </form>
-        `,
-        buttons: {
-          roll: {
-            label: "Roll",
-            callback: (html) => {
-              const df = parseInt(html.find('[name="df"]').val());
-              resolve(df);
-            }
-          },
-          cancel: {
-            label: "Cancel",
-            callback: () => resolve(null)
-          }
-        },
-        default: "roll"
-      }).render(true);
-    });
+    if (!targetId || targetId === "cancel") return null;
+    return game.actors.get(targetId) ?? null;
   }
 }

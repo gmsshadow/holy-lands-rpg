@@ -1,46 +1,88 @@
-export class HolyLandsItemSheet extends ItemSheet {
+const { HandlebarsApplicationMixin } = foundry.applications.api;
+const { ItemSheetV2 } = foundry.applications.sheets;
+const TextEditorImpl = foundry.applications.ux.TextEditor.implementation;
+
+/**
+ * ApplicationV2 item sheet for Holy Lands RPG.
+ * A single class serves all item types; the rendered template is chosen
+ * per-item-type in _configureRenderParts.
+ */
+export class HolyLandsItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 
   /** @override */
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ["holy-lands-rpg", "sheet", "item"],
-      width: 520,
-      height: 480,
-      tabs: [{ navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "description" }]
-    });
-  }
-
-  /** @override */
-  get template() {
-    const path = "systems/holy-lands-rpg/templates/item";
-    return `${path}/item-${this.item.type}-sheet.hbs`;
-  }
-
-  /** @override */
-  async getData() {
-    const context = super.getData();
-    const itemData = this.item.toObject(false);
-
-    context.rollData = {};
-    let actor = this.object?.parent ?? null;
-    if (actor) {
-      context.rollData = actor.getRollData();
+  static DEFAULT_OPTIONS = {
+    classes: ["holy-lands-rpg", "sheet", "item"],
+    position: { width: 520, height: 480 },
+    form: { submitOnChange: true },
+    window: { resizable: true },
+    actions: {
+      editImage: HolyLandsItemSheet.#onEditImage,
+      roll: HolyLandsItemSheet.#onRoll
     }
+  };
 
-    context.system = itemData.system;
-    context.flags = itemData.flags;
+  /** @override */
+  static PARTS = {
+    // Template is replaced per-item-type in _configureRenderParts
+    body: {
+      template: "systems/holy-lands-rpg/templates/item/item-equipment-sheet.hbs",
+      scrollable: [".sheet-body"]
+    }
+  };
 
-    // Add type-specific data
-    if (itemData.type === 'weapon') {
+  /** Active tab state (used by the weapon sheet). */
+  tabGroups = { primary: "description" };
+
+  /* -------------------------------------------- */
+  /*  Rendering                                   */
+  /* -------------------------------------------- */
+
+  /** @override */
+  _configureRenderParts(options) {
+    const parts = super._configureRenderParts(options);
+    parts.body.template = `systems/holy-lands-rpg/templates/item/item-${this.item.type}-sheet.hbs`;
+    return parts;
+  }
+
+  /** @override */
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
+    const item = this.item;
+
+    context.item = item;
+    context.system = item.system;
+    context.flags = item.flags;
+    context.editable = this.isEditable;
+    context.owner = item.isOwner;
+    context.rollData = item.actor?.getRollData() ?? {};
+
+    // Enriched description for the prose-mirror editor
+    context.enrichedDescription = await TextEditorImpl.enrichHTML(item.system.description ?? "", {
+      relativeTo: item,
+      rollData: context.rollData,
+      secrets: item.isOwner
+    });
+
+    // Tab state for the weapon sheet
+    const active = this.tabGroups.primary;
+    context.tabs = {
+      description: { id: "description", group: "primary", cssClass: (active === "description") ? "active" : "" },
+      details: { id: "details", group: "primary", cssClass: (active === "details") ? "active" : "" }
+    };
+
+    // Type-specific selection choices
+    if (item.type === "weapon") {
       context.weaponSkills = {
+        handToHand: "Hand To Hand",
         lightArms: "Light Arms",
         heavyArms: "Heavy Arms",
+        pairedWeapons: "Paired Weapons",
         missile: "Missile",
-        thrown: "Thrown"
+        thrown: "Thrown",
+        kickAttack: "Kick Attack"
       };
     }
-
-    if (itemData.type === 'armor') {
+    if (item.type === "armor") {
       context.armorPlacements = {
         head: "Head",
         chest: "Chest",
@@ -50,8 +92,7 @@ export class HolyLandsItemSheet extends ItemSheet {
         back: "Back"
       };
     }
-
-    if (itemData.type === 'skill') {
+    if (item.type === "skill") {
       context.skillTypes = {
         gift: "Gift",
         talent: "Talent",
@@ -62,33 +103,31 @@ export class HolyLandsItemSheet extends ItemSheet {
     return context;
   }
 
-  /** @override */
-  activateListeners(html) {
-    super.activateListeners(html);
+  /* -------------------------------------------- */
+  /*  Action Handlers                             */
+  /* -------------------------------------------- */
 
-    if (!this.isEditable) return;
-
-    // Roll handlers
-    html.find('.rollable').click(this._onRoll.bind(this));
+  static async #onEditImage(event, target) {
+    const attr = target.dataset.edit || "img";
+    const current = foundry.utils.getProperty(this.document, attr);
+    const fp = new foundry.applications.apps.FilePicker.implementation({
+      type: "image",
+      current,
+      callback: path => this.document.update({ [attr]: path })
+    });
+    return fp.browse();
   }
 
-  /**
-   * Handle clickable rolls
-   */
-  _onRoll(event) {
-    event.preventDefault();
-    const element = event.currentTarget;
-    const dataset = element.dataset;
+  static #onRoll(event, target) {
+    const dataset = target.dataset;
+    if (!dataset.roll) return;
 
-    if (dataset.roll) {
-      let label = dataset.label ? `Rolling ${dataset.label}` : '';
-      let roll = new Roll(dataset.roll, this.item.getRollData());
-      roll.toMessage({
-        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-        flavor: label,
-        rollMode: game.settings.get('core', 'rollMode'),
-      });
-      return roll;
-    }
+    const label = dataset.label ? `Rolling ${dataset.label}` : "";
+    const roll = new Roll(dataset.roll, this.item.getRollData());
+    return roll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor: this.item.actor }),
+      flavor: label,
+      rollMode: game.settings.get("core", "rollMode")
+    });
   }
 }

@@ -2,7 +2,7 @@
   "id": "holy-lands-rpg",
   "title": "Holy Lands RPG",
   "description": "A Christian-themed tabletop RPG system set in medieval times where faith and virtue guide adventurers.",
-  "version": "1.0.6",
+  "version": "2.0.0",
   "authors": [
     {
       "name": "Faith Quest Games (System Creator)",
@@ -10,8 +10,8 @@
     }
   ],
   "compatibility": {
-    "minimum": "11",
-    "verified": "13"
+    "minimum": "13",
+    "verified": "14"
   },
   "esmodules": [
     "module/holy-lands.mjs"
@@ -40,11 +40,13 @@
       "skill": {}
     }
   },
-  "gridDistance": 5,
-  "gridUnits": "ft",
+  "grid": {
+    "distance": 5,
+    "units": "ft"
+  },
   "primaryTokenAttribute": "life",
   "secondaryTokenAttribute": "faith",
-  "url": "https://github.com/gmsshadow/holy-lands-rpghttps://github.com/gmsshadow/holy-lands-rpg",
+  "url": "https://github.com/gmsshadow/holy-lands-rpg",
   "manifest": "https://raw.githubusercontent.com/gmsshadow/holy-lands-rpg/refs/heads/main/system.json",
   "download": "https://github.com/gmsshadow/holy-lands-rpg/archive/refs/heads/main.zip"
 }

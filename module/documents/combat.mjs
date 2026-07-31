@@ -38,7 +38,6 @@ export class HolyLandsCombat extends Combat {
             alias: combatant.name
           }),
           flavor,
-          type: CONST.CHAT_MESSAGE_TYPES.ROLL,
           rolls: [roll]
         },
         messageOptions
@@ -67,18 +66,10 @@ export class HolyLandsCombat extends Combat {
   /** @override */
   async resetAll() {
     // Reset all combatant initiatives and reset AtR
-    const updates = this.combatants.map(c => {
-      // Reset AtR for actor if they have the method
-      if (c.actor && typeof c.actor._resetAtR === 'function') {
-        c.actor._resetAtR(c.actor.system);
-      }
-      
-      return {
-        _id: c.id,
-        initiative: null
-      };
-    });
-    
+    for (const c of this.combatants) {
+      if (c.actor?.resetAtRPersisted) await c.actor.resetAtRPersisted();
+    }
+    const updates = this.combatants.map(c => ({ _id: c.id, initiative: null }));
     await this.updateEmbeddedDocuments("Combatant", updates);
     return this;
   }
@@ -86,11 +77,8 @@ export class HolyLandsCombat extends Combat {
   /** @override */
   async nextRound() {
     // At the start of each new round, reset everyone's AtR
-    for (let combatant of this.combatants) {
-      if (combatant.actor && typeof combatant.actor._resetAtR === 'function') {
-        await combatant.actor._resetAtR(combatant.actor.system);
-        await combatant.actor.update({ 'system.weaponSkills': combatant.actor.system.weaponSkills });
-      }
+    for (const combatant of this.combatants) {
+      if (combatant.actor?.resetAtRPersisted) await combatant.actor.resetAtRPersisted();
     }
     
     return super.nextRound();

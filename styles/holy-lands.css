@@ -620,3 +620,6 @@
 .holy-lands-rpg .attr-bonus-row .ab-effect { flex: 1; font-size: 0.9em; }
 .holy-lands-rpg .attr-bonus-row .ab-count { min-width: 32px; text-align: center; }
 .holy-lands-rpg .attr-bonus-row.has-pending .ab-count { color: #a33; font-weight: bold; }
+
+/* Miracle selection actions */
+.holy-lands-rpg .miracle-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }

@@ -1,0 +1,30 @@
+{
+  "_id": "xs6fk3IUEbXceOqY",
+  "_key": "!items!xs6fk3IUEbXceOqY",
+  "name": "Sober",
+  "type": "miracle",
+  "img": "icons/svg/angel.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 0,
+      "silver": 0
+    },
+    "level": 1,
+    "faithCost": 7,
+    "range": "Touch",
+    "duration": "Instant",
+    "target": "Self or Other",
+    "area": "",
+    "miracleType": "clerical"
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

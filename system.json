@@ -2,7 +2,7 @@
   "id": "holy-lands-rpg",
   "title": "Holy Lands RPG",
   "description": "A Christian-themed tabletop RPG system set in medieval times where faith and virtue guide adventurers.",
-  "version": "2.13.0",
+  "version": "2.14.0",
   "authors": [
     {
       "name": "Faith Quest Games (System Creator)",
@@ -72,6 +72,17 @@
         "PLAYER": "OBSERVER",
         "ASSISTANT": "OWNER"
       }
+    },
+    {
+      "name": "miracles",
+      "label": "Miracles",
+      "path": "packs/miracles",
+      "type": "Item",
+      "system": "holy-lands-rpg",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
     }
   ],
   "packFolders": [
@@ -81,7 +92,8 @@
       "color": "#6b3410",
       "packs": [
         "classes",
-        "skills"
+        "skills",
+        "miracles"
       ]
     }
   ]

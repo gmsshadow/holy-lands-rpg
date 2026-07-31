@@ -461,6 +461,24 @@
   </div>
 
   <div class="tab miracles {{tabs.miracles.cssClass}}" data-group="primary" data-tab="miracles">
+    {{#if miracleClass}}
+    <div class="step6-banner">
+      <span>{{miracleGuidance}}</span>
+    </div>
+    <div class="miracle-actions">
+      <button type="button" data-action="addMiracle" data-miracle-type="high" title="Add a High Miracle from the compendium">
+        <i class="fas fa-plus"></i> Add High Miracle
+      </button>
+      <button type="button" data-action="addMiracle" data-miracle-type="clerical" title="Add a Clerical Miracle from the compendium">
+        <i class="fas fa-plus"></i> Add Clerical Miracle
+      </button>
+      {{#if (eq miracleClass "cleric")}}
+      <button type="button" data-action="grantClericMiracles" title="Add all Level 1 Clerical Miracles at once">
+        <i class="fas fa-layer-group"></i> Grant all Clerical
+      </button>
+      {{/if}}
+    </div>
+    {{/if}}
     <h3>Miracles</h3>
     <ol class="items-list">
       <li class="item flexrow item-header">

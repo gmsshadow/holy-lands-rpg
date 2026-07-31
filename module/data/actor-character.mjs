@@ -91,7 +91,8 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
         faithDieResult: new fields.NumberField({ required: true, integer: true, initial: 0 }),
         giftsGranted: new fields.BooleanField({ required: true, initial: false }),
         // How many Attribute Bonuses (Step 10) have been applied per attribute.
-        attrBonusApplied: new fields.ObjectField({ required: true, initial: {} })
+        attrBonusApplied: new fields.ObjectField({ required: true, initial: {} }),
+        miraclesSelected: new fields.BooleanField({ required: true, initial: false })
       })
     };
   }

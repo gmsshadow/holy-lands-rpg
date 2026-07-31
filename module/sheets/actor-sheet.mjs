@@ -49,7 +49,9 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       charArrayDelete: HolyLandsActorSheet.#onCharArrayDelete,
       grantGifts: HolyLandsActorSheet.#onGrantGifts,
       addSkill: HolyLandsActorSheet.#onAddSkill,
-      applyAttrBonus: HolyLandsActorSheet.#onApplyAttrBonus
+      applyAttrBonus: HolyLandsActorSheet.#onApplyAttrBonus,
+      addMiracle: HolyLandsActorSheet.#onAddMiracle,
+      grantClericMiracles: HolyLandsActorSheet.#onGrantClericMiracles
     }
   };
 
@@ -150,6 +152,12 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     context.startingRolled = !!this.actor.system.creation?.startingRolled;
     context.giftsGranted = !!this.actor.system.creation?.giftsGranted;
     context.attrBonuses = this.actor.system.attrBonusValidation;
+    context.miracleClass = this.actor.miracleClass;
+    if (context.miracleClass) {
+      context.miracleGuidance = (context.miracleClass === "saint")
+        ? "Saint: select 5 High Miracles and 2 Clerical Miracles (your level or lower)."
+        : "Cleric: gain all Clerical Miracles of your level, plus 1 High Miracle.";
+    }
     context.hasClassGifts = !!this.actor.classItem?.system.grantedGifts?.trim();
     context.statures = {
       weeFolk: "WeeFolk",
@@ -338,6 +346,41 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   }
 
   /** Open a Stature-filtered class picker fed from the compendium. */
+  /** Add a Miracle from the compendium, filtered by High/Clerical. */
+  static async #onAddMiracle(event, target) {
+    const filter = target.dataset.miracleType; // "high" | "clerical" | ""
+    const pack = game.packs.get("holy-lands-rpg.miracles");
+    if (!pack) { ui.notifications.error("Miracles compendium not found."); return; }
+    let docs = (await pack.getDocuments()).sort((a, b) => a.name.localeCompare(b.name));
+    if (filter) docs = docs.filter(d => d.system.miracleType === filter);
+    const have = new Set(this.actor.items.filter(i => i.type === "miracle").map(i => i.name.toLowerCase()));
+    const options = docs.map(d => {
+      const dis = have.has(d.name.toLowerCase()) ? " (already have)" : "";
+      return `<option value="${d.id}">${foundry.utils.escapeHTML(d.name)} — Fc ${d.system.faithCost}${dis}</option>`;
+    }).join("");
+    const chosen = await DialogV2.wait({
+      window: { title: `Add ${filter ? filter.capitalize() + " " : ""}Miracle` },
+      content: `<div class="form-group"><label>Miracle:</label><select name="id" autofocus>${options}</select></div>`,
+      buttons: [
+        { action: "add", label: "Add", default: true, callback: (e, b) => b.form.elements.id.value },
+        { action: "cancel", label: "Cancel" }
+      ],
+      rejectClose: false
+    });
+    if (!chosen || chosen === "cancel") return;
+    return this.actor.addMiracleFromCompendium(chosen);
+  }
+
+  static async #onGrantClericMiracles(event, target) {
+    const proceed = await DialogV2.confirm({
+      window: { title: "Grant Clerical Miracles" },
+      content: `<p>Add all Level 1 Clerical Miracles to <strong>${this.actor.name}</strong>? (Then choose one High Miracle.)</p>`,
+      rejectClose: false
+    });
+    if (!proceed) return;
+    return this.actor.grantClericClericalMiracles();
+  }
+
   static async #onApplyAttrBonus(event, target) {
     const attrKey = target.dataset.attr;
     let choiceKey = null;

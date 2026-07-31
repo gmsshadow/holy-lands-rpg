@@ -494,3 +494,17 @@ These are deliberate changes, flagged for review:
   since raising an Attribute past a new even threshold surfaces a new
   pending bonus. Rule-of-Halves-flagged choices (Craft/Gift/Talent/Save)
   are noted in the effect text; the existing RoH warnings still apply.
+
+## v2.14.0 — Miracles compendium and selection
+
+- New **Miracles** compendium (packs/miracles): the 15 Level-1 Miracles from
+  Genesis Ch11 - 12 High, 3 Clerical - each carrying its structured stat
+  block (Faith cost, Range, Duration, Target, Area, type, level). No rules
+  descriptions, per the minimal-data approach (higher-level Miracles live in
+  later books and can be added to the pack later).
+- The Miracles tab now shows selection guidance for Saints and Clerics
+  (Saint: 5 High + 2 Clerical; Cleric: all Clerical of level + 1 High) with
+  Add High Miracle / Add Clerical Miracle pickers filtered by type, and a
+  "Grant all Clerical" shortcut for Clerics. Non-clergy characters see the
+  tab unchanged.
+- Grouped with the other packs under the Holy Lands RPG compendium folder.

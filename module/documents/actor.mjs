@@ -614,6 +614,48 @@ export class HolyLandsActor extends Actor {
     });
   }
 
+  /** Whether this character's class grants Miracles (Saint or Cleric). */
+  get miracleClass() {
+    const key = this.classItem?.system.key ?? this.system.class;
+    return (key === "saint") ? "saint" : (key === "cleric") ? "cleric" : null;
+  }
+
+  /** Add a Miracle from the compendium as an embedded item. */
+  async addMiracleFromCompendium(compendiumId) {
+    const pack = game.packs.get("holy-lands-rpg.miracles");
+    if (!pack) return;
+    const doc = await pack.getDocument(compendiumId);
+    if (!doc) return;
+    const data = doc.toObject();
+    delete data._id;
+    return this.createEmbeddedDocuments("Item", [data]);
+  }
+
+  /**
+   * Cleric shortcut (p.60): grant ALL Level-1 Clerical Miracles at once
+   * (the +1 High Miracle is chosen separately via the picker).
+   */
+  async grantClericClericalMiracles() {
+    const pack = game.packs.get("holy-lands-rpg.miracles");
+    if (!pack) return;
+    const docs = await pack.getDocuments();
+    const clerical = docs.filter(d => (d.system.miracleType === "clerical") && (d.system.level === 1));
+    const have = new Set(this.items.filter(i => i.type === "miracle").map(i => i.name.toLowerCase()));
+    const toCreate = clerical.filter(d => !have.has(d.name.toLowerCase())).map(d => {
+      const o = d.toObject(); delete o._id; return o;
+    });
+    if (toCreate.length) await this.createEmbeddedDocuments("Item", toCreate);
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name}</strong> gains all Level 1 Clerical Miracles: ${toCreate.map(t => t.name).join(", ") || "(already had them)"}. Now choose one (1) High Miracle.`
+    });
+  }
+
+  /** Mark miracle selection complete. */
+  async markMiraclesSelected() {
+    await this.update({ "system.creation.miraclesSelected": true });
+  }
+
   /** Rac/GM correction: unlock the starting Life & Faith roll. */
   async unlockStartingRoll() {
     if (!game.user.isGM) {

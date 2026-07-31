@@ -1,0 +1,30 @@
+{
+  "_id": "p1V4wFVRjC7kyh3R",
+  "_key": "!items!p1V4wFVRjC7kyh3R",
+  "name": "Recall",
+  "type": "miracle",
+  "img": "icons/svg/angel.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 0,
+      "silver": 0
+    },
+    "level": 1,
+    "faithCost": 7,
+    "range": "Self",
+    "duration": "1M/PF",
+    "target": "Self",
+    "area": "",
+    "miracleType": "high"
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

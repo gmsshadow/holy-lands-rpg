@@ -1,0 +1,30 @@
+{
+  "_id": "KdZWQzdMuFTquVZ7",
+  "_key": "!items!KdZWQzdMuFTquVZ7",
+  "name": "Stun",
+  "type": "miracle",
+  "img": "icons/svg/angel.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 0,
+      "silver": 0
+    },
+    "level": 1,
+    "faithCost": 7,
+    "range": "Touch",
+    "duration": "3R",
+    "target": "Other",
+    "area": "",
+    "miracleType": "high"
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

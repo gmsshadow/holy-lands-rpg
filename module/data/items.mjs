@@ -88,7 +88,7 @@ export class SkillData extends foundry.abstract.TypeDataModel {
       // - combatAbilities: this is the "Combat Abilities" skill (Step 7 budget)
       // - weaponSkillKey: this is a "WS <name>" skill for the given key (Step 8)
       combatAbilities: new fields.BooleanField({ required: true, initial: false }),
-      weaponSkillKey: new fields.StringField({ required: true, initial: "", choices: [
+      weaponSkillKey: new fields.StringField({ required: true, blank: true, initial: "", choices: [
         "", "handToHand", "lightArms", "heavyArms", "pairedWeapons", "missile", "thrown", "kickAttack"
       ] }),
 

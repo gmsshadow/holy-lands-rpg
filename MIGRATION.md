@@ -431,3 +431,10 @@ These are deliberate changes, flagged for review:
   "WS <name>" recognised and linked, "CS " prefixes flagged - then the
   legacy data is cleared so it runs once. A notification reports the count.
 - NPC "CS" notable-skills list is unaffected (separate ArrayField).
+
+## v2.10.1
+
+- Fixed: creating a skill item failed validation ("weaponSkillKey may not
+  be a blank string"). A StringField with a choices list rejects "" even
+  when it's listed; added blank:true so skills default to no Weapon Skill
+  link as intended.

@@ -340,6 +340,101 @@ export class HolyLandsActor extends Actor {
     });
   }
 
+  /**
+   * Step 5 (pp.56-57): roll Height (d12 by Stature), look up Weight
+   * (STR x height, males +10%), and roll Native Land and Language Group
+   * (d20 each). All results remain editable afterwards.
+   */
+  async rollDetails() {
+    if (this.type !== "character") return;
+    const M = this.system.constructor;
+    const stature = this.system.stature;
+    const heights = M.HEIGHT_TABLE?.[stature];
+    if (!heights) return;
+
+    const heightRoll = new Roll("1d12");
+    await heightRoll.evaluate();
+    const height = heights[heightRoll.total - 1];
+
+    // Weight lookup: parse height to inches, find the "less than" column.
+    const m = height.match(/(\d+)'\s*(\d+)/);
+    const inches = m ? (Number(m[1]) * 12 + Number(m[2])) : 66;
+    let col = M.WEIGHT_THRESHOLDS_INCHES.findIndex(t => inches < t);
+    if (col < 0) col = M.WEIGHT_THRESHOLDS_INCHES.length - 1;
+    const str = Math.min(20, Math.max(2, this.system.attributes.str?.value ?? 9));
+    let weight = M.WEIGHT_TABLE[str]?.[col] ?? 0;
+    const male = (this.system.gender || "male") === "male";
+    if (male) weight = Math.round(weight * 1.1);
+
+    const landRoll = new Roll("1d20");
+    await landRoll.evaluate();
+    const langRoll = new Roll("1d20");
+    await langRoll.evaluate();
+    const land = M.LANDS[landRoll.total - 1];
+    const lang = M.LANGUAGE_GROUPS[langRoll.total - 1];
+
+    await this.update({
+      "system.height": height,
+      "system.weight": `${weight} lbs`,
+      "system.nativeLand": land,
+      "system.languageGroup": lang
+    });
+
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} - Step 5 Details</strong><br>`
+        + `Height (d12=${heightRoll.total}): <strong>${height}</strong><br>`
+        + `Weight (STR ${str}, ${male ? "male +10%" : "female"}): <strong>${weight} lbs</strong><br>`
+        + `Native Land (d20=${landRoll.total}): <strong>${land}</strong><br>`
+        + `Language Group (d20=${langRoll.total}): <strong>${lang}</strong><br>`
+        + `<em>All of these can be edited on the sheet if you'd rather choose.</em>`,
+      rolls: [heightRoll, landRoll, langRoll]
+    });
+  }
+
+  /**
+   * Step 5 (p.56): roll Sins (by VIR) or Phobias (by WIL) - d20 per slot,
+   * duplicates rerolled. Overwrites the current list; editable afterwards.
+   * @param {"sins"|"phobias"} kind
+   */
+  async rollSinsOrPhobias(kind) {
+    if (this.type !== "character") return;
+    const M = this.system.constructor;
+    const isSins = kind === "sins";
+    const av = isSins ? (this.system.attributes.vir?.value ?? 9) : (this.system.attributes.will?.value ?? 9);
+    const count = M.sinPhobiaCount(av);
+    const table = isSins ? M.SINS : M.PHOBIAS;
+    const label = isSins ? "Sins" : "Phobias";
+    const attrLabel = isSins ? "VIR" : "WIL";
+
+    if (count === 0) {
+      await this.update({ [`system.${kind}`]: [] });
+      return ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        flavor: `<strong>${this.name} - ${label}</strong>: ${attrLabel} ${av} grants <strong>none</strong> (AV 12+).`
+      });
+    }
+
+    const results = [];
+    const rolls = [];
+    let guard = 0;
+    while ((results.length < count) && (guard++ < 100)) {
+      const roll = new Roll("1d20");
+      await roll.evaluate();
+      const entry = table[roll.total - 1];
+      if (results.includes(entry)) continue; // reroll duplicates (p.56)
+      results.push(entry);
+      rolls.push(roll);
+    }
+    await this.update({ [`system.${kind}`]: results });
+
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} - ${label}</strong> (${attrLabel} ${av} → ${count}):<br>` + results.map(r => `• ${r}`).join("<br>"),
+      rolls
+    });
+  }
+
   /** Rac/GM correction: unlock the starting Life & Faith roll. */
   async unlockStartingRoll() {
     if (!game.user.isGM) {

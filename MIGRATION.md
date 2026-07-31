@@ -389,3 +389,22 @@ These are deliberate changes, flagged for review:
   "<Class> (legacy)" beside the Choose Class button - assigning a class
   item upgrades them and keeps the key in sync. The built-in Ch7
   requirement/faith-attribute fallbacks remain for such characters.
+
+## v2.9.0 — Step 5 details: gender, age range, details roll, Sins & Phobias
+
+- **Gender** is now a Male/Female select (p.55).
+- **Age** shows its legal p.56 range beside the label - minimum = highest +
+  lowest AV, maximum = 2 x the sum of the two highest - with a warning when
+  the entered age falls outside it (noting the Rac's Attribute-adjustment
+  option for very young/old characters).
+- **Roll Details** button (header): d12 Height from the Stature table,
+  Weight looked up from the STR x height table with +10% for males, and
+  d20 Native Land and Language Group (new fields, shown on the Biography
+  tab). Everything remains editable afterwards for players who prefer to
+  choose - the chat card says so.
+- **Sins & Phobias finally have UI** (Biography tab): editable lists with
+  add/remove rows, expected counts shown from VIR/WIL per the p.56 table
+  (12+: 0 ... 4-5: 4), and Roll buttons that d20 the correct number of
+  times against the twenty-entry tables, rerolling duplicates. Rolling
+  overwrites the list after confirmation; rows stay editable. This also
+  finally feeds the Retreat Pride/Control/Strife check real data.

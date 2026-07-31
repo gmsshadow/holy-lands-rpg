@@ -93,14 +93,31 @@
     </div>
     <div class="character-details">
       <div class="detail-group">
-        <label>Age</label>
+        <label>Age <span class="hint">({{system.detailsValidation.ageMin}}–{{system.detailsValidation.ageMax}})</span></label>
         <input type="number" name="system.age" value="{{system.age}}"/>
       </div>
       <div class="detail-group">
         <label>Gender</label>
-        <input type="text" name="system.gender" value="{{system.gender}}"/>
+        <select name="system.gender">
+          <option value="male" {{#if (eq system.gender "male")}}selected{{/if}}>Male</option>
+          <option value="female" {{#if (eq system.gender "female")}}selected{{/if}}>Female</option>
+        </select>
       </div>
+      <div class="detail-group">
+        <label>Height</label>
+        <input type="text" name="system.height" value="{{system.height}}"/>
+      </div>
+      <div class="detail-group">
+        <label>Weight</label>
+        <input type="text" name="system.weight" value="{{system.weight}}"/>
+      </div>
+      <button type="button" data-action="rollDetails" title="Step 5: roll Height, Weight, Native Land, and Language Group (editable afterwards)">
+        <i class="fas fa-dice"></i> Roll Details
+      </button>
     </div>
+    {{#if system.detailsValidation.ageOutOfRange}}
+    <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> Age {{system.age}} is outside the p.56 range {{system.detailsValidation.ageMin}}–{{system.detailsValidation.ageMax}} (Rac may adjust Attributes for very young/old characters)</p>
+    {{/if}}
   </div>
 </header>
 
@@ -462,6 +479,50 @@
   </div>
 
   <div class="tab biography {{tabs.biography.cssClass}}" data-group="primary" data-tab="biography">
+    <div class="combat-stats">
+      <div class="stat">
+        <label>Native Land</label>
+        <input type="text" name="system.nativeLand" value="{{system.nativeLand}}"/>
+      </div>
+      <div class="stat">
+        <label>Language Group</label>
+        <input type="text" name="system.languageGroup" value="{{system.languageGroup}}"/>
+      </div>
+    </div>
+
+    <h3>Sins
+      <span class="hint">(VIR grants {{system.detailsValidation.expectedSins}})</span>
+      <button type="button" data-action="rollSinsPhobias" data-kind="sins" title="Roll Sins by Virtue AV (p.56) - overwrites the list">
+        <i class="fas fa-dice-d20"></i> Roll
+      </button>
+    </h3>
+    <div class="skills-list">
+      {{#each system.sins as |sin index|}}
+      <div class="skill">
+        <input type="text" class="char-array-field" data-array="sins" data-index="{{index}}" value="{{sin}}" placeholder="Sin"/>
+        <a class="item-control" data-action="charArrayDelete" data-array="sins" data-index="{{index}}" title="Remove"><i class="fas fa-trash"></i></a>
+      </div>
+      {{/each}}
+      <a class="item-control" data-action="charArrayAdd" data-array="sins" title="Add sin"><i class="fas fa-plus"></i> Add sin</a>
+    </div>
+
+    <h3>Phobias
+      <span class="hint">(WIL grants {{system.detailsValidation.expectedPhobias}})</span>
+      <button type="button" data-action="rollSinsPhobias" data-kind="phobias" title="Roll Phobias by Will AV (p.56) - overwrites the list">
+        <i class="fas fa-dice-d20"></i> Roll
+      </button>
+    </h3>
+    <div class="skills-list">
+      {{#each system.phobias as |phobia index|}}
+      <div class="skill">
+        <input type="text" class="char-array-field" data-array="phobias" data-index="{{index}}" value="{{phobia}}" placeholder="Phobia"/>
+        <a class="item-control" data-action="charArrayDelete" data-array="phobias" data-index="{{index}}" title="Remove"><i class="fas fa-trash"></i></a>
+      </div>
+      {{/each}}
+      <a class="item-control" data-action="charArrayAdd" data-array="phobias" title="Add phobia"><i class="fas fa-plus"></i> Add phobia</a>
+    </div>
+
+    <h3>Biography</h3>
     <div class="editor-content">
       <prose-mirror name="system.biography" value="{{system.biography}}" toggled>
         {{{enrichedBiography}}}

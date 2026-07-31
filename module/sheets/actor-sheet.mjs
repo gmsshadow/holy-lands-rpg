@@ -42,7 +42,11 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       chooseSaveBonus: HolyLandsActorSheet.#onChooseSaveBonus,
       unlockSaveBonus: HolyLandsActorSheet.#onUnlockSaveBonus,
       unlockStartingRoll: HolyLandsActorSheet.#onUnlockStartingRoll,
-      chooseClass: HolyLandsActorSheet.#onChooseClass
+      chooseClass: HolyLandsActorSheet.#onChooseClass,
+      rollDetails: HolyLandsActorSheet.#onRollDetails,
+      rollSinsPhobias: HolyLandsActorSheet.#onRollSinsPhobias,
+      charArrayAdd: HolyLandsActorSheet.#onCharArrayAdd,
+      charArrayDelete: HolyLandsActorSheet.#onCharArrayDelete
     }
   };
 
@@ -208,6 +212,22 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     for (const input of this.element.querySelectorAll(".npc-skill-field")) {
       input.addEventListener("change", this.#onNpcSkillChange.bind(this));
     }
+
+    // Character string-array rows (Sins, Phobias): same rebuild pattern.
+    for (const input of this.element.querySelectorAll(".char-array-field")) {
+      input.addEventListener("change", this.#onCharArrayChange.bind(this));
+    }
+  }
+
+  /** Persist an edit to one string-array row (sins/phobias). */
+  async #onCharArrayChange(event) {
+    const input = event.currentTarget;
+    const path = input.dataset.array;
+    const index = Number(input.dataset.index);
+    const arr = foundry.utils.deepClone(foundry.utils.getProperty(this.actor.system, path) ?? []);
+    if (arr[index] === undefined) return;
+    arr[index] = input.value;
+    await this.actor.update({ [`system.${path}`]: arr });
   }
 
   /** Persist an edit to one CS skill row. */
@@ -308,6 +328,45 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   }
 
   /** Open a Stature-filtered class picker fed from the compendium. */
+  static async #onRollDetails(event, target) {
+    const proceed = await DialogV2.confirm({
+      window: { title: "Step 5: Roll Details" },
+      content: `<p>Roll Height (d12 by Stature), look up Weight (STR &times; height, males +10%), and roll Native Land and Language Group (d20 each) for <strong>${this.actor.name}</strong>?</p>
+        <p><em>Overwrites the current entries - you can edit any of them afterwards.</em></p>`,
+      rejectClose: false
+    });
+    if (!proceed) return;
+    return this.actor.rollDetails();
+  }
+
+  static async #onRollSinsPhobias(event, target) {
+    const kind = target.dataset.kind;
+    const label = kind === "sins" ? "Sins (by Virtue)" : "Phobias (by Will)";
+    const proceed = await DialogV2.confirm({
+      window: { title: `Step 5: Roll ${label}` },
+      content: `<p>Roll ${label} for <strong>${this.actor.name}</strong> - d20 per slot, duplicates rerolled (p.56)?</p>
+        <p><em>Overwrites the current list - entries stay editable afterwards.</em></p>`,
+      rejectClose: false
+    });
+    if (!proceed) return;
+    return this.actor.rollSinsOrPhobias(kind);
+  }
+
+  static async #onCharArrayAdd(event, target) {
+    const path = target.dataset.array;
+    const arr = foundry.utils.deepClone(foundry.utils.getProperty(this.actor.system, path) ?? []);
+    arr.push("");
+    return this.actor.update({ [`system.${path}`]: arr });
+  }
+
+  static async #onCharArrayDelete(event, target) {
+    const path = target.dataset.array;
+    const index = Number(target.dataset.index);
+    const arr = foundry.utils.deepClone(foundry.utils.getProperty(this.actor.system, path) ?? []);
+    arr.splice(index, 1);
+    return this.actor.update({ [`system.${path}`]: arr });
+  }
+
   static async #onChooseClass(event, target) {
     const pack = game.packs.get("holy-lands-rpg.classes");
     if (!pack) {

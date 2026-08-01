@@ -1,0 +1,36 @@
+{
+  "_id": "gNkiu8Y2vqFqcRaR",
+  "_key": "!items!gNkiu8Y2vqFqcRaR",
+  "name": "Great War Axe",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 95,
+      "silver": 0
+    },
+    "weaponSkill": "heavyArms",
+    "damage": "2d10",
+    "damageWee": "1d10",
+    "damageGiant": "3d10",
+    "costWee": 65,
+    "costGiant": 150,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

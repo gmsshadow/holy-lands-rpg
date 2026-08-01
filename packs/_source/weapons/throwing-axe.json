@@ -1,0 +1,36 @@
+{
+  "_id": "z4PKjeziZSAChyYK",
+  "_key": "!items!z4PKjeziZSAChyYK",
+  "name": "Throwing Axe",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 50,
+      "silver": 0
+    },
+    "weaponSkill": "thrown",
+    "damage": "1d8",
+    "damageWee": "1d6",
+    "damageGiant": "2d8",
+    "costWee": 35,
+    "costGiant": 80,
+    "range": "Thrown",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

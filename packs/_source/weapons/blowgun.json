@@ -1,0 +1,36 @@
+{
+  "_id": "Z112M6xV5yZJQ00q",
+  "_key": "!items!Z112M6xV5yZJQ00q",
+  "name": "Blowgun",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 25,
+      "silver": 0
+    },
+    "weaponSkill": "missile",
+    "damage": "1d3",
+    "damageWee": "1d2",
+    "damageGiant": "1d4",
+    "costWee": 15,
+    "costGiant": 35,
+    "range": "Ranged",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

@@ -1,0 +1,36 @@
+{
+  "_id": "dGAkkz6Op13HSwch",
+  "_key": "!items!dGAkkz6Op13HSwch",
+  "name": "War Axe",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 85,
+      "silver": 0
+    },
+    "weaponSkill": "heavyArms",
+    "damage": "2d8",
+    "damageWee": "1d8",
+    "damageGiant": "3d8",
+    "costWee": 60,
+    "costGiant": 135,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

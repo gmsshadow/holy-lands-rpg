@@ -1,0 +1,36 @@
+{
+  "_id": "Pu5RzxznqRE6O4rA",
+  "_key": "!items!Pu5RzxznqRE6O4rA",
+  "name": "Bastard Sword",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 80,
+      "silver": 0
+    },
+    "weaponSkill": "heavyArms",
+    "damage": "4d4",
+    "damageWee": "3d4",
+    "damageGiant": "5d4",
+    "costWee": 55,
+    "costGiant": 130,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

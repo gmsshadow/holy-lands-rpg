@@ -1,0 +1,36 @@
+{
+  "_id": "B7RXVeFAlO3xks7n",
+  "_key": "!items!B7RXVeFAlO3xks7n",
+  "name": "Recurve Bow",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 50,
+      "silver": 0
+    },
+    "weaponSkill": "missile",
+    "damage": "3d4",
+    "damageWee": "1d6",
+    "damageGiant": "4d4",
+    "costWee": 35,
+    "costGiant": 85,
+    "range": "Ranged",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

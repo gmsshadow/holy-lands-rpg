@@ -1,0 +1,36 @@
+{
+  "_id": "DUoyA6g2FWRchFCZ",
+  "_key": "!items!DUoyA6g2FWRchFCZ",
+  "name": "Spiked Club",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 35,
+      "silver": 0
+    },
+    "weaponSkill": "lightArms",
+    "damage": "2d6",
+    "damageWee": "1d6",
+    "damageGiant": "3d6",
+    "costWee": 25,
+    "costGiant": 65,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

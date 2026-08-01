@@ -1,0 +1,36 @@
+{
+  "_id": "7Jn8XgMwmtNbeGjq",
+  "_key": "!items!7Jn8XgMwmtNbeGjq",
+  "name": "Large Shield",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 70,
+      "silver": 0
+    },
+    "weaponSkill": "heavyArms",
+    "damage": "1d4",
+    "damageWee": "1d3",
+    "damageGiant": "1d6",
+    "costWee": 50,
+    "costGiant": 120,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": true,
+    "defendBonus": 4,
+    "defendBonusWee": 3,
+    "defendBonusGiant": 5
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

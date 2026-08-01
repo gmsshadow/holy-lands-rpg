@@ -1,0 +1,36 @@
+{
+  "_id": "V4zRyHJ1tx6V74AQ",
+  "_key": "!items!V4zRyHJ1tx6V74AQ",
+  "name": "Spear",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 40,
+      "silver": 0
+    },
+    "weaponSkill": "thrown",
+    "damage": "2d8",
+    "damageWee": "1d8",
+    "damageGiant": "3d8",
+    "costWee": 30,
+    "costGiant": 70,
+    "range": "Thrown",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

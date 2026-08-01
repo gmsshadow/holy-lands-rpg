@@ -1,0 +1,36 @@
+{
+  "_id": "MhWcyIk24OHogbvj",
+  "_key": "!items!MhWcyIk24OHogbvj",
+  "name": "Buckler",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 35,
+      "silver": 0
+    },
+    "weaponSkill": "lightArms",
+    "damage": "1d4",
+    "damageWee": "1d3",
+    "damageGiant": "1d6",
+    "costWee": 25,
+    "costGiant": 60,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": true,
+    "defendBonus": 2,
+    "defendBonusWee": 1,
+    "defendBonusGiant": 3
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

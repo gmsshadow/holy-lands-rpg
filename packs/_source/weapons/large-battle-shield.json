@@ -1,0 +1,36 @@
+{
+  "_id": "FB0gQwNW6IXIQwSL",
+  "_key": "!items!FB0gQwNW6IXIQwSL",
+  "name": "Large Battle Shield",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 85,
+      "silver": 0
+    },
+    "weaponSkill": "heavyArms",
+    "damage": "1d6",
+    "damageWee": "1d4",
+    "damageGiant": "1d8",
+    "costWee": 60,
+    "costGiant": 145,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": true,
+    "defendBonus": 4,
+    "defendBonusWee": 3,
+    "defendBonusGiant": 5
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

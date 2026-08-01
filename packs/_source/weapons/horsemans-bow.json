@@ -1,0 +1,36 @@
+{
+  "_id": "RWdppgm3cbZQweHI",
+  "_key": "!items!RWdppgm3cbZQweHI",
+  "name": "Horsemans Bow",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 40,
+      "silver": 0
+    },
+    "weaponSkill": "missile",
+    "damage": "2d4",
+    "damageWee": "1d6",
+    "damageGiant": "3d4",
+    "costWee": 25,
+    "costGiant": 60,
+    "range": "Ranged",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

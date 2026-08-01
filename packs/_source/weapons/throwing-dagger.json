@@ -1,0 +1,36 @@
+{
+  "_id": "tpEbs7BPflv92dFN",
+  "_key": "!items!tpEbs7BPflv92dFN",
+  "name": "Throwing Dagger",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 35,
+      "silver": 0
+    },
+    "weaponSkill": "thrown",
+    "damage": "1d6",
+    "damageWee": "1d4",
+    "damageGiant": "2d6",
+    "costWee": 20,
+    "costGiant": 55,
+    "range": "Thrown",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

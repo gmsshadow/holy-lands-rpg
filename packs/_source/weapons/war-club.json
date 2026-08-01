@@ -1,0 +1,36 @@
+{
+  "_id": "9qukNhMcX4aO1Hek",
+  "_key": "!items!9qukNhMcX4aO1Hek",
+  "name": "War Club",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 50,
+      "silver": 0
+    },
+    "weaponSkill": "heavyArms",
+    "damage": "2d8",
+    "damageWee": "1d8",
+    "damageGiant": "3d8",
+    "costWee": 40,
+    "costGiant": 85,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

@@ -1,0 +1,36 @@
+{
+  "_id": "99VppR6lPsfxne70",
+  "_key": "!items!99VppR6lPsfxne70",
+  "name": "Longbow",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 55,
+      "silver": 0
+    },
+    "weaponSkill": "missile",
+    "damage": "2d8",
+    "damageWee": "1d8",
+    "damageGiant": "3d8",
+    "costWee": 40,
+    "costGiant": 95,
+    "range": "Ranged",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

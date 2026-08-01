@@ -1,0 +1,36 @@
+{
+  "_id": "YlKSgmTpCZykwAno",
+  "_key": "!items!YlKSgmTpCZykwAno",
+  "name": "Maul",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 30,
+      "silver": 0
+    },
+    "weaponSkill": "lightArms",
+    "damage": "1d10",
+    "damageWee": "1d6",
+    "damageGiant": "2d10",
+    "costWee": 20,
+    "costGiant": 50,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

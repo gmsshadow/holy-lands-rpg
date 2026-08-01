@@ -1,0 +1,36 @@
+{
+  "_id": "0UnZmUP9UIyHnYYt",
+  "_key": "!items!0UnZmUP9UIyHnYYt",
+  "name": "Staff",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 35,
+      "silver": 0
+    },
+    "weaponSkill": "lightArms",
+    "damage": "1d12",
+    "damageWee": "1d8",
+    "damageGiant": "2d12",
+    "costWee": 25,
+    "costGiant": 55,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

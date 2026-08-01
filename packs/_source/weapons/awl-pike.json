@@ -1,0 +1,36 @@
+{
+  "_id": "m2Dgi5MnPv6Om3jy",
+  "_key": "!items!m2Dgi5MnPv6Om3jy",
+  "name": "Awl Pike",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 105,
+      "silver": 0
+    },
+    "weaponSkill": "heavyArms",
+    "damage": "2d10",
+    "damageWee": "1d10",
+    "damageGiant": "3d10",
+    "costWee": 70,
+    "costGiant": 160,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

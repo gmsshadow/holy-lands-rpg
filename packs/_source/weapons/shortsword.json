@@ -1,0 +1,36 @@
+{
+  "_id": "9pnXEQNrN1OwwxmZ",
+  "_key": "!items!9pnXEQNrN1OwwxmZ",
+  "name": "Shortsword",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 55,
+      "silver": 0
+    },
+    "weaponSkill": "lightArms",
+    "damage": "1d12",
+    "damageWee": "1d6",
+    "damageGiant": "2d12",
+    "costWee": 35,
+    "costGiant": 85,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

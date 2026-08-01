@@ -141,6 +141,14 @@ export class HolyLandsActor extends Actor {
     return this.items.find(i => (i.type === "weapon") && i.system.equipped) ?? null;
   }
 
+  /** Damage formula for a weapon as wielded by this actor's stature. */
+  weaponDamageFormula(weapon) {
+    const fallback = weapon?.system?.damage || "1d4";
+    if (!weapon || (weapon.type !== "weapon")) return fallback;
+    const stature = (this.type === "character") ? this.system.stature : "commonFolk";
+    return weapon.system.damageForStature?.(stature) || fallback;
+  }
+
   /** The character's Class item, if one has been dropped on the sheet. */
   get classItem() {
     return this.items.find(i => i.type === "class") ?? null;
@@ -1216,7 +1224,7 @@ export class HolyLandsActor extends Actor {
       mode: attackContext.mode,
       multiplier: attackContext.multiplier
     };
-    const damageFormula = weapon?.system?.damage || "1d4";
+    const damageFormula = this.weaponDamageFormula(weapon);
     const damageBonus = this.system.combat?.damageBonus || 0;
 
     const damageRoll = new Roll(damageFormula);
@@ -1312,7 +1320,7 @@ export class HolyLandsActor extends Actor {
    * action and not this button.)
    */
   async rollDamage(weapon, isDouble = false) {
-    let damageFormula = weapon?.system?.damage || "1d4";
+    let damageFormula = this.weaponDamageFormula(weapon);
     const damageBonus = this.system.combat?.damageBonus || 0;
 
     if (isDouble) {

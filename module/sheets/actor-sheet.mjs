@@ -202,6 +202,13 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       list.sort((a, b) => (a.sort || 0) - (b.sort || 0));
     }
     context.weapons = buckets.weapon;
+    // Annotate each weapon with the damage for this character's stature.
+    if (this.actor.type === "character") {
+      const stature = this.actor.system.stature;
+      for (const w of context.weapons) {
+        w.displayDamage = w.system.damageForStature?.(stature) || w.system.damage;
+      }
+    }
     context.armor = buckets.armor;
     context.equipment = buckets.equipment;
     context.miracles = buckets.miracle;

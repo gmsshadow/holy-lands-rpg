@@ -18,11 +18,40 @@ export class WeaponData extends foundry.abstract.TypeDataModel {
     return {
       ...baseItemSchema(),
       weaponSkill: new fields.StringField({ required: true, initial: "lightArms" }),
+      // Common/Dwarf damage is the primary `damage`; wee/giant variants are
+      // stored alongside (Genesis Ch8: DAM: common/dwarf [wee | giant]).
       damage: new fields.StringField({ required: true, initial: "1d6" }),
+      damageWee: new fields.StringField({ required: true, initial: "" }),
+      damageGiant: new fields.StringField({ required: true, initial: "" }),
+      // Cost brackets in gold; common/dwarf is the item's base cost.gold.
+      costWee: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
+      costGiant: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
       range: new fields.StringField({ required: true, initial: "Melee" }),
       properties: new fields.StringField({ required: true, initial: "" }),
-      equipped: new fields.BooleanField({ required: true, initial: false })
+      equipped: new fields.BooleanField({ required: true, initial: false }),
+      // Shields: Defend bonus brackets and required attacking WS.
+      isShield: new fields.BooleanField({ required: true, initial: false }),
+      defendBonus: new fields.NumberField({ required: true, integer: true, initial: 0 }),
+      defendBonusWee: new fields.NumberField({ required: true, integer: true, initial: 0 }),
+      defendBonusGiant: new fields.NumberField({ required: true, integer: true, initial: 0 })
     };
+  }
+
+  /**
+   * Damage for a given wielder stature, using the correct bracket.
+   * wee -> damageWee, giant -> damageGiant, else common/dwarf `damage`.
+   */
+  damageForStature(stature) {
+    if ((stature === "weeFolk") && this.damageWee) return this.damageWee;
+    if ((stature === "giantFolk") && this.damageGiant) return this.damageGiant;
+    return this.damage;
+  }
+
+  /** Defend bonus for a given wielder stature (shields). */
+  defendForStature(stature) {
+    if (stature === "weeFolk") return this.defendBonusWee;
+    if (stature === "giantFolk") return this.defendBonusGiant;
+    return this.defendBonus;
   }
 }
 

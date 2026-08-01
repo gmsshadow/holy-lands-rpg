@@ -1,0 +1,36 @@
+{
+  "_id": "IY92hE6JS4HQFm2S",
+  "_key": "!items!IY92hE6JS4HQFm2S",
+  "name": "Spiked War Club",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 60,
+      "silver": 0
+    },
+    "weaponSkill": "heavyArms",
+    "damage": "4d4",
+    "damageWee": "1d8",
+    "damageGiant": "5d4",
+    "costWee": 40,
+    "costGiant": 100,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

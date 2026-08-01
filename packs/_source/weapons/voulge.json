@@ -1,0 +1,36 @@
+{
+  "_id": "IoSZyyBd6USptg2s",
+  "_key": "!items!IoSZyyBd6USptg2s",
+  "name": "Voulge",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 90,
+      "silver": 0
+    },
+    "weaponSkill": "heavyArms",
+    "damage": "2d8",
+    "damageWee": "1d8",
+    "damageGiant": "3d8",
+    "costWee": 70,
+    "costGiant": 145,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

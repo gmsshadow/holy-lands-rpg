@@ -1,0 +1,36 @@
+{
+  "_id": "XCkkd6AZ99XKXg8c",
+  "_key": "!items!XCkkd6AZ99XKXg8c",
+  "name": "Scimitar",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 65,
+      "silver": 0
+    },
+    "weaponSkill": "lightArms",
+    "damage": "3d4",
+    "damageWee": "1d6",
+    "damageGiant": "4d4",
+    "costWee": 45,
+    "costGiant": 105,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

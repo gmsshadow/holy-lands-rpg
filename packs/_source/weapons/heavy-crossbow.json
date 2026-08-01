@@ -1,0 +1,36 @@
+{
+  "_id": "AwpfclOWTANAvhS8",
+  "_key": "!items!AwpfclOWTANAvhS8",
+  "name": "Heavy Crossbow",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 100,
+      "silver": 0
+    },
+    "weaponSkill": "missile",
+    "damage": "2d12",
+    "damageWee": "1d12",
+    "damageGiant": "3d12",
+    "costWee": 70,
+    "costGiant": 160,
+    "range": "Ranged",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

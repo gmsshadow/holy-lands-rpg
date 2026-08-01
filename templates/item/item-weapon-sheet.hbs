@@ -29,8 +29,14 @@
     </div>
 
     <div class="form-group">
-      <label>Damage</label>
-      <input type="text" name="system.damage" value="{{system.damage}}" placeholder="1d6"/>
+      <label>Damage (common/dwarf)</label>
+      <input type="text" name="system.damage" value="{{system.damage}}" placeholder="2d6"/>
+    </div>
+
+    <div class="form-group">
+      <label>Damage (wee) / (giant)</label>
+      <input type="text" name="system.damageWee" value="{{system.damageWee}}" placeholder="1d6" style="width:80px;"/>
+      <input type="text" name="system.damageGiant" value="{{system.damageGiant}}" placeholder="3d6" style="width:80px;"/>
     </div>
 
     <div class="form-group">
@@ -44,19 +50,36 @@
     </div>
 
     <div class="form-group">
-      <label>Cost (Gold)</label>
+      <label>Cost common/dwarf (Gold)</label>
       <input type="number" name="system.cost.gold" value="{{system.cost.gold}}"/>
     </div>
 
     <div class="form-group">
-      <label>Cost (Silver)</label>
-      <input type="number" name="system.cost.silver" value="{{system.cost.silver}}"/>
+      <label>Cost (wee) / (giant) gold</label>
+      <input type="number" name="system.costWee" value="{{system.costWee}}" style="width:80px;"/>
+      <input type="number" name="system.costGiant" value="{{system.costGiant}}" style="width:80px;"/>
     </div>
 
     <div class="form-group">
       <label>Weight</label>
       <input type="number" name="system.weight" value="{{system.weight}}" step="any"/>
     </div>
+
+    <div class="form-group">
+      <label>
+        <input type="checkbox" name="system.isShield" {{checked system.isShield}}/>
+        Shield (uses Defend bonus below)
+      </label>
+    </div>
+
+    {{#if system.isShield}}
+    <div class="form-group">
+      <label>Defend bonus common/dwarf [wee | giant]</label>
+      <input type="number" name="system.defendBonus" value="{{system.defendBonus}}" style="width:60px;"/>
+      <input type="number" name="system.defendBonusWee" value="{{system.defendBonusWee}}" style="width:60px;"/>
+      <input type="number" name="system.defendBonusGiant" value="{{system.defendBonusGiant}}" style="width:60px;"/>
+    </div>
+    {{/if}}
 
     <div class="form-group">
       <label>

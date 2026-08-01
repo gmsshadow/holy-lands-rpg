@@ -1,0 +1,36 @@
+{
+  "_id": "UhRK0s2CfQ6sIBhm",
+  "_key": "!items!UhRK0s2CfQ6sIBhm",
+  "name": "Moon",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 95,
+      "silver": 0
+    },
+    "weaponSkill": "heavyArms",
+    "damage": "2d8",
+    "damageWee": "1d8",
+    "damageGiant": "3d8",
+    "costWee": 65,
+    "costGiant": 145,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

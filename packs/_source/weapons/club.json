@@ -1,0 +1,36 @@
+{
+  "_id": "jjAGCUzyTOHW7Fw9",
+  "_key": "!items!jjAGCUzyTOHW7Fw9",
+  "name": "Club",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 25,
+      "silver": 0
+    },
+    "weaponSkill": "lightArms",
+    "damage": "1d8",
+    "damageWee": "1d4",
+    "damageGiant": "2d8",
+    "costWee": 15,
+    "costGiant": 40,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": false,
+    "defendBonus": 0,
+    "defendBonusWee": 0,
+    "defendBonusGiant": 0
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

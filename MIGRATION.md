@@ -508,3 +508,23 @@ These are deliberate changes, flagged for review:
   "Grant all Clerical" shortcut for Clerics. Non-clergy characters see the
   tab unchanged.
 - Grouped with the other packs under the Holy Lands RPG compendium folder.
+
+## v2.15.0 — Weapons compendium with stature damage/cost brackets
+
+- **WeaponData** extended for the Ch8 three-way stature brackets: common/
+  dwarf is the base `damage` and `cost.gold`; `damageWee`/`damageGiant` and
+  `costWee`/`costGiant` hold the [wee | giant] variants. Helper
+  damageForStature() returns the correct die by wielder Stature.
+- **Attack pipeline is now stature-aware**: a weapon's damage roll uses the
+  wielder's Stature bracket (a WeeFolk with a Battle Axe rolls 1d6, a
+  GiantFolk 3d6, common/dwarf 2d6). The character weapon list shows the
+  stature-correct damage too.
+- **Shields** are modelled as weapons with isShield + a Defend-bonus bracket
+  (common/dwarf [wee | giant]) and their attacking WS; the weapon sheet
+  reveals the shield fields when ticked.
+- New **Weapons** compendium (packs/weapons): all 57 Ch8 entries - Light
+  Arms, Heavy Arms, Missile, Thrown, and the three Shields - each with full
+  damage/cost brackets and correct Weapon Skill, no descriptions. Grouped
+  under the Holy Lands RPG compendium folder.
+- Note: ammunition and the per-stature ammo costs were left out of this
+  first pass (they're consumables, not wielded items); can be added later.

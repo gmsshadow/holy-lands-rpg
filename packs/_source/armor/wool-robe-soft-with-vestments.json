@@ -1,0 +1,32 @@
+{
+  "_id": "NRVd91dAfFMwskh1",
+  "_key": "!items!NRVd91dAfFMwskh1",
+  "name": "Wool Robe (soft) with Vestments",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 100,
+      "silver": 0
+    },
+    "ap": "chest",
+    "aDEF": 3,
+    "CAP": 10,
+    "PEN": 0,
+    "currentADEF": 3,
+    "currentPEN": 0,
+    "costWee": 70,
+    "costGiant": 140,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

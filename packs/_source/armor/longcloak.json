@@ -1,0 +1,32 @@
+{
+  "_id": "YFCIO86MoD2UegLp",
+  "_key": "!items!YFCIO86MoD2UegLp",
+  "name": "Longcloak",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 50,
+      "silver": 0
+    },
+    "ap": "back",
+    "aDEF": 1,
+    "CAP": 10,
+    "PEN": 1,
+    "currentADEF": 1,
+    "currentPEN": 1,
+    "costWee": 35,
+    "costGiant": 70,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

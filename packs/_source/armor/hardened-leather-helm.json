@@ -1,0 +1,32 @@
+{
+  "_id": "3lyzKUKa3egOyV9S",
+  "_key": "!items!3lyzKUKa3egOyV9S",
+  "name": "Hardened Leather Helm",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 85,
+      "silver": 0
+    },
+    "ap": "head",
+    "aDEF": 2,
+    "CAP": 20,
+    "PEN": 2,
+    "currentADEF": 2,
+    "currentPEN": 2,
+    "costWee": 60,
+    "costGiant": 120,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

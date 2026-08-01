@@ -1,0 +1,32 @@
+{
+  "_id": "cBdrlsMMZq5W7O7o",
+  "_key": "!items!cBdrlsMMZq5W7O7o",
+  "name": "Full Helm (plate)",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 130,
+      "silver": 0
+    },
+    "ap": "head",
+    "aDEF": 3,
+    "CAP": 30,
+    "PEN": 2,
+    "currentADEF": 3,
+    "currentPEN": 2,
+    "costWee": 95,
+    "costGiant": 185,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

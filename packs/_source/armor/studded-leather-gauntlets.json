@@ -1,0 +1,32 @@
+{
+  "_id": "F8yx3nnYqsrVU7jF",
+  "_key": "!items!F8yx3nnYqsrVU7jF",
+  "name": "Studded Leather Gauntlets",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 55,
+      "silver": 0
+    },
+    "ap": "arms",
+    "aDEF": 1,
+    "CAP": 20,
+    "PEN": 0,
+    "currentADEF": 1,
+    "currentPEN": 0,
+    "costWee": 40,
+    "costGiant": 75,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

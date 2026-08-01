@@ -528,3 +528,19 @@ These are deliberate changes, flagged for review:
   under the Holy Lands RPG compendium folder.
 - Note: ammunition and the per-stature ammo costs were left out of this
   first pass (they're consumables, not wielded items); can be added later.
+
+## v2.16.0 — Armor compendium
+
+- **ArmorData** gains cost brackets (costWee/costGiant) alongside the base
+  common/dwarf cost, matching the Ch9 pricing; aDEF/PEN/CAP and the AP slot
+  were already present and feed the existing equip/degradation logic.
+- New **Armor** compendium (packs/armor): all 60 Ch9 pieces across the six
+  Areas of Protection (Arms 9, Chest 25, Back 3, Feet 3, Head 9, Legs 11),
+  each with aDEF, PEN, CAP, and cost brackets - no descriptions. Equip
+  pieces on a character and the existing defense calc handles highest-aDEF-
+  per-slot stacking, tDEF, armor penalty totals, and CAP degradation.
+- The three remaining shields from the Ch9 opening (Small Battle Shield,
+  Small Shield, Tower Shield) were added to the Weapons pack, which now
+  holds 60 entries (6 shields total).
+- The armor item sheet shows the cost brackets. Grouped under the Holy
+  Lands RPG compendium folder.

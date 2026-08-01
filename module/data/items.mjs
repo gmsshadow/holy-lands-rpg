@@ -63,6 +63,9 @@ export class ArmorData extends foundry.abstract.TypeDataModel {
       aDEF: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
       CAP: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
       PEN: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
+      // Cost brackets in gold; common/dwarf is the base cost.gold.
+      costWee: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
+      costGiant: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
       currentADEF: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
       currentPEN: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
       equipped: new fields.BooleanField({ required: true, initial: false })

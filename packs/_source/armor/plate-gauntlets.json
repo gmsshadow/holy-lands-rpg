@@ -1,0 +1,32 @@
+{
+  "_id": "MfdK8gnAjaJykKVL",
+  "_key": "!items!MfdK8gnAjaJykKVL",
+  "name": "Plate Gauntlets",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 110,
+      "silver": 0
+    },
+    "ap": "arms",
+    "aDEF": 2,
+    "CAP": 30,
+    "PEN": 1,
+    "currentADEF": 2,
+    "currentPEN": 1,
+    "costWee": 80,
+    "costGiant": 155,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

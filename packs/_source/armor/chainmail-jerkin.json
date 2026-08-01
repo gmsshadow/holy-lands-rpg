@@ -1,0 +1,32 @@
+{
+  "_id": "SHSlepcwmTIDVCW5",
+  "_key": "!items!SHSlepcwmTIDVCW5",
+  "name": "Chainmail Jerkin",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 170,
+      "silver": 0
+    },
+    "ap": "chest",
+    "aDEF": 5,
+    "CAP": 30,
+    "PEN": 3,
+    "currentADEF": 5,
+    "currentPEN": 3,
+    "costWee": 120,
+    "costGiant": 240,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

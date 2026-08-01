@@ -1,0 +1,32 @@
+{
+  "_id": "Jm5dfNt1n0QoDCrF",
+  "_key": "!items!Jm5dfNt1n0QoDCrF",
+  "name": "Platemail Bracers",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 95,
+      "silver": 0
+    },
+    "ap": "arms",
+    "aDEF": 2,
+    "CAP": 30,
+    "PEN": 0,
+    "currentADEF": 2,
+    "currentPEN": 0,
+    "costWee": 70,
+    "costGiant": 135,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

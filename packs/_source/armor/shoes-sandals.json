@@ -1,0 +1,32 @@
+{
+  "_id": "Lyc7LfG3VsROxcFe",
+  "_key": "!items!Lyc7LfG3VsROxcFe",
+  "name": "Shoes/Sandals",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 20,
+      "silver": 0
+    },
+    "ap": "feet",
+    "aDEF": 0,
+    "CAP": 10,
+    "PEN": 0,
+    "currentADEF": 0,
+    "currentPEN": 0,
+    "costWee": 15,
+    "costGiant": 30,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

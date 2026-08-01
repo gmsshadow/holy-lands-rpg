@@ -1,0 +1,32 @@
+{
+  "_id": "xlNoj6sJgV1UsIw5",
+  "_key": "!items!xlNoj6sJgV1UsIw5",
+  "name": "Wool Robe (soft)",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 75,
+      "silver": 0
+    },
+    "ap": "chest",
+    "aDEF": 2,
+    "CAP": 10,
+    "PEN": 0,
+    "currentADEF": 2,
+    "currentPEN": 0,
+    "costWee": 55,
+    "costGiant": 105,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

@@ -1,0 +1,36 @@
+{
+  "_id": "NNTwFu5Zr049sJac",
+  "_key": "!items!NNTwFu5Zr049sJac",
+  "name": "Tower Shield",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 95,
+      "silver": 0
+    },
+    "weaponSkill": "heavyArms",
+    "damage": "1d4",
+    "damageWee": "1d3",
+    "damageGiant": "1d6",
+    "costWee": 70,
+    "costGiant": 160,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": true,
+    "defendBonus": 5,
+    "defendBonusWee": 4,
+    "defendBonusGiant": 6
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

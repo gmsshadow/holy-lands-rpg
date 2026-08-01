@@ -1,0 +1,32 @@
+{
+  "_id": "2aGX3sTmabs1DEKh",
+  "_key": "!items!2aGX3sTmabs1DEKh",
+  "name": "Chausses (plate)",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 130,
+      "silver": 0
+    },
+    "ap": "legs",
+    "aDEF": 2,
+    "CAP": 30,
+    "PEN": 1,
+    "currentADEF": 2,
+    "currentPEN": 1,
+    "costWee": 95,
+    "costGiant": 185,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

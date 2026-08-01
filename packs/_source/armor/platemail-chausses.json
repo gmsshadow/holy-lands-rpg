@@ -1,0 +1,32 @@
+{
+  "_id": "rFpZhhqpSuWZ1JMa",
+  "_key": "!items!rFpZhhqpSuWZ1JMa",
+  "name": "Platemail Chausses",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 175,
+      "silver": 0
+    },
+    "ap": "legs",
+    "aDEF": 3,
+    "CAP": 30,
+    "PEN": 2,
+    "currentADEF": 3,
+    "currentPEN": 2,
+    "costWee": 125,
+    "costGiant": 250,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

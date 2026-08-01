@@ -1,0 +1,32 @@
+{
+  "_id": "WT83DtM1LrfZj1n5",
+  "_key": "!items!WT83DtM1LrfZj1n5",
+  "name": "Decorative Cloth Tunic",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 50,
+      "silver": 0
+    },
+    "ap": "chest",
+    "aDEF": 0,
+    "CAP": 10,
+    "PEN": 0,
+    "currentADEF": 0,
+    "currentPEN": 0,
+    "costWee": 35,
+    "costGiant": 70,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

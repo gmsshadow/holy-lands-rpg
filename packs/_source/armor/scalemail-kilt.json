@@ -1,0 +1,32 @@
+{
+  "_id": "rl8FDD2xlAzdS5Oo",
+  "_key": "!items!rl8FDD2xlAzdS5Oo",
+  "name": "Scalemail Kilt",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 125,
+      "silver": 0
+    },
+    "ap": "legs",
+    "aDEF": 2,
+    "CAP": 30,
+    "PEN": 2,
+    "currentADEF": 2,
+    "currentPEN": 2,
+    "costWee": 90,
+    "costGiant": 175,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

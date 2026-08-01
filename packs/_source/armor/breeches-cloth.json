@@ -1,0 +1,32 @@
+{
+  "_id": "a3GmbZgxFpdzOzhP",
+  "_key": "!items!a3GmbZgxFpdzOzhP",
+  "name": "Breeches (cloth)",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 20,
+      "silver": 0
+    },
+    "ap": "legs",
+    "aDEF": 0,
+    "CAP": 10,
+    "PEN": 0,
+    "currentADEF": 0,
+    "currentPEN": 0,
+    "costWee": 15,
+    "costGiant": 25,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

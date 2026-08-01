@@ -1,0 +1,32 @@
+{
+  "_id": "XVKN0Yu1ssTqYsP9",
+  "_key": "!items!XVKN0Yu1ssTqYsP9",
+  "name": "Bear Hide Tunic",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 115,
+      "silver": 0
+    },
+    "ap": "chest",
+    "aDEF": 3,
+    "CAP": 20,
+    "PEN": 0,
+    "currentADEF": 3,
+    "currentPEN": 0,
+    "costWee": 85,
+    "costGiant": 160,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

@@ -1,0 +1,32 @@
+{
+  "_id": "X7Jk3saQSpNp3YwL",
+  "_key": "!items!X7Jk3saQSpNp3YwL",
+  "name": "Bear Hide Helm",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 65,
+      "silver": 0
+    },
+    "ap": "head",
+    "aDEF": 1,
+    "CAP": 20,
+    "PEN": 1,
+    "currentADEF": 1,
+    "currentPEN": 1,
+    "costWee": 50,
+    "costGiant": 90,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

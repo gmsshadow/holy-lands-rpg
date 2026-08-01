@@ -1,0 +1,32 @@
+{
+  "_id": "2YqTcqEYW4jecACa",
+  "_key": "!items!2YqTcqEYW4jecACa",
+  "name": "Bear Hide Jerkin",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 85,
+      "silver": 0
+    },
+    "ap": "chest",
+    "aDEF": 2,
+    "CAP": 20,
+    "PEN": 0,
+    "currentADEF": 2,
+    "currentPEN": 0,
+    "costWee": 60,
+    "costGiant": 120,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

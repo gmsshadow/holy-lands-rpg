@@ -1,0 +1,32 @@
+{
+  "_id": "KSrUdeKqnbmLecyQ",
+  "_key": "!items!KSrUdeKqnbmLecyQ",
+  "name": "Scalemail Jerkin",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 215,
+      "silver": 0
+    },
+    "ap": "chest",
+    "aDEF": 6,
+    "CAP": 30,
+    "PEN": 2,
+    "currentADEF": 6,
+    "currentPEN": 2,
+    "costWee": 155,
+    "costGiant": 305,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

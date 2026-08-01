@@ -1,0 +1,32 @@
+{
+  "_id": "CFOEbYzvuva6UC7j",
+  "_key": "!items!CFOEbYzvuva6UC7j",
+  "name": "Padded Leather Tunic",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 105,
+      "silver": 0
+    },
+    "ap": "chest",
+    "aDEF": 3,
+    "CAP": 20,
+    "PEN": 0,
+    "currentADEF": 3,
+    "currentPEN": 0,
+    "costWee": 75,
+    "costGiant": 150,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

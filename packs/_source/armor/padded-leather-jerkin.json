@@ -1,0 +1,32 @@
+{
+  "_id": "wZcbWrL4Pcdp5IeU",
+  "_key": "!items!wZcbWrL4Pcdp5IeU",
+  "name": "Padded Leather Jerkin",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 90,
+      "silver": 0
+    },
+    "ap": "chest",
+    "aDEF": 2,
+    "CAP": 20,
+    "PEN": 0,
+    "currentADEF": 2,
+    "currentPEN": 0,
+    "costWee": 65,
+    "costGiant": 125,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

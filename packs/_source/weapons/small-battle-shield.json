@@ -1,0 +1,36 @@
+{
+  "_id": "wj42BBwH5vNjyKHe",
+  "_key": "!items!wj42BBwH5vNjyKHe",
+  "name": "Small Battle Shield",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 60,
+      "silver": 0
+    },
+    "weaponSkill": "lightArms",
+    "damage": "1d6",
+    "damageWee": "1d4",
+    "damageGiant": "1d8",
+    "costWee": 40,
+    "costGiant": 100,
+    "range": "Melee",
+    "properties": "",
+    "equipped": false,
+    "isShield": true,
+    "defendBonus": 3,
+    "defendBonusWee": 2,
+    "defendBonusGiant": 4
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

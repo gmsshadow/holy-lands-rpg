@@ -1,0 +1,32 @@
+{
+  "_id": "BSvSWpyK28IOttjy",
+  "_key": "!items!BSvSWpyK28IOttjy",
+  "name": "Chainmail Hauberk",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 200,
+      "silver": 0
+    },
+    "ap": "chest",
+    "aDEF": 6,
+    "CAP": 30,
+    "PEN": 3,
+    "currentADEF": 6,
+    "currentPEN": 3,
+    "costWee": 140,
+    "costGiant": 285,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

@@ -1,0 +1,32 @@
+{
+  "_id": "IJUG9q3sSaNvZlXe",
+  "_key": "!items!IJUG9q3sSaNvZlXe",
+  "name": "Bear Hide Boots",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 50,
+      "silver": 0
+    },
+    "ap": "feet",
+    "aDEF": 1,
+    "CAP": 10,
+    "PEN": 0,
+    "currentADEF": 1,
+    "currentPEN": 0,
+    "costWee": 35,
+    "costGiant": 70,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

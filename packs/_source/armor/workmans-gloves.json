@@ -1,0 +1,32 @@
+{
+  "_id": "CNigq1rlIXX137LH",
+  "_key": "!items!CNigq1rlIXX137LH",
+  "name": "Workmans Gloves",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 25,
+      "silver": 0
+    },
+    "ap": "arms",
+    "aDEF": 0,
+    "CAP": 20,
+    "PEN": 0,
+    "currentADEF": 0,
+    "currentPEN": 0,
+    "costWee": 20,
+    "costGiant": 35,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

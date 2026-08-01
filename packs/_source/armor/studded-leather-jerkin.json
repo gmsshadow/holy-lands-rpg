@@ -1,0 +1,32 @@
+{
+  "_id": "xT0yFjv2gMja8aqC",
+  "_key": "!items!xT0yFjv2gMja8aqC",
+  "name": "Studded Leather Jerkin",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 160,
+      "silver": 0
+    },
+    "ap": "chest",
+    "aDEF": 4,
+    "CAP": 20,
+    "PEN": 0,
+    "currentADEF": 4,
+    "currentPEN": 0,
+    "costWee": 110,
+    "costGiant": 220,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

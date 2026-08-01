@@ -1,0 +1,32 @@
+{
+  "_id": "bYjcANgWUY0R9KgM",
+  "_key": "!items!bYjcANgWUY0R9KgM",
+  "name": "Studded Leather Helm",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 95,
+      "silver": 0
+    },
+    "ap": "head",
+    "aDEF": 2,
+    "CAP": 20,
+    "PEN": 2,
+    "currentADEF": 2,
+    "currentPEN": 2,
+    "costWee": 70,
+    "costGiant": 135,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

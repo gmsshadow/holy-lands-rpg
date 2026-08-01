@@ -1,0 +1,32 @@
+{
+  "_id": "dedh0TZLUWpNUSUE",
+  "_key": "!items!dedh0TZLUWpNUSUE",
+  "name": "Plate Breastplate",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 235,
+      "silver": 0
+    },
+    "ap": "chest",
+    "aDEF": 7,
+    "CAP": 30,
+    "PEN": 1,
+    "currentADEF": 7,
+    "currentPEN": 1,
+    "costWee": 165,
+    "costGiant": 335,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

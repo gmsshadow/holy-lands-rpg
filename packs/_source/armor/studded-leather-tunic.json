@@ -1,0 +1,32 @@
+{
+  "_id": "kgZNPIEbp7DgMvWL",
+  "_key": "!items!kgZNPIEbp7DgMvWL",
+  "name": "Studded Leather Tunic",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 190,
+      "silver": 0
+    },
+    "ap": "chest",
+    "aDEF": 5,
+    "CAP": 20,
+    "PEN": 0,
+    "currentADEF": 5,
+    "currentPEN": 0,
+    "costWee": 135,
+    "costGiant": 270,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

@@ -1,0 +1,32 @@
+{
+  "_id": "CMczHnE7tpVzZfXH",
+  "_key": "!items!CMczHnE7tpVzZfXH",
+  "name": "Wool Robe (heavy)",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 150,
+      "silver": 0
+    },
+    "ap": "chest",
+    "aDEF": 4,
+    "CAP": 10,
+    "PEN": 0,
+    "currentADEF": 4,
+    "currentPEN": 0,
+    "costWee": 105,
+    "costGiant": 210,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

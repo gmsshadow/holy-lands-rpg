@@ -1,0 +1,32 @@
+{
+  "_id": "DIjZLBKSFAAg7Geu",
+  "_key": "!items!DIjZLBKSFAAg7Geu",
+  "name": "Cloak",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 30,
+      "silver": 0
+    },
+    "ap": "back",
+    "aDEF": 0,
+    "CAP": 10,
+    "PEN": 0,
+    "currentADEF": 0,
+    "currentPEN": 0,
+    "costWee": 25,
+    "costGiant": 40,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

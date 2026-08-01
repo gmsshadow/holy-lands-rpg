@@ -1,0 +1,32 @@
+{
+  "_id": "kSMlpjqQs1p170sa",
+  "_key": "!items!kSMlpjqQs1p170sa",
+  "name": "Heavy Robe with Vestments",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 210,
+      "silver": 0
+    },
+    "ap": "chest",
+    "aDEF": 5,
+    "CAP": 10,
+    "PEN": 0,
+    "currentADEF": 5,
+    "currentPEN": 0,
+    "costWee": 150,
+    "costGiant": 300,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

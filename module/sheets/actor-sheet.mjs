@@ -51,7 +51,9 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       addSkill: HolyLandsActorSheet.#onAddSkill,
       applyAttrBonus: HolyLandsActorSheet.#onApplyAttrBonus,
       addMiracle: HolyLandsActorSheet.#onAddMiracle,
-      grantClericMiracles: HolyLandsActorSheet.#onGrantClericMiracles
+      grantClericMiracles: HolyLandsActorSheet.#onGrantClericMiracles,
+      grantEquipment: HolyLandsActorSheet.#onGrantEquipment,
+      unlockEquipment: HolyLandsActorSheet.#onUnlockEquipment
     }
   };
 
@@ -151,6 +153,8 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     context.saveBonusChosen = !!this.actor.system.creation?.saveBonusChosen;
     context.startingRolled = !!this.actor.system.creation?.startingRolled;
     context.giftsGranted = !!this.actor.system.creation?.giftsGranted;
+    context.equipmentGranted = !!this.actor.system.creation?.equipmentGranted;
+    context.hasStartingKit = !!this.actor.classItem?.system.startingKit?.length;
     context.attrBonuses = this.actor.system.attrBonusValidation;
     context.miracleClass = this.actor.miracleClass;
     if (context.miracleClass) {
@@ -376,6 +380,56 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     });
     if (!chosen || chosen === "cancel") return;
     return this.actor.addMiracleFromCompendium(chosen);
+  }
+
+  static async #onGrantEquipment(event, target) {
+    const cls = this.actor.classItem;
+    if (!cls) { ui.notifications.warn("Assign a Class first."); return; }
+    const kit = cls.system.startingKit ?? [];
+
+    // Build a choice form for any 'or' entries.
+    const optionEntries = kit.map((e, i) => ({ e, i })).filter(x => x.e.options?.length);
+    let choices = {};
+    if (optionEntries.length) {
+      const rows = optionEntries.map(({ e, i }) => {
+        const opts = e.options.map(o => `<option value="${foundry.utils.escapeHTML(o)}">${foundry.utils.escapeHTML(o)}</option>`).join("");
+        return `<div class="form-group"><label>Choose:</label><select name="opt_${i}">${opts}</select></div>`;
+      }).join("");
+      const result = await DialogV2.wait({
+        window: { title: `${cls.name} - Starting Equipment Choices` },
+        content: `<p>This class offers some equipment choices:</p>${rows}`,
+        buttons: [
+          { action: "ok", label: "Grant Equipment", default: true,
+            callback: (event, button) => {
+              const out = {};
+              for (const { i } of optionEntries) out[i] = button.form.elements[`opt_${i}`].value;
+              return out;
+            } },
+          { action: "cancel", label: "Cancel" }
+        ],
+        rejectClose: false
+      });
+      if (!result || result === "cancel") return;
+      choices = result;
+    } else {
+      const proceed = await DialogV2.confirm({
+        window: { title: "Step 9: Starting Equipment" },
+        content: `<p>Grant <strong>${cls.name}</strong>'s starting weapons, armor, and equipment to <strong>${this.actor.name}</strong>? (Dice quantities are rolled; then locks.)</p>`,
+        rejectClose: false
+      });
+      if (!proceed) return;
+    }
+    return this.actor.grantStartingEquipment(choices);
+  }
+
+  static async #onUnlockEquipment(event, target) {
+    const proceed = await DialogV2.confirm({
+      window: { title: "Unlock Starting Equipment" },
+      content: `<p>Rac override: unlock the Step 9 equipment grant for <strong>${this.actor.name}</strong>? (Does not remove items already granted.)</p>`,
+      rejectClose: false
+    });
+    if (!proceed) return;
+    return this.actor.unlockStartingEquipment();
   }
 
   static async #onGrantClericMiracles(event, target) {

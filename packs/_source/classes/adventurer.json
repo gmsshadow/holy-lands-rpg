@@ -21,11 +21,130 @@
     ],
     "blessingsType": "",
     "grantedGifts": "Choose skills freely with a PF of +2 (see p.65)",
-    "startingEquipment": "See class description (Genesis Ch7)",
+    "startingEquipment": "Auto-grant available (Step 9). Verify against Genesis Ch7.",
     "primaryAttribute": "",
     "primaryMin": 0,
     "secondaryAttribute": "",
-    "secondaryMin": 0
+    "secondaryMin": 0,
+    "startingKit": [
+      {
+        "name": "Dagger",
+        "qty": 1,
+        "roll": "",
+        "options": [],
+        "compendium": "weapons"
+      },
+      {
+        "name": "Club",
+        "qty": 1,
+        "roll": "",
+        "options": [
+          "Club",
+          "Staff"
+        ],
+        "compendium": "weapons"
+      },
+      {
+        "name": "Rope (/10 Ft.)",
+        "qty": 1,
+        "roll": "1d4+1",
+        "options": [],
+        "compendium": "equipment"
+      },
+      {
+        "name": "Candle Lantern (With Large Candle)",
+        "qty": 1,
+        "roll": "",
+        "options": [],
+        "compendium": "equipment"
+      },
+      {
+        "name": "Torch",
+        "qty": 1,
+        "roll": "",
+        "options": [],
+        "compendium": "equipment"
+      },
+      {
+        "name": "Flint & Steel",
+        "qty": 1,
+        "roll": "",
+        "options": [],
+        "compendium": "equipment"
+      },
+      {
+        "name": "Food Rations, Preserved (3)",
+        "qty": 1,
+        "roll": "2d4",
+        "options": [],
+        "compendium": "equipment"
+      },
+      {
+        "name": "Sheath For A Sword",
+        "qty": 1,
+        "roll": "",
+        "options": [],
+        "compendium": "equipment"
+      },
+      {
+        "name": "Waterskin, Small",
+        "qty": 1,
+        "roll": "",
+        "options": [],
+        "compendium": "equipment"
+      },
+      {
+        "name": "Sleeping Blanket, Light",
+        "qty": 1,
+        "roll": "",
+        "options": [],
+        "compendium": "equipment"
+      },
+      {
+        "name": "Pack, Small (Leather)",
+        "qty": 1,
+        "roll": "",
+        "options": [],
+        "compendium": "equipment"
+      },
+      {
+        "name": "Cloak",
+        "qty": 1,
+        "roll": "",
+        "options": [
+          "Cape",
+          "Cloak"
+        ],
+        "compendium": "armor"
+      },
+      {
+        "name": "Jerkin (cloth)",
+        "qty": 1,
+        "roll": "",
+        "options": [
+          "Jerkin (cloth)",
+          "Cloth Tunic"
+        ],
+        "compendium": "armor"
+      },
+      {
+        "name": "Breeches (cloth)",
+        "qty": 1,
+        "roll": "",
+        "options": [],
+        "compendium": "armor"
+      },
+      {
+        "name": "Leather Boots",
+        "qty": 1,
+        "roll": "",
+        "options": [
+          "Shoes/Sandals",
+          "Leather Boots"
+        ],
+        "compendium": "armor"
+      }
+    ]
   },
   "effects": [],
   "folder": null,

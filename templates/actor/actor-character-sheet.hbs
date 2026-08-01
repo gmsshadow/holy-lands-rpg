@@ -365,6 +365,20 @@
   </div>
 
   <div class="tab equipment {{tabs.equipment.cssClass}}" data-group="primary" data-tab="equipment">
+    {{#if hasStartingKit}}
+    {{#unless equipmentGranted}}
+    <div class="step6-banner">
+      <span>Step 9: grant this class's starting weapons, armor &amp; equipment?</span>
+      <button type="button" data-action="grantEquipment" title="Add the class's starting kit from the compendia (rolls dice quantities, then locks)">
+        <i class="fas fa-shield"></i> Grant Starting Equipment
+      </button>
+    </div>
+    {{else}}
+    {{#if isGM}}
+    <p class="hint"><a data-action="unlockEquipment"><i class="fas fa-lock-open"></i> unlock starting-equipment grant</a></p>
+    {{/if}}
+    {{/unless}}
+    {{/if}}
     <h3>Currency</h3>
     <div class="currency">
       <div class="currency-item">

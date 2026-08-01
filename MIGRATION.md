@@ -558,3 +558,22 @@ These are deliberate changes, flagged for review:
 - All three gear categories (Weapons, Armor, Equipment) plus Skills,
   Miracles, and Classes now ship as compendia - the data foundation for
   Step 9 starting-equipment auto-grant.
+
+## v2.18.0 — Step 9: starting equipment auto-grant (creation complete)
+
+- **ClassData** gains a structured `startingKit` (name, qty, dice roll for
+  quantity, 'or' options, and target compendium). All 13 classes populated
+  from Ch7 with their common gear plus per-class weapons/armor.
+- **Grant Starting Equipment** button on the Equipment tab (when a class
+  with a kit is assigned and equipment isn't yet granted). It resolves each
+  kit entry against the Weapons/Armor/Equipment compendia, rolls dice
+  quantities (e.g. (1d4+1) rope, 2d4 rations), and for 'or' entries prompts
+  the player to choose (Mace or Warhammer, etc). Locks after granting
+  (creation.equipmentGranted); GM unlock link provided. Unmatched names are
+  reported in chat rather than failing silently.
+- Verified: all 13 classes' kits - and every 'or' option - resolve against
+  the current compendia.
+- This completes the Chapter 6 creation walkthrough end to end: Stature,
+  Attributes (+2A rerolls), Abilities, Save, Details/Sins/Phobias, Skills
+  (Step 6 grant), Combat budgets (Steps 7-8), Life/Faith, Attribute Bonuses
+  (Step 10), Miracles, and now Starting Equipment (Step 9).

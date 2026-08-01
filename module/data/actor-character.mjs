@@ -92,7 +92,8 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
         giftsGranted: new fields.BooleanField({ required: true, initial: false }),
         // How many Attribute Bonuses (Step 10) have been applied per attribute.
         attrBonusApplied: new fields.ObjectField({ required: true, initial: {} }),
-        miraclesSelected: new fields.BooleanField({ required: true, initial: false })
+        miraclesSelected: new fields.BooleanField({ required: true, initial: false }),
+        equipmentGranted: new fields.BooleanField({ required: true, initial: false })
       })
     };
   }

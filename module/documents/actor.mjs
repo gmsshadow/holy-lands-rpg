@@ -659,6 +659,97 @@ export class HolyLandsActor extends Actor {
     });
   }
 
+  /**
+   * Step 9 (p.59): grant the class's starting kit as items, resolving each
+   * entry against the compendia. Handles fixed items, dice-rolled
+   * quantities, and 'or' options (resolved by the choices map). Skips
+   * silently if already granted.
+   * @param {object} choices  Map of entry index -> chosen option name (for
+   *                          entries with options); absent = first option.
+   */
+  async grantStartingEquipment(choices = {}) {
+    if (this.type !== "character") return;
+    const cls = this.classItem;
+    if (!cls) { ui.notifications.warn("Assign a Class first."); return; }
+    if (this.system.creation?.equipmentGranted) {
+      ui.notifications.warn("Starting equipment has already been granted.");
+      return;
+    }
+    const kit = cls.system.startingKit ?? [];
+    if (!kit.length) { ui.notifications.warn(`${cls.name} has no starting kit defined.`); return; }
+
+    const packMap = {
+      weapons: game.packs.get("holy-lands-rpg.weapons"),
+      armor: game.packs.get("holy-lands-rpg.armor"),
+      equipment: game.packs.get("holy-lands-rpg.equipment")
+    };
+    const docCache = {};
+    const getDocs = async pk => {
+      if (!pk) return [];
+      if (!docCache[pk]) docCache[pk] = await packMap[pk]?.getDocuments() ?? [];
+      return docCache[pk];
+    };
+
+    const toCreate = [];
+    const rolls = [];
+    const lines = [];
+    const unmatched = [];
+
+    for (let i = 0; i < kit.length; i++) {
+      const entry = kit[i];
+      // Resolve the chosen name (options -> player choice or first option).
+      let name = entry.name;
+      if (entry.options?.length) {
+        name = choices[i] || entry.options[0];
+      }
+
+      // Which packs to search.
+      const packsToSearch = entry.compendium ? [entry.compendium] : ["weapons", "armor", "equipment"];
+      let match = null;
+      for (const pk of packsToSearch) {
+        const docs = await getDocs(pk);
+        match = docs.find(d => d.name.toLowerCase() === name.toLowerCase())
+          || docs.find(d => d.name.toLowerCase().includes(name.toLowerCase()));
+        if (match) break;
+      }
+      if (!match) { unmatched.push(name); continue; }
+
+      // Quantity: rolled or fixed.
+      let qty = entry.qty || 1;
+      if (entry.roll) {
+        const r = new Roll(entry.roll);
+        await r.evaluate();
+        qty = Math.max(1, r.total);
+        rolls.push(r);
+      }
+
+      const data = match.toObject();
+      delete data._id;
+      data.system = data.system || {};
+      data.system.quantity = qty;
+      toCreate.push(data);
+      lines.push(`${qty > 1 ? qty + "x " : ""}${match.name}${entry.roll ? ` (${entry.roll})` : ""}`);
+    }
+
+    if (toCreate.length) await this.createEmbeddedDocuments("Item", toCreate);
+    await this.update({ "system.creation.equipmentGranted": true });
+
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} - Step 9: Starting Equipment (${cls.name})</strong><br>`
+        + lines.join("<br>")
+        + (unmatched.length ? `<br><em>Not found in compendia (add manually): ${unmatched.join(", ")}</em>` : ""),
+      rolls
+    });
+  }
+
+  /** Rac/GM correction: unlock the Step 9 equipment grant. */
+  async unlockStartingEquipment() {
+    if (!game.user.isGM) { ui.notifications.warn("Only the Rac (GM) can unlock this."); return; }
+    await this.update({ "system.creation.equipmentGranted": false });
+    ui.notifications.info(`${this.name}: starting equipment grant unlocked.`);
+  }
+
   /** Mark miracle selection complete. */
   async markMiraclesSelected() {
     await this.update({ "system.creation.miraclesSelected": true });

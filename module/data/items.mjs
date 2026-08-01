@@ -163,7 +163,22 @@ export class ClassData extends foundry.abstract.TypeDataModel {
 
       blessingsType: new fields.StringField({ required: true, initial: "" }),
       grantedGifts: new fields.StringField({ required: true, initial: "" }),
-      startingEquipment: new fields.StringField({ required: true, initial: "" })
+      startingEquipment: new fields.StringField({ required: true, initial: "" }),
+
+      // Structured starting kit for Step 9 auto-grant. Each entry:
+      //   { name, qty, roll, options[], compendium }
+      // - name: display/base name; matched against the compendium
+      // - qty: fixed quantity (default 1)
+      // - roll: a dice formula for quantity (e.g. "2d4"), overrides qty
+      // - options: alternative item names the player chooses between ("or")
+      // - compendium: which pack to search (weapons/armor/equipment); blank = any
+      startingKit: new fields.ArrayField(new fields.SchemaField({
+        name: new fields.StringField({ required: true, initial: "" }),
+        qty: new fields.NumberField({ required: true, integer: true, initial: 1 }),
+        roll: new fields.StringField({ required: true, initial: "" }),
+        options: new fields.ArrayField(new fields.StringField()),
+        compendium: new fields.StringField({ required: true, initial: "" })
+      }))
     };
   }
 }

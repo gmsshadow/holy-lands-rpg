@@ -1,0 +1,24 @@
+{
+  "_id": "0VxZgAWGTyaTMKIt",
+  "_key": "!items!0VxZgAWGTyaTMKIt",
+  "name": "Sheets of Parchment (X75)",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 10,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

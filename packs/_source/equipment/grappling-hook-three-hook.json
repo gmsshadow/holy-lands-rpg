@@ -1,0 +1,24 @@
+{
+  "_id": "qp3dSz09MBFg1RPk",
+  "_key": "!items!qp3dSz09MBFg1RPk",
+  "name": "Grappling Hook, Three-Hook",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 17,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

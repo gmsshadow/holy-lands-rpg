@@ -1,0 +1,24 @@
+{
+  "_id": "HXfifsoALpa4amHr",
+  "_key": "!items!HXfifsoALpa4amHr",
+  "name": "Chalk Piece, Green",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 0,
+      "silver": 15
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

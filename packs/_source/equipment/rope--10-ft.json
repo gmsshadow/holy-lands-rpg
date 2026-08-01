@@ -1,0 +1,24 @@
+{
+  "_id": "JTBcAuAiGeGy9m6v",
+  "_key": "!items!JTBcAuAiGeGy9m6v",
+  "name": "Rope (/10 Ft.)",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 3,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

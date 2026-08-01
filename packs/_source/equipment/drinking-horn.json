@@ -1,0 +1,24 @@
+{
+  "_id": "fY3x51tyXDkJpkU4",
+  "_key": "!items!fY3x51tyXDkJpkU4",
+  "name": "Drinking Horn",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 40,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

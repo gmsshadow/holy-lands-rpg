@@ -1,0 +1,24 @@
+{
+  "_id": "V9kF3mcHTe4IOUW1",
+  "_key": "!items!V9kF3mcHTe4IOUW1",
+  "name": "Food Rations, Preserved (3)",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 0,
+      "silver": 10
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

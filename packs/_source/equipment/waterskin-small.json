@@ -1,0 +1,24 @@
+{
+  "_id": "q70Ruyx1xTT3CxhU",
+  "_key": "!items!q70Ruyx1xTT3CxhU",
+  "name": "Waterskin, Small",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 11,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

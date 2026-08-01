@@ -1,0 +1,24 @@
+{
+  "_id": "dcyLiON8zhsqa9D2",
+  "_key": "!items!dcyLiON8zhsqa9D2",
+  "name": "Sheath For A Sword",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 18,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

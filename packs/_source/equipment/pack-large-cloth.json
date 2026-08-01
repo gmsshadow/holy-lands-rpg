@@ -1,0 +1,24 @@
+{
+  "_id": "4jTnU3ETr50NuU9M",
+  "_key": "!items!4jTnU3ETr50NuU9M",
+  "name": "Pack, Large (Cloth)",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 14,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

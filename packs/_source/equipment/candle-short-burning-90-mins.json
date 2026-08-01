@@ -1,0 +1,24 @@
+{
+  "_id": "0Tw4gnKE5WRZFX6a",
+  "_key": "!items!0Tw4gnKE5WRZFX6a",
+  "name": "Candle, Short-Burning (90 Mins.)",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 1,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

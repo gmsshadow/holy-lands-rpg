@@ -1,0 +1,24 @@
+{
+  "_id": "e49TtfQjfSf65vVk",
+  "_key": "!items!e49TtfQjfSf65vVk",
+  "name": "Journal With 100 Parchment Pages",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 16,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

@@ -544,3 +544,17 @@ These are deliberate changes, flagged for review:
   holds 60 entries (6 shields total).
 - The armor item sheet shows the cost brackets. Grouped under the Holy
   Lands RPG compendium folder.
+
+## v2.17.0 — Equipment compendium
+
+- New **Equipment** compendium (packs/equipment): all 74 Chapter 10 items
+  (belts, packs, lanterns, rope, rations, instruments, tools, inks, tents,
+  wound kit, etc.) with their costs - gold or silver as the book lists them
+  (e.g. Lute 103g, Chalk Piece 20s, Preserved Rations 30s). No descriptions.
+- Equipment has a single flat cost (no stature brackets or AP slots), so
+  EquipmentData needed no changes; the existing equipment item sheet already
+  covers quantity, cost, and weight. Grouped under the Holy Lands RPG
+  compendium folder.
+- All three gear categories (Weapons, Armor, Equipment) plus Skills,
+  Miracles, and Classes now ship as compendia - the data foundation for
+  Step 9 starting-equipment auto-grant.

@@ -1,0 +1,24 @@
+{
+  "_id": "oR4qWW3qnWijithp",
+  "_key": "!items!oR4qWW3qnWijithp",
+  "name": "Belt, Leather",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 7,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

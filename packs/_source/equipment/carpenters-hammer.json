@@ -1,0 +1,24 @@
+{
+  "_id": "8jHhU6PhaS5lYdox",
+  "_key": "!items!8jHhU6PhaS5lYdox",
+  "name": "Carpenters Hammer",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 15,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

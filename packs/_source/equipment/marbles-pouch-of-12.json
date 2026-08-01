@@ -1,0 +1,24 @@
+{
+  "_id": "Jl3l7tl2mJNVZmhI",
+  "_key": "!items!Jl3l7tl2mJNVZmhI",
+  "name": "Marbles (Pouch of 12)",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 8,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

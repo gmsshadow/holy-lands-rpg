@@ -1,0 +1,24 @@
+{
+  "_id": "4vV7MU25hheFjQfU",
+  "_key": "!items!4vV7MU25hheFjQfU",
+  "name": "Candle Lantern (With Large Candle)",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 6,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

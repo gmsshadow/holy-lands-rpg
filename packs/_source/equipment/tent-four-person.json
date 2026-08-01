@@ -1,0 +1,24 @@
+{
+  "_id": "QBSIShmmAt3lO9CR",
+  "_key": "!items!QBSIShmmAt3lO9CR",
+  "name": "Tent, Four-Person",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 31,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

@@ -1,0 +1,24 @@
+{
+  "_id": "IG7Hy22XWj0H0ZqL",
+  "_key": "!items!IG7Hy22XWj0H0ZqL",
+  "name": "Vial of Ink (Green)",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 9,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

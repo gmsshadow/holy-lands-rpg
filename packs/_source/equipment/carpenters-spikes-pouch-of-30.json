@@ -1,0 +1,24 @@
+{
+  "_id": "9ScBjUaT2BUCGXau",
+  "_key": "!items!9ScBjUaT2BUCGXau",
+  "name": "Carpenters Spikes (Pouch of 30)",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 11,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

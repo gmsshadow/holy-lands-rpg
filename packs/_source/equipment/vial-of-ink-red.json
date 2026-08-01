@@ -1,0 +1,24 @@
+{
+  "_id": "RYFKsZ4Mvd8D3e4C",
+  "_key": "!items!RYFKsZ4Mvd8D3e4C",
+  "name": "Vial of Ink (Red)",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 9,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

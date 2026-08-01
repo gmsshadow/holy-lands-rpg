@@ -1,0 +1,24 @@
+{
+  "_id": "YwHvZq0hMTsUzGxd",
+  "_key": "!items!YwHvZq0hMTsUzGxd",
+  "name": "Sleeping Blanket, Heavy",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 24,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

@@ -1,0 +1,24 @@
+{
+  "_id": "PLgUwy06nW2ZhWyK",
+  "_key": "!items!PLgUwy06nW2ZhWyK",
+  "name": "Belt, Rope",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 4,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

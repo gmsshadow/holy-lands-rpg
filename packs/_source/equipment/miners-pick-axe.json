@@ -1,0 +1,24 @@
+{
+  "_id": "HGMftiDouBiIHcJa",
+  "_key": "!items!HGMftiDouBiIHcJa",
+  "name": "Miners Pick Axe",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 51,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

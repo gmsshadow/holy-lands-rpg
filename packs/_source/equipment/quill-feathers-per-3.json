@@ -1,0 +1,24 @@
+{
+  "_id": "VQSG6jqHFqJ245M1",
+  "_key": "!items!VQSG6jqHFqJ245M1",
+  "name": "Quill Feathers (Per 3)",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 1,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

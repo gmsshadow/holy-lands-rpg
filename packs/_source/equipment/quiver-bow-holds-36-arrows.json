@@ -1,0 +1,24 @@
+{
+  "_id": "D5qzRWlfza5oD8ch",
+  "_key": "!items!D5qzRWlfza5oD8ch",
+  "name": "Quiver (Bow), Holds 36 Arrows",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 49,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

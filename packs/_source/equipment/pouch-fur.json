@@ -1,0 +1,24 @@
+{
+  "_id": "jB8YjG0LmJMcyp4f",
+  "_key": "!items!jB8YjG0LmJMcyp4f",
+  "name": "Pouch, Fur",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 8,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

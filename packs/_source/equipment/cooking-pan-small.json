@@ -1,0 +1,24 @@
+{
+  "_id": "3wGdpjl5YGwoXsgg",
+  "_key": "!items!3wGdpjl5YGwoXsgg",
+  "name": "Cooking Pan, Small",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 12,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

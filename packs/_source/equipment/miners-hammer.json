@@ -1,0 +1,24 @@
+{
+  "_id": "FGi7931Z8JFrhYbi",
+  "_key": "!items!FGi7931Z8JFrhYbi",
+  "name": "Miners Hammer",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 41,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

@@ -1,0 +1,24 @@
+{
+  "_id": "LsMduxGbTxWjfR2T",
+  "_key": "!items!LsMduxGbTxWjfR2T",
+  "name": "Rope Ladder (/5 Ft.)",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 8,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

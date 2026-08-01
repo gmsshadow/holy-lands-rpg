@@ -1,0 +1,24 @@
+{
+  "_id": "0TY3Ar3hTEJNJlzh",
+  "_key": "!items!0TY3Ar3hTEJNJlzh",
+  "name": "Wound Kit",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 29,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

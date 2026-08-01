@@ -1,0 +1,24 @@
+{
+  "_id": "Op4bYqza2QhBnenk",
+  "_key": "!items!Op4bYqza2QhBnenk",
+  "name": "Vial of Ink (Blue)",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 9,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

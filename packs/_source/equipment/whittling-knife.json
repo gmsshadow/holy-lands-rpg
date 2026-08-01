@@ -1,0 +1,24 @@
+{
+  "_id": "6Vgx1LCyHmj5g2s9",
+  "_key": "!items!6Vgx1LCyHmj5g2s9",
+  "name": "Whittling Knife",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 10,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

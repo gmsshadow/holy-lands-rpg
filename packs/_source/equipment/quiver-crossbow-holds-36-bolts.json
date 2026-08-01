@@ -1,0 +1,24 @@
+{
+  "_id": "WfX5GG9JUNY3hniu",
+  "_key": "!items!WfX5GG9JUNY3hniu",
+  "name": "Quiver (Crossbow), Holds 36 Bolts",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 26,
+      "silver": 0
+    },
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

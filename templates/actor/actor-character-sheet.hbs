@@ -526,6 +526,11 @@
       {{#if system.blessingsValidation.blessingsType}}
       <span class="hint">{{system.blessingsValidation.blessingsType}}</span>
       {{/if}}
+      {{#if system.blessingsValidation.remaining}}
+      <button type="button" data-action="rollBlessings" title="Roll new Blessings on the class table (p.61)">
+        <i class="fas fa-dice"></i> Roll {{system.blessingsValidation.remaining}}
+      </button>
+      {{/if}}
     </h3>
     <ol class="items-list">
       <li class="item flexrow item-header">

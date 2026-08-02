@@ -18,7 +18,7 @@
       "dwarfolk",
       "giantFolk"
     ],
-    "blessingsType": "Blessings of Duty",
+    "blessingsType": "Blessings of Fortune",
     "grantedGifts": "Combat Abilities\nCS Ground Fight\nCS Tackling\nWeaponry\nWS Hand to Hand\nWS Heavy Arms\nWS Light Arms",
     "startingEquipment": "Auto-grant available (Step 9). Verify against Genesis Ch7.",
     "primaryAttribute": "str",

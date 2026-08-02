@@ -5,6 +5,8 @@
  * class is responsible for rolls, the attack/defense pipeline and AtR
  * management only.
  */
+import { CLASS_BLESSING_TABLE, blessingFromRoll } from "../data/blessing-tables.mjs";
+
 export class HolyLandsActor extends Actor {
 
   /** Whether the optional Critical Rolls rule is enabled (world setting). */
@@ -748,6 +750,71 @@ export class HolyLandsActor extends Actor {
     if (!game.user.isGM) { ui.notifications.warn("Only the Rac (GM) can unlock this."); return; }
     await this.update({ "system.creation.equipmentGranted": false });
     ui.notifications.info(`${this.name}: starting equipment grant unlocked.`);
+  }
+
+  /** The blessing table key (fortune/duty/courage) for this character. */
+  get blessingTableKey() {
+    const key = this.classItem?.system.key ?? this.system.class;
+    return CLASS_BLESSING_TABLE[key] ?? null;
+  }
+
+  /**
+   * Roll new Blessings on the class's table (Genesis p.60-61). Rolls d%
+   * (0-99) for each Blessing the character is entitled to but doesn't yet
+   * have, rerolling duplicates and any the character already holds, then
+   * grants the matching Blessing items from the compendium.
+   * @param {number} [count]  How many to roll; defaults to the outstanding
+   *                          entitlement (entitled - held).
+   */
+  async rollBlessings(count = null) {
+    if (this.type !== "character") return;
+    const tableKey = this.blessingTableKey;
+    if (!tableKey) { ui.notifications.warn("This character's class has no Blessing table."); return; }
+
+    const entitled = Math.floor((this.system.faith?.max || 0) / 5) * 2;
+    const have = this.items.filter(i => i.type === "blessing");
+    const haveNames = new Set(have.map(i => i.name.toLowerCase()));
+    const outstanding = (count !== null) ? count : Math.max(0, entitled - have.length);
+    if (outstanding <= 0) {
+      ui.notifications.info(`${this.name} already has all ${entitled} entitled Blessings.`);
+      return;
+    }
+
+    const pack = game.packs.get("holy-lands-rpg.blessings");
+    const packDocs = pack ? await pack.getDocuments() : [];
+    const findBlessing = name => packDocs.find(d => d.name.toLowerCase() === name.toLowerCase());
+
+    const rolledNames = new Set();
+    const toCreate = [];
+    const rolls = [];
+    const lines = [];
+    let guard = 0;
+    while ((toCreate.length < outstanding) && (guard++ < 500)) {
+      const r = new Roll("1d100");
+      await r.evaluate();
+      const d = r.total - 1; // 0-99
+      const name = blessingFromRoll(tableKey, d);
+      if (!name) continue;
+      const lower = name.toLowerCase();
+      if (haveNames.has(lower) || rolledNames.has(lower)) continue; // unique
+      rolledNames.add(lower);
+      const match = findBlessing(name);
+      if (!match) { lines.push(`d%=${d}: ${name} (not in compendium)`); continue; }
+      const data = match.toObject(); delete data._id;
+      toCreate.push(data);
+      rolls.push(r);
+      lines.push(`d%=${d}: <strong>${name}</strong>`);
+    }
+
+    if (toCreate.length) await this.createEmbeddedDocuments("Item", toCreate);
+
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} - Blessings (${this.classItem?.system.blessingsType ?? tableKey})</strong><br>`
+        + lines.join("<br>")
+        + `<br><em>Now has ${have.length + toCreate.length} of ${entitled} entitled Blessings.</em>`,
+      rolls
+    });
   }
 
   /** Mark miracle selection complete. */

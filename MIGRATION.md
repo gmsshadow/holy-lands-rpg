@@ -604,3 +604,21 @@ These are deliberate changes, flagged for review:
 - Count tracking (v2.19.0) already shows held-of-entitled on the sheet; a
   class-type-filtered picker to grant Blessings can follow, matching the
   miracle-selection pattern.
+
+## v2.21.0 — Blessing auto-roll (p.61 tables)
+
+- **Blessing tables** (Genesis p.61) added as data: the three d% tables -
+  Courage, Duty, Fortune - each covering 0-99, with the class -> table
+  mapping from the Ch7 descriptions (e.g. Adventurer/Scout/Spy/Voyager/
+  Warrior/Jester = Fortune; Bard/Cleric/Saint = Duty; Fighter/Knight/Devil
+  Hunter/Saisier = Courage).
+- Fixed: class items' blessingsType corrected to the real three types
+  (earlier data wrongly listed a non-existent "Wisdom" table).
+- **Roll Blessings** button on the Blessings header (shown when the
+  character is owed Blessings). It rolls d% on the class's table for each
+  outstanding Blessing (entitled minus held), rerolling duplicates and any
+  already held, and grants the matching Blessing items from the compendium.
+  Verified: every one of the ~40 entries per table resolves to a compendium
+  item (after aligning two "Use Magic" -> "Using Magic" names).
+- Works at creation and level up alike - the button count follows the
+  2-per-5-Faith entitlement tracked since v2.19.0.

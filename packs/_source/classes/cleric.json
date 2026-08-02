@@ -20,7 +20,7 @@
       "commonFolk",
       "dwarfolk"
     ],
-    "blessingsType": "Blessings of Wisdom",
+    "blessingsType": "Blessings of Duty",
     "grantedGifts": "Demonology\nMedical\nMiracles: Clerical\nPreach\nRead/Write nLG\nSacred Studies\nWS Light Arms",
     "startingEquipment": "Auto-grant available (Step 9). Verify against Genesis Ch7.",
     "primaryAttribute": "int",

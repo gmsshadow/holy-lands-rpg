@@ -19,7 +19,7 @@
       "commonFolk",
       "giantFolk"
     ],
-    "blessingsType": "",
+    "blessingsType": "Blessings of Courage",
     "grantedGifts": "Blacksmith\nBowsmith\nBuild/Construct\nCombat Abilities\nWeaponry\nWS (choice)",
     "startingEquipment": "Auto-grant available (Step 9). Verify against Genesis Ch7.",
     "primaryAttribute": "",

@@ -53,7 +53,8 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       addMiracle: HolyLandsActorSheet.#onAddMiracle,
       grantClericMiracles: HolyLandsActorSheet.#onGrantClericMiracles,
       grantEquipment: HolyLandsActorSheet.#onGrantEquipment,
-      unlockEquipment: HolyLandsActorSheet.#onUnlockEquipment
+      unlockEquipment: HolyLandsActorSheet.#onUnlockEquipment,
+      rollBlessings: HolyLandsActorSheet.#onRollBlessings
     }
   };
 
@@ -380,6 +381,23 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     });
     if (!chosen || chosen === "cancel") return;
     return this.actor.addMiracleFromCompendium(chosen);
+  }
+
+  static async #onRollBlessings(event, target) {
+    const bv = this.actor.system.blessingsValidation;
+    const outstanding = bv?.remaining ?? 0;
+    if (outstanding <= 0) {
+      ui.notifications.info(`${this.actor.name} already has all ${bv?.entitled ?? 0} entitled Blessings.`);
+      return;
+    }
+    const proceed = await DialogV2.confirm({
+      window: { title: "Roll Blessings" },
+      content: `<p>Roll <strong>${outstanding}</strong> new Blessing${outstanding > 1 ? "s" : ""} for <strong>${this.actor.name}</strong> on the <strong>${this.actor.classItem?.system.blessingsType ?? "class"}</strong> table (p.61)?</p>
+        <p><em>Rolls d% for each, rerolling duplicates and any already held, and grants the matching Blessings.</em></p>`,
+      rejectClose: false
+    });
+    if (!proceed) return;
+    return this.actor.rollBlessings();
   }
 
   static async #onGrantEquipment(event, target) {

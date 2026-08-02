@@ -519,7 +519,14 @@
       {{/each}}
     </ol>
 
-    <h3>Blessings</h3>
+    <h3>Blessings
+      <span class="budget {{#if system.blessingsValidation.over}}over{{/if}}" title="Two Blessings per five max Faith (Ch11)">
+        {{system.blessingsValidation.held}} of {{system.blessingsValidation.entitled}}
+      </span>
+      {{#if system.blessingsValidation.blessingsType}}
+      <span class="hint">{{system.blessingsValidation.blessingsType}}</span>
+      {{/if}}
+    </h3>
     <ol class="items-list">
       <li class="item flexrow item-header">
         <div class="item-name">Name</div>

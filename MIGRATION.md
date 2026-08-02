@@ -577,3 +577,16 @@ These are deliberate changes, flagged for review:
   Attributes (+2A rerolls), Abilities, Save, Details/Sins/Phobias, Skills
   (Step 6 grant), Combat budgets (Steps 7-8), Life/Faith, Attribute Bonuses
   (Step 10), Miracles, and now Starting Equipment (Step 9).
+
+## v2.19.0 — Blessings entitlement count
+
+- The Blessings section header now shows "held of entitled" (two Blessings
+  per five points of maximum Faith, Ch11), turning red if over the limit,
+  with the class's Blessings type shown alongside. Calculated live in
+  derived data, so it updates at creation and as max Faith rises on level up.
+- The Level Up chat card's Blessings reminder is now accurate: it compares
+  the entitlement against Blessings actually held and states how many more
+  may be selected, instead of only naming the target number.
+- Note: this is count tracking only - granting Blessings still needs a
+  Blessings compendium (Ch11) and a picker, planned for the next
+  compendium pass.

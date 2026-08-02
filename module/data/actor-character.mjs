@@ -229,6 +229,24 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
     // Requires embedded items, so it runs in derived prep.
     calculateDefense(this, this.parent);
     this.#prepareCombatValidation();
+    this.#prepareBlessingsCount();
+  }
+
+  /**
+   * Blessings entitlement (Genesis Ch11): a character may have two (2)
+   * Blessings for every five (5) points of maximum Faith. Tracks entitled
+   * vs currently-held so the sheet can show "X of Y" at creation and level.
+   */
+  #prepareBlessingsCount() {
+    const entitled = Math.floor((this.faith?.max || 0) / 5) * 2;
+    const held = this.parent.items.filter(i => i.type === "blessing").length;
+    this.blessingsValidation = {
+      entitled,
+      held,
+      remaining: Math.max(0, entitled - held),
+      over: held > entitled,
+      blessingsType: this.parent.classItem?.system.blessingsType || ""
+    };
   }
 
   /** Embedded skill items grouped by section (gift/talent/craft). */

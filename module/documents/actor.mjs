@@ -862,7 +862,11 @@ export class HolyLandsActor extends Actor {
       "system.faith.value": (this.system.faith.value || 0) + faithRoll.total
     });
 
-    const expectedBlessings = Math.floor(newFaithMax / 5) * 2;
+    const entitledBlessings = Math.floor(newFaithMax / 5) * 2;
+    const heldBlessings = this.items.filter(i => i.type === "blessing").length;
+    const blessingNote = (heldBlessings < entitledBlessings)
+      ? `Blessings: entitled to ${entitledBlessings} (2 per 5 max Faith), currently have ${heldBlessings} - may select ${entitledBlessings - heldBlessings} more.`
+      : `Blessings: entitled to ${entitledBlessings} (2 per 5 max Faith), currently have ${heldBlessings}.`;
     return ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
       flavor: `<strong>${this.name} reaches Level ${newLevel}!</strong> (${cls.name})<br>`
@@ -870,7 +874,7 @@ export class HolyLandsActor extends Actor {
         + `<em>Also gain: +1 to one Attribute and +1 to one Saving Throw (Rule of Halves applies); `
         + `new Talent at Levels 2-3 / new Craft at Levels 3-7 (start at +1 PF); `
         + `Saints and Clerics select new Miracles. `
-        + `Blessings: should now have ${expectedBlessings} (2 per 5 max Faith).</em>`,
+        + `${blessingNote}</em>`,
       rolls: [lifeRoll, faithRoll]
     });
   }

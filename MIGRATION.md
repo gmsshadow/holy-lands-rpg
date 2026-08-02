@@ -590,3 +590,17 @@ These are deliberate changes, flagged for review:
 - Note: this is count tracking only - granting Blessings still needs a
   Blessings compendium (Ch11) and a picker, planned for the next
   compendium pass.
+
+## v2.20.0 — Blessings compendium
+
+- **BlessingData** gains a `faithCost` field (default 5); the useBlessing
+  action now reads it instead of a hardcoded constant, and the blessing
+  item sheet exposes it.
+- New **Blessings** compendium (packs/blessings): all 125 Blessings from
+  Genesis Ch11, alphabetical, each with a blank description, Faith cost 5,
+  and once-per-day Blessings (the book's asterisked entries) marked in their
+  Duration. No rules text, per the minimal-data approach. Grouped under the
+  Holy Lands RPG compendium folder.
+- Count tracking (v2.19.0) already shows held-of-entitled on the sheet; a
+  class-type-filtered picker to grant Blessings can follow, matching the
+  miracle-selection pattern.

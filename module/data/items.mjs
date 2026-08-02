@@ -101,6 +101,7 @@ export class BlessingData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
       ...baseItemSchema(),
+      faithCost: new fields.NumberField({ required: true, integer: true, initial: 5, min: 0 }),
       duration: new fields.StringField({ required: true, initial: "Permanent" }),
       effect: new fields.StringField({ required: true, initial: "" })
     };

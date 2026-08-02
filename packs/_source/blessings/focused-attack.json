@@ -1,0 +1,26 @@
+{
+  "_id": "9vdcz5cetQ0u1cBm",
+  "_key": "!items!9vdcz5cetQ0u1cBm",
+  "name": "Focused Attack",
+  "type": "blessing",
+  "img": "icons/svg/holy-shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 0,
+      "silver": 0
+    },
+    "duration": "Once per day",
+    "effect": "",
+    "faithCost": 5
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

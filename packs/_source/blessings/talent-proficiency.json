@@ -1,0 +1,26 @@
+{
+  "_id": "8DY2bO8gIyYMROjL",
+  "_key": "!items!8DY2bO8gIyYMROjL",
+  "name": "Talent Proficiency",
+  "type": "blessing",
+  "img": "icons/svg/holy-shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 0,
+      "silver": 0
+    },
+    "duration": "",
+    "effect": "",
+    "faithCost": 5
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

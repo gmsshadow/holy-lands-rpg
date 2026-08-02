@@ -1,0 +1,26 @@
+{
+  "_id": "pHZvMr5n9J6Njwex",
+  "_key": "!items!pHZvMr5n9J6Njwex",
+  "name": "Peak Saving Throw",
+  "type": "blessing",
+  "img": "icons/svg/holy-shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 0,
+      "silver": 0
+    },
+    "duration": "",
+    "effect": "",
+    "faithCost": 5
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

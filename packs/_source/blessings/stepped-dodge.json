@@ -1,0 +1,26 @@
+{
+  "_id": "vT0F9pSd39Io6ymH",
+  "_key": "!items!vT0F9pSd39Io6ymH",
+  "name": "Stepped Dodge",
+  "type": "blessing",
+  "img": "icons/svg/holy-shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 0,
+      "silver": 0
+    },
+    "duration": "",
+    "effect": "",
+    "faithCost": 5
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

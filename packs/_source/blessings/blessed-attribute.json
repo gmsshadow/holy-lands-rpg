@@ -1,0 +1,26 @@
+{
+  "_id": "Z4SNvTPyrSra4OG1",
+  "_key": "!items!Z4SNvTPyrSra4OG1",
+  "name": "Blessed Attribute",
+  "type": "blessing",
+  "img": "icons/svg/holy-shield.svg",
+  "system": {
+    "description": "",
+    "quantity": 1,
+    "weight": 0,
+    "cost": {
+      "gold": 0,
+      "silver": 0
+    },
+    "duration": "Once per day",
+    "effect": "",
+    "faithCost": 5
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

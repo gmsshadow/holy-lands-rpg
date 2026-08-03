@@ -102,7 +102,7 @@ export class BlessingData extends foundry.abstract.TypeDataModel {
     return {
       ...baseItemSchema(),
       faithCost: new fields.NumberField({ required: true, integer: true, initial: 5, min: 0 }),
-      duration: new fields.StringField({ required: true, initial: "Permanent" }),
+      duration: new fields.StringField({ required: true, initial: "One Action" }),
       effect: new fields.StringField({ required: true, initial: "" })
     };
   }
@@ -156,6 +156,12 @@ export class ClassData extends foundry.abstract.TypeDataModel {
       faithCreationDie: new fields.StringField({ required: true, initial: "1d4" }),
       // Per level: add faithPerLevelDie(GE) to max and current Faith
       faithPerLevelDie: new fields.StringField({ required: true, initial: "1d4" }),
+
+      // Step 9 starting coinage (Genesis Ch7): dice x multiplier per class.
+      coinGoldDie: new fields.StringField({ required: true, initial: "3d4" }),
+      coinGoldMult: new fields.NumberField({ required: true, integer: true, initial: 10 }),
+      coinSilverDie: new fields.StringField({ required: true, initial: "1d4" }),
+      coinSilverMult: new fields.NumberField({ required: true, integer: true, initial: 3 }),
 
       // Statures this class may be (Genesis p.53 / Ch7)
       statures: new fields.ArrayField(new fields.StringField(), {

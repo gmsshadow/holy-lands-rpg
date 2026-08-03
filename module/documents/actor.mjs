@@ -376,12 +376,13 @@ export class HolyLandsActor extends Actor {
     const male = (this.system.gender || "male") === "male";
     if (male) weight = Math.round(weight * 1.1);
 
+    // Native Land and Language Group are one paired d20 table (p.57): a
+    // single roll gives a land and its matching language group.
     const landRoll = new Roll("1d20");
     await landRoll.evaluate();
-    const langRoll = new Roll("1d20");
-    await langRoll.evaluate();
-    const land = M.LANDS[landRoll.total - 1];
-    const lang = M.LANGUAGE_GROUPS[langRoll.total - 1];
+    const idx = landRoll.total - 1;
+    const land = M.LANDS[idx];
+    const lang = M.LANGUAGE_GROUPS[idx];
 
     await this.update({
       "system.height": height,
@@ -395,10 +396,9 @@ export class HolyLandsActor extends Actor {
       flavor: `<strong>${this.name} - Step 5 Details</strong><br>`
         + `Height (d12=${heightRoll.total}): <strong>${height}</strong><br>`
         + `Weight (STR ${str}, ${male ? "male +10%" : "female"}): <strong>${weight} lbs</strong><br>`
-        + `Native Land (d20=${landRoll.total}): <strong>${land}</strong><br>`
-        + `Language Group (d20=${langRoll.total}): <strong>${lang}</strong><br>`
-        + `<em>All of these can be edited on the sheet if you'd rather choose.</em>`,
-      rolls: [heightRoll, landRoll, langRoll]
+        + `Native Land &amp; Language (d20=${landRoll.total}): <strong>${land}</strong> - <strong>${lang}</strong><br>`
+        + `<em>All of these can be edited on the sheet if you'd rather choose (you may mix land and language).</em>`,
+      rolls: [heightRoll, landRoll]
     });
   }
 
@@ -734,7 +734,22 @@ export class HolyLandsActor extends Actor {
     }
 
     if (toCreate.length) await this.createEmbeddedDocuments("Item", toCreate);
-    await this.update({ "system.creation.equipmentGranted": true });
+
+    // Starting coinage (Genesis Ch7): roll gold and silver with Grace Effect.
+    const goldRoll = new Roll(this.constructor.graceFormula(cls.system.coinGoldDie || "3d4"));
+    await goldRoll.evaluate();
+    const silverRoll = new Roll(this.constructor.graceFormula(cls.system.coinSilverDie || "1d4"));
+    await silverRoll.evaluate();
+    const gold = goldRoll.total * (cls.system.coinGoldMult || 10);
+    const silver = silverRoll.total * (cls.system.coinSilverMult || 3);
+    rolls.push(goldRoll, silverRoll);
+
+    await this.update({
+      "system.creation.equipmentGranted": true,
+      "system.currency.gold": (this.system.currency?.gold || 0) + gold,
+      "system.currency.silver": (this.system.currency?.silver || 0) + silver
+    });
+    lines.push(`Coinage: <strong>${gold}g</strong> (${cls.system.coinGoldDie} GE x ${cls.system.coinGoldMult}) and <strong>${silver}s</strong> (${cls.system.coinSilverDie} GE x ${cls.system.coinSilverMult})`);
 
     return ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),

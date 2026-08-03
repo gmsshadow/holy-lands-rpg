@@ -622,3 +622,29 @@ These are deliberate changes, flagged for review:
   item (after aligning two "Use Magic" -> "Using Magic" names).
 - Works at creation and level up alike - the button count follows the
   2-per-5-Faith entitlement tracked since v2.19.0.
+
+## v2.22.0 — Playtest fixes
+
+- **Details roll (Step 5):** native land and language are now one paired
+  d20 roll (p.57 table) instead of two separate rolls, so the language
+  group always matches the land. The sheet still lets you edit either, and
+  the chat note reminds you that you may mix them if desired.
+- **Classes - starting coinage:** ClassData gains coinage fields
+  (coinGoldDie/Mult, coinSilverDie/Mult), populated per class from Ch7
+  (gold die varies: Saint 1d4, Saisier 2d4, most 3d4, Bard/Cleric 4d4,
+  Knight 5d4, Voyager 7d4; all x10 gold, plus 1d4x3 silver). The Step 9
+  equipment grant now rolls coinage with the Grace Effect and adds it to the
+  character's currency, reporting it in the chat card.
+- **Adventurer:** requirements text cleared (the class has no attribute
+  requirements) and faith-creation attributes blanked (it gains no Faith
+  bonus from an attribute). Automation was already correct; this removes the
+  misleading text.
+- **Blessings - starting entitlement:** corrected understanding - a
+  character gets two (2) Blessings only if max Faith is 5+, and none at 4 or
+  below (p.60); the running total is still two per five-point threshold on
+  level up (p.62). The count/roll now guards on Faith >= 5 explicitly.
+- **Blessings - duration:** all 125 Blessings changed from blank/"Permanent"
+  to "One Action" (p.60: a Blessing affects the character for one action
+  unless otherwise specified). The 17 once-per-day Blessings read "One
+  Action (once per day)" to keep that usage limit. BlessingData default is
+  now "One Action" too.

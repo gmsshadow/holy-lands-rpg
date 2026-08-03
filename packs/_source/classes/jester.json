@@ -139,7 +139,11 @@
         ],
         "compendium": "armor"
       }
-    ]
+    ],
+    "coinGoldDie": "3d4",
+    "coinGoldMult": 10,
+    "coinSilverDie": "1d4",
+    "coinSilverMult": 3
   },
   "effects": [],
   "folder": null,

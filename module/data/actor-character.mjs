@@ -233,12 +233,16 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
   }
 
   /**
-   * Blessings entitlement (Genesis Ch11): a character may have two (2)
-   * Blessings for every five (5) points of maximum Faith. Tracks entitled
-   * vs currently-held so the sheet can show "X of Y" at creation and level.
+   * Blessings entitlement. At game start (Genesis p.60) a character gains
+   * exactly two (2) Blessings if maximum Faith is five (5) or higher, and
+   * none if it is four (4) or lower. On level up (p.62), two more are gained
+   * each time maximum Faith reaches a new multiple of five - so the running
+   * entitlement is two per five points of max Faith. We show the level-up
+   * entitlement here (which equals 2 at Faith 5-9, matching the start rule).
    */
   #prepareBlessingsCount() {
-    const entitled = Math.floor((this.faith?.max || 0) / 5) * 2;
+    const faithMax = this.faith?.max || 0;
+    const entitled = (faithMax >= 5) ? Math.floor(faithMax / 5) * 2 : 0;
     const held = this.parent.items.filter(i => i.type === "blessing").length;
     this.blessingsValidation = {
       entitled,

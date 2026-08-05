@@ -693,3 +693,20 @@ These are deliberate changes, flagged for review:
 - The combat tracker's turn picker and round-end check now read the ACTIVE
   skill's AtR rather than a sum across all skills, so "who has actions left"
   reflects the character's current weapon.
+
+## v2.26.0 — Weapon-skill switching resolves as a Special (p.51)
+
+- Completes the p.51 "Using two or more Weapon Skills in a single Round"
+  rule on top of the shared-AtR-pool model. The first Weapon Skill a
+  character attacks with in a Round is recorded as their opener; any later
+  attack that Round with a DIFFERENT Weapon Skill is automatically resolved
+  as a Special (using that skill's SPC Bonus), matching the book's example
+  where a Light Arms opener followed by a Kick Attack is rolled as a Special
+  with the remaining AtR.
+- If a switched attack was declared as a Critical, it's demoted to a Special
+  (multiplier reset to 1), since the switch itself must be a Special.
+- The "all previous attacks that Round were successful" condition and the
+  realism check (no sword-then-fist with hands full, etc.) are intentionally
+  left to Rac discretion, as requested.
+- The opener resets at the start of each Round; free counter-attacks are
+  exempt and don't set or trigger the rule.

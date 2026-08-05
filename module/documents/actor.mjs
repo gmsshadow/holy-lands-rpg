@@ -141,6 +141,23 @@ export class HolyLandsActor extends Actor {
     for (const key of ["advNat20", "advNat1", "forfeitAdvantage", "retreating"]) {
       await this.setCombatFlag(key, false);
     }
+    // Forget which Weapon Skill opened the Round (p.51 switch rule).
+    if (this.getFlag("holy-lands-rpg", "roundWeaponSkill") !== undefined) {
+      await this.unsetFlag("holy-lands-rpg", "roundWeaponSkill");
+    }
+  }
+
+  /**
+   * The Weapon Skill this actor first attacked with this Round, or null if
+   * they haven't attacked yet. Used to enforce the p.51 rule that switching
+   * to a different Weapon Skill mid-Round must be rolled as a Special.
+   */
+  get roundWeaponSkill() {
+    return this.getFlag("holy-lands-rpg", "roundWeaponSkill") ?? null;
+  }
+
+  async setRoundWeaponSkill(key) {
+    return this.setFlag("holy-lands-rpg", "roundWeaponSkill", key);
   }
 
   /** Forfeit Advantage: double the next Dodge/Defend Bonus this Round. */
@@ -1132,7 +1149,7 @@ export class HolyLandsActor extends Actor {
    *                                         from all Natural 20/1 riders (Ch5).
    */
   async rollAttack(weapon, targetActor = null, options = {}) {
-    const { mode = "attack", multiplier = 1, modifier = 0, free = false, isCounter = false } = options;
+    let { mode = "attack", multiplier = 1, modifier = 0, free = false, isCounter = false } = options;
 
     const weaponSkill = weapon?.system?.weaponSkill || "lightArms";
     const ws = this.system.weaponSkills?.[weaponSkill];
@@ -1146,19 +1163,36 @@ export class HolyLandsActor extends Actor {
       return;
     }
 
+    // Attacking with a weapon makes that Weapon Skill the active attack type
+    // (so the sheet/tracker AtR follows what you're actually using). Free
+    // counters don't change your chosen stance.
+    if (!free && (this.system.activeWeaponSkill !== weaponSkill)) {
+      await this.setActiveWeaponSkill(weaponSkill);
+    }
+
+    // Page 51 ("Using two or more Weapon Skills"): the first Weapon Skill a
+    // character attacks with in a Round is their opener. Switching to a
+    // DIFFERENT Weapon Skill later that Round must be rolled as a Special.
+    // (The "all previous attacks succeeded" and realism conditions are left
+    // to the Rac.) Free counters are exempt and don't set the opener.
+    if (!free) {
+      const opener = this.roundWeaponSkill;
+      if (opener === null) {
+        await this.setRoundWeaponSkill(weaponSkill);
+      }
+      else if ((opener !== weaponSkill) && (mode !== "special")) {
+        mode = "special";
+        multiplier = 1; // a Special is a single action, not a multiplied Critical
+        ui.notifications.info(`${ws.label} follows a different Weapon Skill this Round - resolved as a Special (p.51).`);
+      }
+    }
+
     // AtR cost: Critical strikes spend AtR equal to their multiplier (Ch5).
     const atrCost = free ? 0 : (mode === "critical" ? Math.max(2, multiplier) : 1);
     const atr = this.getAtR(weaponSkill);
     if (!free && (atr.current < atrCost)) {
       ui.notifications.warn(`Not enough AtR for ${ws.label} (${atrCost} needed, ${atr.current} remaining)`);
       return;
-    }
-
-    // Attacking with a weapon makes that Weapon Skill the active attack type
-    // (so the sheet/tracker AtR follows what you're actually using). Free
-    // counters don't change your chosen stance.
-    if (!free && (this.system.activeWeaponSkill !== weaponSkill)) {
-      await this.setActiveWeaponSkill(weaponSkill);
     }
 
     // Select the attack-action Bonus by mode. The Critical Bonus can never

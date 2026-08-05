@@ -1098,7 +1098,7 @@ export class HolyLandsActor extends Actor {
    *                                         from all Natural 20/1 riders (Ch5).
    */
   async rollAttack(weapon, targetActor = null, options = {}) {
-    const { mode = "attack", multiplier = 1, modifier = 0, free = false } = options;
+    const { mode = "attack", multiplier = 1, modifier = 0, free = false, isCounter = false } = options;
 
     const weaponSkill = weapon?.system?.weaponSkill || "lightArms";
     const ws = this.system.weaponSkills?.[weaponSkill];
@@ -1197,7 +1197,7 @@ export class HolyLandsActor extends Actor {
     });
 
     const attackContext = {
-      attackTotal, isNat20, mode, multiplier, free,
+      attackTotal, isNat20, mode, multiplier, free, isCounter,
       atrCost, weaponSkill
     };
 
@@ -1258,7 +1258,7 @@ export class HolyLandsActor extends Actor {
 
   /** Resolve defense roll and determine hit/miss. */
   async _resolveDefense(weapon, defender, attackContext, defenseType) {
-    const { attackTotal, isNat20: isNat20Attack, free, atrCost, weaponSkill } = attackContext;
+    const { attackTotal, isNat20: isNat20Attack, free, isCounter = false, atrCost, weaponSkill } = attackContext;
 
     // Assemble the defender's Bonus:
     // base -> x2 if Advantage was forfeited -> -3 if Natural 1 Advantage.
@@ -1305,6 +1305,9 @@ export class HolyLandsActor extends Actor {
         flavor: `${defender.name} rolled a <strong>Natural 20 ${defenseType.capitalize()}!</strong> The attack is stopped and ${defender.name} gains a free counter-attack (no AtR).`,
         rolls: [defenseRoll]
       });
+      // A counter does not spawn another counter (Combat Handbook: the
+      // exchange resolves, then the Rac chooses who acts next).
+      if (isCounter) return this.#handBackToRac(defender, this);
       return this._offerCounterAttack(defender, this, { free: true });
     }
 
@@ -1349,8 +1352,25 @@ export class HolyLandsActor extends Actor {
     }
 
     // Successful defense costs nothing - and the defender may return attack
-    // immediately if they have AtR remaining (Ch5, "Return Attack").
-    if (!free) return this._offerCounterAttack(defender, this, { free: false });
+    // immediately if they have AtR remaining (Ch5, "Return Attack"). This is
+    // OPTIONAL - the defender may decline. Crucially it does not loop: a
+    // return/counter attack does not itself grant another return attack;
+    // once it resolves, control passes back to the Rac to choose who acts
+    // next (Combat Handbook, Section 5 & p.49).
+    if (!free && !isCounter) return this._offerCounterAttack(defender, this, { free: false });
+    if (isCounter) return this.#handBackToRac(defender, this);
+  }
+
+  /**
+   * After a return/counter attack resolves, post a short note handing control
+   * back to the Rac - the exchange is over and the Rac decides who goes next
+   * (Holy Lands RPG has no fixed initiative loop).
+   */
+  async #handBackToRac(counterAttacker, originalAttacker) {
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: counterAttacker }),
+      flavor: `<em>The exchange between ${counterAttacker.name} and ${originalAttacker.name} is resolved. The Rac decides who acts next.</em>`
+    });
   }
 
   /**
@@ -1388,9 +1408,15 @@ export class HolyLandsActor extends Actor {
       content: `<p>Make a ${kind} against <strong>${attacker.name}</strong> with <strong>${counterWeapon?.name || "Unarmed"}</strong>${free ? " (no AtR cost, no critical effects)" : ""}?</p>`,
       rejectClose: false
     });
-    if (!proceed) return;
+    if (!proceed) {
+      // Declined - the return attack is optional; hand back to the Rac.
+      return ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: defender }),
+        flavor: `<em>${defender.name} declines the ${kind}. The Rac decides who acts next.</em>`
+      });
+    }
 
-    return defender.rollAttack(counterWeapon, attacker, { free });
+    return defender.rollAttack(counterWeapon, attacker, { free, isCounter: true });
   }
 
   /** Resolve damage and apply armor degradation. */

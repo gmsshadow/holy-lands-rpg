@@ -648,3 +648,29 @@ These are deliberate changes, flagged for review:
   unless otherwise specified). The 17 once-per-day Blessings read "One
   Action (once per day)" to keep that usage limit. BlessingData default is
   now "One Action" too.
+
+## v2.23.0 — System background artwork
+
+- Added the Holy Lands RPG title artwork (castle, cross-shield logo, three
+  robed adventurers) to the system at assets/images/background.jpg.
+- Wired it as the system background via the "background" line in system.json
+  ("assets/images/background.jpg"), so it shows on the world setup / system
+  screen in Foundry.
+
+## v2.24.0 — Rac-chosen turn order & non-looping Return Attack
+
+- Added the official **Combat Handbook** to documentation/ for reference.
+- **Turn order (Combat Handbook, Section 5):** Holy Lands RPG does not use
+  fixed D&D-style initiative. The highest Advantage roll still acts first,
+  but the combat tracker no longer auto-advances through a sorted list.
+  After each turn, the Rac is prompted to choose who acts next - and it may
+  be the same combatant again. The picker lists each combatant's Advantage
+  and remaining AtR; when everyone is out of AtR it rolls into the next
+  Round (there's also an explicit End Round button). Non-GM clients fall
+  back to default behaviour.
+- **Return Attack is optional and does not loop (p.49):** the return/counter
+  attack was already declinable, but a counter could previously grant the
+  original attacker another counter, chaining. Attacks now carry an
+  isCounter flag: a return or free counter-attack resolves once, then hands
+  control back to the Rac with a chat note - no infinite counter loop.
+  Declining a return attack likewise hands back to the Rac.

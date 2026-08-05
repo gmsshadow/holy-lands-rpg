@@ -101,6 +101,8 @@ export class NpcData extends foundry.abstract.TypeDataModel {
         kickAttack: weaponSkillField("Kick Attack", 1)
       }),
 
+      activeWeaponSkill: new fields.StringField({ required: true, initial: "lightArms" }),
+
       saves: new fields.SchemaField(saves),
 
       defense: defenseSchema(),

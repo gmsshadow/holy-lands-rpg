@@ -64,6 +64,11 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
         kickAttack: weaponSkillField("Kick Attack", 1)
       }),
 
+      // The weapon skill the character is currently attacking with. Its AtR
+      // is the one shown and acted on; all pools decrement together on an
+      // action (see spendActionAtR).
+      activeWeaponSkill: new fields.StringField({ required: true, initial: "lightArms" }),
+
       defense: defenseSchema(),
 
       combat: new fields.SchemaField({

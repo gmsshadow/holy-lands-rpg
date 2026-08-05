@@ -99,6 +99,15 @@
   </div>
 
   <h3>Weapon Skills (WS)</h3>
+  <div class="active-ws-bar">
+    <label>Active attack type:</label>
+    <select name="system.activeWeaponSkill">
+      {{#each system.weaponSkills as |ws key|}}
+      <option value="{{key}}" {{#if (eq ../system.activeWeaponSkill key)}}selected{{/if}}>{{ws.label}}</option>
+      {{/each}}
+    </select>
+    <span class="active-atr" title="AtR remaining on the active attack type">AtR {{activeAtR.current}}/{{activeAtR.max}}</span>
+  </div>
   {{#each system.weaponSkills as |ws key|}}
   <div class="weapon-skill">
     <h4>{{ws.label}}</h4>

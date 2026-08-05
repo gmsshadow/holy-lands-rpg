@@ -65,15 +65,49 @@ export class HolyLandsActor extends Actor {
     return true;
   }
 
-  /** When taking damage, consume 1 AtR from the first available weapon skill. */
-  async _consumeAtRFromDamage() {
-    const weaponSkills = this.system.weaponSkills || {};
+  /**
+   * Spend AtR for an action. In Holy Lands RPG a character's AtR is a single
+   * pool of "actions this Round" shared across all Weapon Skills - switching
+   * weapons must not grant extra attacks. So an action decrements EVERY
+   * Weapon Skill's AtR by the action's cost (floored at 0), not just the one
+   * used. A Critical costs more (equal to its multiplier), and because it
+   * represents pouring the whole Round's focus into one blow, that full cost
+   * is taken from all pools too (Combat Handbook, Section 7).
+   * @param {number} cost  AtR cost of the action (1 for a normal attack, N
+   *                       for an xN Critical).
+   */
+  async spendActionAtR(cost = 1) {
+    const weaponSkills = this.system.weaponSkills;
+    if (!weaponSkills) return;
+    const update = {};
     for (const [key, skill] of Object.entries(weaponSkills)) {
-      if (skill.atRCurrent > 0) {
-        await this.consumeAtR(key, 1);
-        break;
-      }
+      if (skill.atRCurrent === undefined) continue;
+      update[`system.weaponSkills.${key}.atRCurrent`] = Math.max(0, (skill.atRCurrent || 0) - cost);
     }
+    if (Object.keys(update).length) await this.update(update);
+  }
+
+  /** When taking damage, one action-beat is lost: every AtR pool drops by 1. */
+  async _consumeAtRFromDamage() {
+    return this.spendActionAtR(1);
+  }
+
+  /** Total AtR remaining on the ACTIVE weapon skill (what the sheet shows). */
+  get activeAtR() {
+    const key = this.system.activeWeaponSkill || "lightArms";
+    const skill = this.system.weaponSkills?.[key];
+    return {
+      key,
+      label: skill?.label || key,
+      current: skill?.atRCurrent ?? 0,
+      max: skill?.atRMax ?? 0
+    };
+  }
+
+  /** Set the active weapon skill (the attack type currently in use). */
+  async setActiveWeaponSkill(key) {
+    if (!this.system.weaponSkills?.[key]) return;
+    await this.update({ "system.activeWeaponSkill": key });
   }
 
   /* -------------------------------------------- */
@@ -1120,6 +1154,13 @@ export class HolyLandsActor extends Actor {
       return;
     }
 
+    // Attacking with a weapon makes that Weapon Skill the active attack type
+    // (so the sheet/tracker AtR follows what you're actually using). Free
+    // counters don't change your chosen stance.
+    if (!free && (this.system.activeWeaponSkill !== weaponSkill)) {
+      await this.setActiveWeaponSkill(weaponSkill);
+    }
+
     // Select the attack-action Bonus by mode. The Critical Bonus can never
     // exceed the Attack Bonus of the same Weapon Skill (Ch5).
     const attackBonus = ws.attackBonus || 0;
@@ -1160,7 +1201,7 @@ export class HolyLandsActor extends Actor {
     if (isNat1) {
       if (!free) {
         await this.update({ "system.combat.halfDefenseFlag": true });
-        await this.consumeAtR(weaponSkill, atrCost);
+        await this.spendActionAtR(atrCost);
       }
       return ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: this }),
@@ -1171,7 +1212,7 @@ export class HolyLandsActor extends Actor {
 
     // No target: just show the attack roll.
     if (!targetActor) {
-      await this.consumeAtR(weaponSkill, atrCost);
+      await this.spendActionAtR(atrCost);
       return ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: this }),
         flavor: `${weaponName}${modeLabel} Attack: ${attackTotal}${bonusNote}${isNat20 ? " (Natural 20!)" : ""}`,
@@ -1182,7 +1223,7 @@ export class HolyLandsActor extends Actor {
     // GATE A: the attack must exceed the defender's tDEF.
     const defenderTDEF = targetActor.system?.defense?.tDEF || 4;
     if (!isNat20 && (attackTotal <= defenderTDEF)) {
-      await this.consumeAtR(weaponSkill, atrCost);
+      await this.spendActionAtR(atrCost);
       return ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: this }),
         flavor: `${weaponName}${modeLabel} Attack: ${attackTotal}${bonusNote} vs tDEF ${defenderTDEF} - <strong>Attack Failed (armor holds)</strong>`,
@@ -1209,7 +1250,7 @@ export class HolyLandsActor extends Actor {
     else if (targetActor.isOwner) {
       defenseChoice = await this._promptDefenseChoice(targetActor);
       if (!defenseChoice) {
-        await this.consumeAtR(weaponSkill, atrCost);
+        await this.spendActionAtR(atrCost);
         return;
       }
     }
@@ -1299,7 +1340,7 @@ export class HolyLandsActor extends Actor {
     // Natural 20 Defense: always successful + a free counter-attack that
     // costs no AtR and is exempt from further Benefit/Penalty riders.
     if (isNat20Defense) {
-      await this.consumeAtR(weaponSkill, atrCost);
+      await this.spendActionAtR(atrCost);
       await ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: defender }),
         flavor: `${defender.name} rolled a <strong>Natural 20 ${defenseType.capitalize()}!</strong> The attack is stopped and ${defender.name} gains a free counter-attack (no AtR).`,
@@ -1313,7 +1354,7 @@ export class HolyLandsActor extends Actor {
 
     // Natural 1 Defense: automatic failure, 1.5x Damage.
     if (isNat1Defense) {
-      await this.consumeAtR(weaponSkill, atrCost);
+      await this.spendActionAtR(atrCost);
       await ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: defender }),
         flavor: `${defender.name} rolled a <strong>Natural 1 ${defenseType.capitalize()}!</strong> Automatic failure - Damage will be x1.5.`,
@@ -1326,7 +1367,7 @@ export class HolyLandsActor extends Actor {
     // Attack is always successful unless the defender also rolled a Natural
     // 20 (handled above - the tie goes to the defender).
     const attackHits = attackContext.isNat20 || (finalDefenseTotal < attackTotal);
-    await this.consumeAtR(weaponSkill, atrCost);
+    await this.spendActionAtR(atrCost);
 
     let flavor = `${weapon?.name || "Unarmed"} Attack ${attackTotal} vs ${defenseType.capitalize()} ${finalDefenseTotal}${noteText}`;
     flavor += attackHits ? " - <strong>Hit!</strong>" : " - <strong>Defended!</strong>";

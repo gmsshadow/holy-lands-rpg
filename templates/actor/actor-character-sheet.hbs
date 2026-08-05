@@ -328,7 +328,18 @@
     </div>
 
     <h3>Weapon Skills</h3>
-    <p class="hint">Each "WS &lt;name&gt;" skill in your Gifts/Talents/Crafts grants its PF in +1s for that Weapon Skill's ATT/CRI/SPC, and +1 AtR (Step 8, p.59).</p>
+    <div class="active-ws-bar">
+      <label>Active attack type:</label>
+      <select name="system.activeWeaponSkill">
+        {{#each system.weaponSkills as |ws key|}}
+        <option value="{{key}}" {{#if (eq ../system.activeWeaponSkill key)}}selected{{/if}}>{{ws.label}}</option>
+        {{/each}}
+      </select>
+      <span class="active-atr" title="AtR remaining on the active attack type">
+        AtR {{activeAtR.current}}/{{activeAtR.max}}
+      </span>
+    </div>
+    <p class="hint">Each "WS &lt;name&gt;" skill in your Gifts/Talents/Crafts grants its PF in +1s for that Weapon Skill's ATT/CRI/SPC, and +1 AtR (Step 8, p.59). All AtR pools drop together when you act, so changing weapons doesn't grant extra attacks.</p>
     {{#each system.weaponSkills as |ws key|}}
     {{#with (lookup ../system.combatValidation.ws key) as |v|}}
     <div class="weapon-skill">

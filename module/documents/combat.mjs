@@ -115,9 +115,8 @@ export class HolyLandsCombat extends Combat {
 
     // If every combatant is out of AtR, advance to the next Round instead.
     const anyAtR = this.combatants.some(c => {
-      const ws = c.actor?.system?.weaponSkills;
-      if (!ws) return true; // no WS data -> don't block round end on them
-      return Object.values(ws).some(w => (w.atRCurrent ?? 0) > 0);
+      if (!c.actor?.system?.weaponSkills) return true; // no WS data -> don't block
+      return (c.actor.activeAtR?.current ?? 0) > 0;
     });
     if (!anyAtR) {
       ui.notifications.info("All combatants are out of AtR - advancing to the next Round.");
@@ -140,12 +139,11 @@ export class HolyLandsCombat extends Combat {
    */
   async #promptNextCombatant() {
     const options = this.turns.map(c => {
-      const ws = c.actor?.system?.weaponSkills;
-      const atr = ws ? Object.values(ws).reduce((s, w) => s + (w.atRCurrent ?? 0), 0) : null;
+      const active = c.actor?.system?.weaponSkills ? c.actor.activeAtR : null;
       const adv = Number.isNumeric(c.initiative) ? c.initiative : "-";
-      const atrLabel = (atr === null) ? "" : ` - AtR ${atr}`;
+      const atrLabel = active ? ` - ${active.label} AtR ${active.current}/${active.max}` : "";
       const current = (c.id === this.combatant?.id) ? " (current)" : "";
-      const spent = (atr === 0) ? " [no AtR]" : "";
+      const spent = (active && active.current === 0) ? " [no AtR]" : "";
       return `<option value="${c.id}">${foundry.utils.escapeHTML(c.name)} (ADV ${adv}${atrLabel})${current}${spent}</option>`;
     }).join("");
 

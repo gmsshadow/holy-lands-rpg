@@ -674,3 +674,22 @@ These are deliberate changes, flagged for review:
   isCounter flag: a return or free counter-attack resolves once, then hands
   control back to the Rac with a chat note - no infinite counter loop.
   Declining a return attack likewise hands back to the Rac.
+
+## v2.25.0 — Shared AtR pool & active attack type
+
+- **AtR is now a single shared "actions this Round" pool.** Previously each
+  Weapon Skill tracked AtR independently, so switching weapons handed you a
+  fresh set of attacks. Now any action decrements EVERY Weapon Skill's AtR
+  together (floored at 0) via spendActionAtR - attacking or being hit costs
+  the whole pool one beat, and a Critical costs all pools its full multiplier
+  (Combat Handbook Section 7: a CRI is the Round's focus poured into one
+  blow, so it reduces every attack avenue). The attack pipeline and the
+  damage-loss path both use this.
+- **Active attack type:** characters and NPCs gain activeWeaponSkill (the
+  weapon skill currently in use). The sheet shows its AtR (current/max) and a
+  dropdown to change it any time - at rest or mid-combat. Attacking with a
+  weapon auto-sets the active type to that weapon's skill (free counters
+  don't change your stance).
+- The combat tracker's turn picker and round-end check now read the ACTIVE
+  skill's AtR rather than a sum across all skills, so "who has actions left"
+  reflects the character's current weapon.

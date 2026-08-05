@@ -207,6 +207,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       list.sort((a, b) => (a.sort || 0) - (b.sort || 0));
     }
     context.weapons = buckets.weapon;
+    context.activeAtR = this.actor.activeAtR;
     // Annotate each weapon with the damage for this character's stature.
     if (this.actor.type === "character") {
       const stature = this.actor.system.stature;

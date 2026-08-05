@@ -623,3 +623,13 @@
 
 /* Miracle selection actions */
 .holy-lands-rpg .miracle-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+
+/* Active weapon-skill (attack type) selector */
+.holy-lands-rpg .active-ws-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px; margin: 4px 0;
+  background: rgba(107, 52, 16, 0.08);
+  border-left: 3px solid #6b3410; border-radius: 3px;
+}
+.holy-lands-rpg .active-ws-bar label { font-weight: bold; white-space: nowrap; }
+.holy-lands-rpg .active-ws-bar .active-atr { margin-left: auto; font-weight: bold; }

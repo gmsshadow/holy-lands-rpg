@@ -208,6 +208,10 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     }
     context.weapons = buckets.weapon;
     context.activeAtR = this.actor.activeAtR;
+    // Equipped weapons for the quick block at the top of the Combat tab.
+    if (this.actor.type === "character") {
+      context.equippedWeapons = buckets.weapon.filter(w => w.system.equipped);
+    }
     // Annotate each weapon with the damage for this character's stature.
     if (this.actor.type === "character") {
       const stature = this.actor.system.stature;

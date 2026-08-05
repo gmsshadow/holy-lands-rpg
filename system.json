@@ -2,7 +2,7 @@
   "id": "holy-lands-rpg",
   "title": "Holy Lands RPG",
   "description": "A Christian-themed tabletop RPG system set in medieval times where faith and virtue guide adventurers.",
-  "version": "2.26.0",
+  "version": "2.27.0",
   "authors": [
     {
       "name": "Faith Quest Games (System Creator)",
@@ -145,5 +145,12 @@
       ]
     }
   ],
-  "background": "assets/images/background.jpg"
+  "background": "systems/holy-lands-rpg/assets/images/background.jpg",
+  "media": [
+    {
+      "type": "setup",
+      "url": "systems/holy-lands-rpg/assets/images/background.jpg",
+      "thumbnail": "systems/holy-lands-rpg/assets/images/background.jpg"
+    }
+  ]
 }

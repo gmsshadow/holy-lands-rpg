@@ -710,3 +710,21 @@ These are deliberate changes, flagged for review:
   left to Rac discretion, as requested.
 - The opener resets at the start of each Round; free counter-attacks are
   exempt and don't set or trigger the rule.
+
+## v2.27.0 — Background path fix & Combat tab quick-access
+
+- **Fixed the system background not displaying.** The "background" path was
+  relative to the system folder, but Foundry resolves it from the data root,
+  so it 404'd (broken-image icon). Corrected to
+  "systems/holy-lands-rpg/assets/images/background.jpg" and also added the
+  modern media[] setup entry (v10+ preferred) pointing at the same file.
+- **Combat tab quick-access (PCs):** equipped weapons now appear as a "Ready
+  Weapons" block at the very top of the Combat tab, each with Roll Attack /
+  Roll Damage buttons, and the Active Attack Type selector (with live AtR)
+  sits directly beneath them - the fastest path to acting in a fight. The
+  Active Attack Type box was removed from its old spot under Weapon Skills
+  (the full weapon list and WS detail remain below as before).
+- Confirmed: activeWeaponSkill is a stored actor field, so it persists
+  across sessions when set outside combat; and AtR reductions apply to all
+  Weapon Skill pools from both attacking and being hit (all routes go
+  through spendActionAtR).

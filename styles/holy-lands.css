@@ -633,3 +633,7 @@
 }
 .holy-lands-rpg .active-ws-bar label { font-weight: bold; white-space: nowrap; }
 .holy-lands-rpg .active-ws-bar .active-atr { margin-left: auto; font-weight: bold; }
+
+/* Ready weapons quick block on the Combat tab */
+.holy-lands-rpg .ready-weapons { margin-bottom: 6px; }
+.holy-lands-rpg .ready-weapons .item-props { min-width: 90px; text-align: right; opacity: 0.9; }

@@ -160,7 +160,8 @@
     "coinGoldDie": "3d4",
     "coinGoldMult": 10,
     "coinSilverDie": "1d4",
-    "coinSilverMult": 3
+    "coinSilverMult": 3,
+    "talentCraftList": "Animal Handling\nAnimal Riding\nAnimal Science\nBowsmith\nCombat Abilities\nCook\nCreatures and Beasts\nCS Grapple\nFalconry\nHerbal Science\nHorsemanship\nHP: Hearing\nHP: Sight\nHP: Touch\nLight Sleep\nMedical\nNets and Snares\nPoison Science\nProfile Ambush\nProfile Area\nRepair Light Armor\nShadow\nSignaling\nSwimming\nWS Light Arms"
   },
   "effects": [],
   "folder": null,

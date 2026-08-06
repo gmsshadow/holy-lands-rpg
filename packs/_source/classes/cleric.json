@@ -163,7 +163,8 @@
     "coinGoldDie": "4d4",
     "coinGoldMult": 10,
     "coinSilverDie": "1d4",
-    "coinSilverMult": 3
+    "coinSilverMult": 3,
+    "talentCraftList": "Appraise\nArcheology\nCombat Abilities\nCook\nCult Knowledge\nEmpower Crucifix\nEstimation Logic\nHerbal Science\nHP: Hearing\nHP: Sight\nHP: Touch\nIdentify Holy Item\nIntuition\nMeditation\nMiracles: High\nPoison Science\nPolitical Science\nRead/Write addLG\nRepair Light Armor\nSinging\nSneak\nSorcery Studies\nSpeak addLG\nWS Heavy Arms\nWS Thrown"
   },
   "effects": [],
   "folder": null,

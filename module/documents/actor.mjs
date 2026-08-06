@@ -984,6 +984,76 @@ export class HolyLandsActor extends Actor {
     await this.update({ "system.creation.miraclesSelected": true });
   }
 
+  /**
+   * The class's Talent/Craft skill list (Genesis Ch7) as an array of names,
+   * or null if the class doesn't define one (Adventurer/Fighter are handled
+   * differently). The trailing "*" marker some entries carry is stripped.
+   */
+  get talentCraftList() {
+    const raw = this.classItem?.system.talentCraftList || "";
+    if (!raw.trim()) return null;
+    return raw.split("\n").map(x => x.trim().replace(/\*$/, "")).filter(Boolean);
+  }
+
+  /**
+   * Grant chosen Talents (+2 PF) and Crafts (+1 PF) from the class list at
+   * creation. Skills are matched against the Skills compendium so links come
+   * across; unmatched names become plain skills. Locks when done.
+   * @param {string[]} talentNames  Exactly 5 skill names for Talents.
+   * @param {string[]} craftNames   Exactly 3 (different) names for Crafts.
+   */
+  async grantTalentsAndCrafts(talentNames, craftNames) {
+    if (this.type !== "character") return;
+    if (this.system.creation?.talentsCraftsChosen) {
+      ui.notifications.warn("Talents and Crafts have already been chosen.");
+      return;
+    }
+
+    const pack = game.packs.get("holy-lands-rpg.skills");
+    const packDocs = pack ? await pack.getDocuments() : [];
+    const findSkill = name => packDocs.find(d => d.name.toLowerCase() === name.toLowerCase());
+    const existing = new Set(this.items.filter(i => i.type === "skill").map(i => i.name.toLowerCase()));
+
+    const build = (name, section, pf) => {
+      const match = findSkill(name);
+      const data = match
+        ? foundry.utils.mergeObject(match.toObject(), { system: { skillType: section, pf } })
+        : { name, type: "skill", img: "icons/svg/book.svg",
+            system: { skillType: section, pf, combatAbilities: /combat\s*abilit/i.test(name), isCombatSkill: /^cs\s/i.test(name) } };
+      delete data._id;
+      return data;
+    };
+
+    const toCreate = [];
+    const skipped = [];
+    for (const name of talentNames) {
+      if (existing.has(name.toLowerCase())) { skipped.push(name); continue; }
+      toCreate.push(build(name, "talent", 2));
+    }
+    for (const name of craftNames) {
+      if (existing.has(name.toLowerCase())) { skipped.push(name); continue; }
+      toCreate.push(build(name, "craft", 1));
+    }
+
+    if (toCreate.length) await this.createEmbeddedDocuments("Item", toCreate);
+    await this.update({ "system.creation.talentsCraftsChosen": true });
+
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} - Step 6: Talents &amp; Crafts (${this.classItem?.name})</strong><br>`
+        + `Talents (+2): ${talentNames.join(", ")}<br>`
+        + `Crafts (+1): ${craftNames.join(", ")}`
+        + (skipped.length ? `<br><em>Already held (skipped): ${skipped.join(", ")}</em>` : "")
+    });
+  }
+
+  /** Rac/GM correction: unlock the Talents & Crafts choice. */
+  async unlockTalentsCrafts() {
+    if (!game.user.isGM) { ui.notifications.warn("Only the Rac (GM) can unlock this."); return; }
+    await this.update({ "system.creation.talentsCraftsChosen": false });
+    ui.notifications.info(`${this.name}: Talents & Crafts choice unlocked.`);
+  }
+
   /** Rac/GM correction: unlock the starting Life & Faith roll. */
   async unlockStartingRoll() {
     if (!game.user.isGM) {

@@ -154,7 +154,8 @@
     "coinGoldDie": "3d4",
     "coinGoldMult": 10,
     "coinSilverDie": "1d4",
-    "coinSilverMult": 3
+    "coinSilverMult": 3,
+    "talentCraftList": "Appraise\nBlacksmith\nBuild/Construct\nCamp\nCook\nCreatures and Beasts\nCS Grapple Escape\nCS Profiling Tactics\nCS Roll with Blows\nDemonology\nHorsemanship\nIntimidation\nIrregular Sleep\nLight Sleep\nNavigation\nNets and Snares\nProfile Ambush\nRepair Light Armor\nSiege Engines\nSneak\nSpeak addLG\nSwimming\nWS Missiles\nWS Paired Weapons\nWS Thrown"
   },
   "effects": [],
   "folder": null,

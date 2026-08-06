@@ -218,6 +218,20 @@
     </div>
     {{/unless}}
     {{/if}}
+    {{#if hasTalentCraftList}}
+    {{#unless talentsCraftsChosen}}
+    <div class="step6-banner">
+      <span>Step 6: choose 5 Talents (+2) and 3 Crafts (+1) from the class list?</span>
+      <button type="button" data-action="chooseTalentsCrafts" title="Pick Talents and Crafts from the class's Ch7 skill list">
+        <i class="fas fa-list-check"></i> Choose Talents &amp; Crafts
+      </button>
+    </div>
+    {{else}}
+    {{#if isGM}}
+    <p class="hint"><a data-action="unlockTalentsCrafts"><i class="fas fa-lock-open"></i> unlock Talents &amp; Crafts choice</a></p>
+    {{/if}}
+    {{/unless}}
+    {{/if}}
     <div class="skills-columns">
       <div class="skill-column">
         <div class="skill-col-header"><h3>Gifts</h3><span class="pf-label">PF</span></div>

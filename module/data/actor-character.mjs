@@ -99,7 +99,8 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
         attrBonusApplied: new fields.ObjectField({ required: true, initial: {} }),
         miraclesSelected: new fields.BooleanField({ required: true, initial: false }),
         equipmentGranted: new fields.BooleanField({ required: true, initial: false }),
-        blessingsGranted: new fields.BooleanField({ required: true, initial: false })
+        blessingsGranted: new fields.BooleanField({ required: true, initial: false }),
+        talentsCraftsChosen: new fields.BooleanField({ required: true, initial: false })
       })
     };
   }

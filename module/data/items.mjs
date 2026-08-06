@@ -170,6 +170,11 @@ export class ClassData extends foundry.abstract.TypeDataModel {
 
       blessingsType: new fields.StringField({ required: true, initial: "" }),
       grantedGifts: new fields.StringField({ required: true, initial: "" }),
+
+      // The class's Talent/Craft skill list (Genesis Ch7). At creation the
+      // character picks 5 Talents (+2 PF) then 3 Crafts (+1 PF) from this
+      // list. Stored as a newline-separated list of skill names.
+      talentCraftList: new fields.StringField({ required: true, initial: "" }),
       startingEquipment: new fields.StringField({ required: true, initial: "" }),
 
       // Structured starting kit for Step 9 auto-grant. Each entry:

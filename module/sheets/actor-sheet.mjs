@@ -50,6 +50,8 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       charArrayDelete: HolyLandsActorSheet.#onCharArrayDelete,
       grantGifts: HolyLandsActorSheet.#onGrantGifts,
       addSkill: HolyLandsActorSheet.#onAddSkill,
+      chooseTalentsCrafts: HolyLandsActorSheet.#onChooseTalentsCrafts,
+      unlockTalentsCrafts: HolyLandsActorSheet.#onUnlockTalentsCrafts,
       applyAttrBonus: HolyLandsActorSheet.#onApplyAttrBonus,
       addMiracle: HolyLandsActorSheet.#onAddMiracle,
       grantClericMiracles: HolyLandsActorSheet.#onGrantClericMiracles,
@@ -165,6 +167,8 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
         : "Cleric: gain all Clerical Miracles of your level, plus 1 High Miracle.";
     }
     context.hasClassGifts = !!this.actor.classItem?.system.grantedGifts?.trim();
+    context.hasTalentCraftList = !!this.actor.talentCraftList;
+    context.talentsCraftsChosen = !!this.actor.system.creation?.talentsCraftsChosen;
     context.statures = {
       weeFolk: "WeeFolk",
       dwarfolk: "Dwarfolk",
@@ -561,6 +565,77 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     });
     if (!result || result === "cancel") return;
     return this.actor.addSkillFromCompendium(result.id, section, result.pf);
+  }
+
+  /**
+   * Pick 5 Talents (+2) then 3 Crafts (+1) from the class's Talent/Craft list
+   * (Genesis Ch7). Crafts cannot repeat a chosen Talent. Client-side JS keeps
+   * the dropdowns in sync so duplicates aren't selectable.
+   */
+  static async #onChooseTalentsCrafts(event, target) {
+    const list = this.actor.talentCraftList;
+    if (!list) {
+      ui.notifications.warn("This class doesn't use the standard Talent/Craft list (Adventurer/Fighter differ).");
+      return;
+    }
+
+    const opts = extra => `<option value="">- choose -</option>` +
+      list.map(n => `<option value="${foundry.utils.escapeHTML(n)}">${foundry.utils.escapeHTML(n)}</option>`).join("");
+    const talentRows = Array.from({ length: 5 }, (_, i) =>
+      `<div class="form-group"><label>Talent ${i + 1} (+2):</label><select name="talent_${i}" class="tc-pick" data-kind="talent">${opts()}</select></div>`).join("");
+    const craftRows = Array.from({ length: 3 }, (_, i) =>
+      `<div class="form-group"><label>Craft ${i + 1} (+1):</label><select name="craft_${i}" class="tc-pick" data-kind="craft">${opts()}</select></div>`).join("");
+
+    // Inline script keeps selections unique across all 8 dropdowns.
+    const sync = `<script>(function(){
+      const root = document.currentScript.parentElement;
+      const picks = () => Array.from(root.querySelectorAll('.tc-pick'));
+      function refresh(){
+        const chosen = picks().map(s=>s.value).filter(Boolean);
+        picks().forEach(sel=>{
+          Array.from(sel.options).forEach(o=>{
+            if(!o.value) return;
+            o.disabled = chosen.includes(o.value) && (sel.value !== o.value);
+          });
+        });
+      }
+      picks().forEach(s=>s.addEventListener('change', refresh));
+      refresh();
+    })();</script>`;
+
+    const result = await DialogV2.wait({
+      window: { title: `${this.actor.classItem?.name} - Choose Talents & Crafts` },
+      content: `<p>Choose <strong>5 Talents</strong> (+2 PF) and <strong>3 Crafts</strong> (+1 PF) from the ${this.actor.classItem?.name} skill list. Each skill may be chosen once.</p>
+        <fieldset><legend>Talents</legend>${talentRows}</fieldset>
+        <fieldset><legend>Crafts</legend>${craftRows}</fieldset>${sync}`,
+      buttons: [
+        { action: "grant", label: "Grant", default: true, callback: (event, button) => {
+          const f = button.form.elements;
+          const talents = [0,1,2,3,4].map(i => f[`talent_${i}`].value).filter(Boolean);
+          const crafts = [0,1,2].map(i => f[`craft_${i}`].value).filter(Boolean);
+          return { talents, crafts };
+        } },
+        { action: "cancel", label: "Cancel" }
+      ],
+      rejectClose: false
+    });
+    if (!result || result === "cancel") return;
+
+    const { talents, crafts } = result;
+    if (talents.length !== 5 || crafts.length !== 3) {
+      ui.notifications.warn(`Select exactly 5 Talents and 3 Crafts (got ${talents.length} and ${crafts.length}).`);
+      return;
+    }
+    const all = [...talents, ...crafts];
+    if (new Set(all.map(x => x.toLowerCase())).size !== all.length) {
+      ui.notifications.warn("Each skill may only be chosen once across Talents and Crafts.");
+      return;
+    }
+    return this.actor.grantTalentsAndCrafts(talents, crafts);
+  }
+
+  static async #onUnlockTalentsCrafts(event, target) {
+    return this.actor.unlockTalentsCrafts();
   }
 
   static async #onRollDetails(event, target) {

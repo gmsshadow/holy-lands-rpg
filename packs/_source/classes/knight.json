@@ -156,7 +156,8 @@
     "coinGoldDie": "5d4",
     "coinGoldMult": 10,
     "coinSilverDie": "1d4",
-    "coinSilverMult": 3
+    "coinSilverMult": 3,
+    "talentCraftList": "Animal Riding\nAppraise\nBuild/Construct\nCamp\nCook\nCreatures and Beasts\nCS Profiling Tactics\nCult Knowledge\nDancing\nFalconry\nIntimidation\nLight Sleep\nMedical\nNavigation\nPreach\nProfile Ambush\nRead/Write nLG\nRead/Write addLG\nSacred Studies\nSiege Engines\nSpeak addLG\nSwimming\nTrack\nWS Hand to Hand\nWS Paired Weapons"
   },
   "effects": [],
   "folder": null,

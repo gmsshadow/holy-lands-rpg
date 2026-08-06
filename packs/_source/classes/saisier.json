@@ -142,7 +142,8 @@
     "coinGoldDie": "2d4",
     "coinGoldMult": 10,
     "coinSilverDie": "1d4",
-    "coinSilverMult": 3
+    "coinSilverMult": 3,
+    "talentCraftList": "Breakfall\nCamp\nCook\nCS Backflip\nCS Deflect Missile\nCS Profiling Tactics\nCS Roll with Blows\nCS Twirl Weapon\nElude Pursuit\nHerbal Science\nHorsemanship\nLight Sleep\nMedical\nMeditation*\nNavigation\nProfile Character\nRead/Write nLG\nShadow\nSleight of Hand\nSneak\nSpeak addLG\nSwimming\nWS Light Arms\nWS Paired Weapons\nWS Thrown"
   },
   "effects": [],
   "folder": null,

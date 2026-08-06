@@ -155,7 +155,8 @@
     "coinGoldDie": "3d4",
     "coinGoldMult": 10,
     "coinSilverDie": "1d4",
-    "coinSilverMult": 3
+    "coinSilverMult": 3,
+    "talentCraftList": "Archeology\nBowsmith\nCamp\nCook\nCult Knowledge\nElude Pursuit\nHorsemanship\nHP: Hearing\nIrregular Sleep\nNavigation\nNets and Snares\nPoison Science\nProfile Ambush\nProfile Area\nRead/Write Ancient Languages\nRead/Write nLG\nShadow\nSneak\nSorcery Studies\nSwimming\nTrack\nTrap Works\nWS Heavy Arms\nWS Paired Weapons\nWS Thrown"
   },
   "effects": [],
   "folder": null,

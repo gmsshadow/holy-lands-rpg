@@ -150,7 +150,8 @@
     "coinGoldDie": "3d4",
     "coinGoldMult": 10,
     "coinSilverDie": "1d4",
-    "coinSilverMult": 3
+    "coinSilverMult": 3,
+    "talentCraftList": "Appraise\nCamp\nCombat Abilities\nCounterfeit\nCS Grapple Escape\nDisguise\nHP: Sight\nImpersonate\nIrregular Sleep\nLight Sleep\nNavigation\nPolitical Science\nProfile Character\nProfile Area\nRead/Write nLG\nRead/Write addLG\nSignaling\nSleight of Hand\nSpeak addLG\nSwimming\nTrack\nTrap Works\nWS Hand to Hand\nWS Missiles\nWS Thrown"
   },
   "effects": [],
   "folder": null,

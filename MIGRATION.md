@@ -776,3 +776,23 @@ These are deliberate changes, flagged for review:
   rolled the sheet targets the flat 2; afterwards it shows the lifetime
   figure (2 per 5 Faith) as the running reference. The Roll Blessings button
   and header read from this. Tooltip corrected to describe the real rule.
+
+## v2.31.0 — Step 6 Talents & Crafts from the class list
+
+- **ClassData** gains talentCraftList (the Ch7 per-class Talent/Craft skill
+  list). Populated for all 11 relevant classes (Adventurer and Fighter
+  excluded - they work differently) with 25 skills each, transcribed from
+  the book.
+- Added 8 skills the lists reference that weren't in the compendium yet
+  (HP: Hearing/Sight/Touch, Cult Knowledge, CS Profiling Tactics,
+  Miracles: High, Miracles: Holy Songs, Read/Write addLG). The Skills
+  compendium is now 94 items; every class-list skill resolves.
+- **Choose Talents & Crafts** button on the Skills tab (Step 6): pick 5
+  Talents (+2 PF) and 3 Crafts (+1 PF) from the class's list in one dialog,
+  with duplicate selections prevented (client-side, plus server-side
+  validation of exactly 5 + 3 unique). Skills are granted into the correct
+  section at the correct PF, matched against the compendium so links carry
+  across. Locks when done (creation.talentsCraftsChosen); GM unlock link
+  provided.
+- This completes the earlier gap where Talent/Craft picks drew from the
+  whole compendium rather than the class list.

@@ -157,7 +157,8 @@
     "coinGoldDie": "1d4",
     "coinGoldMult": 10,
     "coinSilverDie": "1d4",
-    "coinSilverMult": 3
+    "coinSilverMult": 3,
+    "talentCraftList": "Animal Handling\nAnimal Riding\nArcheology\nCamp\nCombat Abilities\nCook\nCreatures and Beasts\nCult Knowledge\nDemonology\nFalconry\nHerbal Science\nHorsemanship\nHP: Touch\nIdentify Holy Item\nMedical\nNavigation\nPolitical Science\nPreach\nRead/Write addLG\nEstimation Logic\nSneak\nSorcery Studies\nSpeak addLG\nSwimming\nWS Light Arms"
   },
   "effects": [],
   "folder": null,

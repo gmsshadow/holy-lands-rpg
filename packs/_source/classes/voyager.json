@@ -146,7 +146,8 @@
     "coinGoldDie": "7d4",
     "coinGoldMult": 10,
     "coinSilverDie": "1d4",
-    "coinSilverMult": 3
+    "coinSilverMult": 3,
+    "talentCraftList": "Acrobatics\nArcheology\nBuild/Construct\nCombat Abilities\nComedy/Storytelling\nCS Backflip\nCS Twirl Weapon\nDancing\nEstimation Logic\nFalconry\nHerbal Science\nHorsemanship\nJuggling\nNets and Snares\nPick Locks\nPreach\nRead/Write addLG\nRead/Write nLG\nSinging\nSneak\nWeaponry\nWS Hand to Hand\nWS Heavy Arms\nWS Paired Weapons\nWS Missiles"
   },
   "effects": [],
   "folder": null,

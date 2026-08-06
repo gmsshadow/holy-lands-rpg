@@ -143,7 +143,8 @@
     "coinGoldDie": "3d4",
     "coinGoldMult": 10,
     "coinSilverDie": "1d4",
-    "coinSilverMult": 3
+    "coinSilverMult": 3,
+    "talentCraftList": "Animal Handling\nBreakfall\nCombat Abilities\nCraft/Tinker\nCS Deflect Missile\nCS Grapple Escape\nCS Roll with Blows\nCS Twirl Weapon\nDancing\nDisguise\nElude Pursuit\nIrregular Sleep\nPick Pockets\nPlay Percussion Instrument\nPlay Wind Instrument\nPolitical Science\nRead/Write nLG\nRead/Write addLG\nSignaling\nSinging\nSneak\nSpeak addLG\nSwimming\nWS Light Arms\nWS Paired Weapons"
   },
   "effects": [],
   "folder": null,

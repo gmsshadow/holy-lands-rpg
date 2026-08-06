@@ -812,3 +812,12 @@ These are deliberate changes, flagged for review:
 - All 48 unique skills across both pools resolve against the compendium.
 - Completes Step 6 for all 13 classes: 11 use the standard Gift-grant +
   Talent/Craft picker, Adventurer and Fighter use the all-at-+2 pool picker.
+
+## v2.33.0 — Skill-picker dialogs scroll when tall
+
+- Fixed the Adventurer/Fighter "Choose Skills" dialog (and the standard
+  Talents & Crafts dialog) overflowing the viewport: with 15 (or 8)
+  dropdowns the box could render taller than the screen, aligned to the
+  bottom, hiding the first Gifts with no way to scroll. The dropdown area is
+  now wrapped in a scrollable container capped at 60vh, so all slots are
+  reachable regardless of screen size.

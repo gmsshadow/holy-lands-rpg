@@ -608,8 +608,10 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     const result = await DialogV2.wait({
       window: { title: `${this.actor.classItem?.name} - Choose Talents & Crafts` },
       content: `<p>Choose <strong>5 Talents</strong> (+2 PF) and <strong>3 Crafts</strong> (+1 PF) from the ${this.actor.classItem?.name} skill list. Each skill may be chosen once.</p>
+        <div class="tc-scroll" style="max-height: 60vh; overflow-y: auto; padding-right: 6px;">
         <fieldset><legend>Talents</legend>${talentRows}</fieldset>
-        <fieldset><legend>Crafts</legend>${craftRows}</fieldset>${sync}`,
+        <fieldset><legend>Crafts</legend>${craftRows}</fieldset>
+        </div>${sync}`,
       buttons: [
         { action: "grant", label: "Grant", default: true, callback: (event, button) => {
           const f = button.form.elements;
@@ -675,9 +677,11 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     const result = await DialogV2.wait({
       window: { title: `${this.actor.classItem?.name} - Choose Skills (all +2 PF)` },
       content: `<p>Choose <strong>7 Gifts</strong>, <strong>5 Talents</strong>, and <strong>3 Crafts</strong> from the ${this.actor.classItem?.name} pool. All start at +2 PF; each skill may be chosen once.</p>
+        <div class="tc-scroll" style="max-height: 60vh; overflow-y: auto; padding-right: 6px;">
         <fieldset><legend>Gifts (7)</legend>${rows("Gift", 7)}</fieldset>
         <fieldset><legend>Talents (5)</legend>${rows("Talent", 5)}</fieldset>
-        <fieldset><legend>Crafts (3)</legend>${rows("Craft", 3)}</fieldset>${sync}`,
+        <fieldset><legend>Crafts (3)</legend>${rows("Craft", 3)}</fieldset>
+        </div>${sync}`,
       buttons: [
         { action: "grant", label: "Grant", default: true, callback: (event, button) => {
           const f = button.form.elements;

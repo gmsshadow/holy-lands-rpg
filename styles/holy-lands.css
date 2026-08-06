@@ -646,3 +646,8 @@
 .holy-lands-rpg .equip-toggle { opacity: 0.45; }
 .holy-lands-rpg .equip-toggle.equipped { opacity: 1; color: #2e7d32; }
 .holy-lands-rpg .equip-toggle:hover { opacity: 0.85; }
+
+/* Scrollable skill-picker dialogs (Talents/Crafts, Adventurer/Fighter) */
+.holy-lands-rpg .tc-scroll,
+.dialog .tc-scroll { scrollbar-width: thin; }
+.tc-scroll fieldset { margin-bottom: 8px; }

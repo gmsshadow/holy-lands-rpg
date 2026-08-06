@@ -130,6 +130,24 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
   };
 
   /** Step 10 Attribute Bonus effects (p.60). */
+  /**
+   * Rule of Halves check for a set of sibling Bonuses (Combat Handbook): no
+   * single Bonus may be more than twice the next highest. Returns the top two
+   * values, whether it's violated, and the max the top value may legally be.
+   * Zero/near-zero groups never violate.
+   */
+  static ruleOfHalvesCheck(values) {
+    const sorted = [...values].map(v => v || 0).sort((a, b) => b - a);
+    const highest = sorted[0] || 0;
+    const second = sorted[1] || 0;
+    const maxAllowed = second * 2;
+    return {
+      highest, second, maxAllowed,
+      violation: highest > maxAllowed
+    };
+  }
+
+  /** Step 10 Attribute Bonus effects (p.60). */
   static ATTR_BONUS_EFFECTS = {
     int: "increase any Craft by +1 (RoH)",
     wis: "increase any Gift by +1 (RoH)",
@@ -318,20 +336,22 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
     const c = this.combat;
     const caValues = [c.advantageBonus || 0, c.dodgeBonus || 0, c.defendBonus || 0, c.damageBonus || 0];
     const caSpent = caValues.reduce((a, b) => a + b, 0);
-    const sorted = [...caValues].sort((a, b) => b - a);
-    const halvesViolation = (sorted[0] > 7) && (sorted[1] < Math.ceil(sorted[0] / 2));
+    // Rule of Halves (Combat Handbook, "How Bonuses Work"): no single action's
+    // Bonus may be more than twice the next highest. Applies to the split at
+    // any level, not just high totals.
+    const caRoH = this.constructor.ruleOfHalvesCheck(caValues);
 
     const ca = {
       budget: caBudget,
       spent: caSpent,
       hasSkill: slots.some(isCombatAbilities),
       over: caSpent > caBudget,
-      halvesViolation,
+      halvesViolation: caRoH.violation,
       warnings: []
     };
     if (ca.over) ca.warnings.push(`${caSpent} points spent but only ${caBudget} granted by the Combat Abilities skill`);
     if (!ca.hasSkill && caSpent > 0) ca.warnings.push("No Combat Abilities skill found in Gifts/Talents/Crafts");
-    if (halvesViolation) ca.warnings.push(`Rule of Halves: with a +${sorted[0]} Bonus the second highest must be at least +${Math.ceil(sorted[0] / 2)}`);
+    if (caRoH.violation) ca.warnings.push(`Rule of Halves: a +${caRoH.highest} Bonus (ADV/DOD/DEF/DAM) may be at most twice the next highest (+${caRoH.second}) - reduce it to +${caRoH.maxAllowed} or raise another.`);
 
     // --- Step 8: per-Weapon-Skill budgets, ATT >= CRI/SPC, AtR ---
     const ws = {};
@@ -346,17 +366,23 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
       const baseAtR = ["handToHand", "pairedWeapons"].includes(key) ? 2 : 1;
       const expectedAtR = baseAtR + (hasSkill ? 1 : 0);
 
+      // Rule of Halves across ATT/CRI/SPC (Combat Handbook, Section 3 & RoH
+      // sidebar): no single action's Bonus may exceed twice the next highest.
+      const wsRoH = this.constructor.ruleOfHalvesCheck([att, cri, spc]);
+
       const v = {
         budget, spent, hasSkill, expectedAtR,
         over: spent > budget,
         criOverAtt: cri > att,
         spcOverAtt: spc > att,
+        halvesViolation: wsRoH.violation,
         atrMismatch: (skill.atRMax || 0) !== expectedAtR,
         warnings: []
       };
       if (v.over) v.warnings.push(`${spent} points spent but only ${budget} granted by the ${skill.label} skill`);
       if (v.criOverAtt) v.warnings.push("Critical Bonus cannot exceed the Attack Bonus");
       if (v.spcOverAtt) v.warnings.push("Special Bonus cannot exceed the Attack Bonus");
+      if (wsRoH.violation) v.warnings.push(`Rule of Halves: a +${wsRoH.highest} Bonus (ATT/CRI/SPC) may be at most twice the next highest (+${wsRoH.second}) - reduce it to +${wsRoH.maxAllowed} or raise another.`);
       if (v.atrMismatch) v.warnings.push(`Expected ${expectedAtR} AtR (${baseAtR} base${hasSkill ? " +1 for having the skill" : ""}; Rac awards such as AGI 12+ may differ)`);
       ws[key] = v;
     }

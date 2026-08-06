@@ -821,3 +821,22 @@ These are deliberate changes, flagged for review:
   bottom, hiding the first Gifts with no way to scroll. The dropdown area is
   now wrapped in a scrollable container capped at 60vh, so all slots are
   reachable regardless of screen size.
+
+## v2.34.0 — Rule of Halves validation on Combat Abilities & Weapon Skills
+
+- Added a shared ruleOfHalvesCheck helper implementing the Combat Handbook
+  rule precisely: no single action's Bonus may be more than twice the next
+  highest. Verified against the book's examples (+2 DEF/+1 ADV valid since
+  2=2x1; +3 DEF alone invalid; +4 ATT/+2 CRI valid since 4=2x2; +3 ATT/+1 CRI
+  invalid).
+- **Weapon Skills** now get this check across their ATT/CRI/SPC split (this
+  was the requested addition) - a warning appears on the WS block when the
+  split breaks the rule, alongside the existing ATT>=CRI/SPC and budget
+  checks.
+- **Combat Abilities** RoH corrected: previously it only checked above a +7
+  total and used a min-based test; it now applies the handbook's twice-the-
+  next-highest rule to the ADV/DOD/DEF/DAM split at any level, matching the
+  quoted "+3 to DEF, +0 to others is not allowed" example.
+- Warnings are soft (non-blocking), consistent with the other creation-step
+  validations, and render in the existing warning slots - no sheet layout
+  change.

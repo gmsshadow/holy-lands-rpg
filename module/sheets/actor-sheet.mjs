@@ -28,6 +28,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       rollSave: HolyLandsActorSheet.#onRollSave,
       rollAttack: HolyLandsActorSheet.#onRollAttack,
       rollDamage: HolyLandsActorSheet.#onRollDamage,
+      toggleEquip: HolyLandsActorSheet.#onToggleEquip,
       castMiracle: HolyLandsActorSheet.#onCastMiracle,
       useBlessing: HolyLandsActorSheet.#onUseBlessing,
       forfeitAdvantage: HolyLandsActorSheet.#onForfeitAdvantage,
@@ -208,9 +209,10 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     }
     context.weapons = buckets.weapon;
     context.activeAtR = this.actor.activeAtR;
-    // Equipped weapons for the quick block at the top of the Combat tab.
+    // Equipped weapons + innate unarmed attacks for the Combat tab quick block.
     if (this.actor.type === "character") {
       context.equippedWeapons = buckets.weapon.filter(w => w.system.equipped);
+      context.innateAttacks = this.actor.innateAttacks;
     }
     // Annotate each weapon with the damage for this character's stature.
     if (this.actor.type === "character") {
@@ -741,6 +743,14 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   }
 
   static async #onRollAttack(event, target) {
+    const innateKind = target.closest("[data-innate]")?.dataset.innate;
+    if (innateKind) {
+      const options = await this.#promptAttackOptions(null);
+      if (!options) return;
+      const targetActor = await this.#selectTarget();
+      if (!targetActor) return;
+      return this.actor.rollUnarmedAttack(innateKind, targetActor, options);
+    }
     const weapon = this.#getItemForTarget(target);
     const options = await this.#promptAttackOptions(weapon);
     if (!options) return;
@@ -883,9 +893,18 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   }
 
   static async #onRollDamage(event, target) {
+    const innateKind = target.closest("[data-innate]")?.dataset.innate;
+    if (innateKind) return this.actor.rollUnarmedDamage(innateKind);
     const weapon = this.#getItemForTarget(target);
     const isCritical = event.shiftKey || false;
     return this.actor.rollDamage(weapon, isCritical);
+  }
+
+  /** Toggle an item's equipped state (weapons, armor, equipment). */
+  static async #onToggleEquip(event, target) {
+    const item = this.#getItemForTarget(target);
+    if (!item || item.system.equipped === undefined) return;
+    return item.update({ "system.equipped": !item.system.equipped });
   }
 
   static async #onCastMiracle(event, target) {

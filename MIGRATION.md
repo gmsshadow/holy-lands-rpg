@@ -728,3 +728,51 @@ These are deliberate changes, flagged for review:
   across sessions when set outside combat; and AtR reductions apply to all
   Weapon Skill pools from both attacking and being hit (all routes go
   through spendActionAtR).
+
+## v2.28.0 — Innate unarmed attacks (Punch/Kick, p.48)
+
+- Characters now have two permanent innate attacks - Punch and Kick - shown
+  at the top of the Combat tab's Ready Weapons block (above equipped
+  weapons), each with Roll Attack / Roll Damage buttons. They're virtual
+  (not deletable items) and always present.
+- **Unarmed damage now depends on BOTH Stature and Weapon Skill (p.48):**
+  Punch is 1d2 untrained / 1d4 with WS Hand to Hand (wee 1|1d2, giant
+  1d3|1d6); Kick is 1d3 untrained / 1d6 with WS Kick Attack (wee 1d2|1d4,
+  giant 1d4|1d8). Having the relevant WS is detected from the character's
+  Skill items (weaponSkillKey), and the row shows "(untrained)" when the WS
+  is absent. All eight values verified against the book.
+- Punch routes through WS Hand to Hand and Kick through WS Kick Attack, so
+  they use the correct ATT/CRI/SPC bonuses, AtR, and the shared-pool and
+  weapon-switch rules already in place. The attack pipeline was extended to
+  accept these synthetic innate attacks.
+
+## v2.29.0 — Equip toggle button on all gear
+
+- Added an equip/unequip toggle button next to the Edit button on every
+  weapon, armor, and equipment row - no more opening the item sheet just to
+  change equipped state. The icon is a filled green shield when equipped and
+  a faded outline when not, with a tooltip stating the current state.
+- Equipping a weapon this way makes it appear immediately in the Combat tab's
+  Ready Weapons block (and armor in the defense calc), since those already
+  key off the equipped flag.
+- Single toggleEquip action handles all three item types (it flips
+  system.equipped on the item).
+
+## v2.30.0 — Starting Blessings entitlement fixed (flat 2, not scaled)
+
+- Fixed the starting-Blessings bug: a newly created character with high Faith
+  was granted too many Blessings (e.g. Faith 12 gave 4). The v2.22.0 change
+  added a Faith >= 5 guard but left the old floor(Faith/5)*2 scaling in
+  place, so it still scaled above Faith 10.
+- Corrected to the actual rules: at creation (p.60) a character gains a FLAT
+  two (2) Blessings if max Faith is 5+, and zero at 4 or below - never more
+  than 2 regardless of how high Faith is. Faith 12 at creation now grants 2.
+- Level-up (p.62) now grants 2 new Blessings for each increment of five (5)
+  max Faith actually crossed by that level's Faith gain (computed from
+  old vs new Faith max), rather than referencing a static "should have"
+  total. Crossing one increment = 2; crossing two at once = 4; no crossing
+  = 0. The level-up chat note reports this accurately.
+- Added a blessingsGranted creation flag: before starting Blessings are
+  rolled the sheet targets the flat 2; afterwards it shows the lifetime
+  figure (2 per 5 Faith) as the running reference. The Roll Blessings button
+  and header read from this. Tooltip corrected to describe the real rule.

@@ -637,3 +637,12 @@
 /* Ready weapons quick block on the Combat tab */
 .holy-lands-rpg .ready-weapons { margin-bottom: 6px; }
 .holy-lands-rpg .ready-weapons .item-props { min-width: 90px; text-align: right; opacity: 0.9; }
+
+/* Innate unarmed attacks in the Ready Weapons block */
+.holy-lands-rpg .innate-attack { opacity: 0.95; }
+.holy-lands-rpg .innate-attack .hint { font-size: 0.85em; font-style: italic; }
+
+/* Equip toggle in item lists (weapons, armor, equipment) */
+.holy-lands-rpg .equip-toggle { opacity: 0.45; }
+.holy-lands-rpg .equip-toggle.equipped { opacity: 1; color: #2e7d32; }
+.holy-lands-rpg .equip-toggle:hover { opacity: 0.85; }

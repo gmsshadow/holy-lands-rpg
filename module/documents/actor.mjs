@@ -196,15 +196,101 @@ export class HolyLandsActor extends Actor {
 
   /** Damage formula for a weapon as wielded by this actor's stature. */
   weaponDamageFormula(weapon) {
+    // Synthetic innate attacks (Punch/Kick) carry their own resolved damage.
+    if (weapon?.innateDamage) return weapon.innateDamage;
     const fallback = weapon?.system?.damage || "1d4";
     if (!weapon || (weapon.type !== "weapon")) return fallback;
     const stature = (this.type === "character") ? this.system.stature : "commonFolk";
     return weapon.system.damageForStature?.(stature) || fallback;
   }
 
+  /** Whether the actor has a Skill item mapped to the given Weapon Skill key. */
+  hasWeaponSkill(weaponSkillKey) {
+    return this.items.some(i =>
+      (i.type === "skill") && (i.system.weaponSkillKey === weaponSkillKey));
+  }
+
+  /**
+   * Unarmed attack damage (Genesis p.48). Depends on Stature AND whether the
+   * character has the relevant Weapon Skill:
+   *   Punching             1d2 [wee 1 | giant 1d3]
+   *   Punching w/ WS H2H   1d4 [wee 1d2 | giant 1d6]
+   *   Kicking              1d3 [wee 1d2 | giant 1d4]
+   *   Kicking w/ WS Kick   1d6 [wee 1d4 | giant 1d8]
+   * @param {"punch"|"kick"} kind
+   */
+  static UNARMED_DAMAGE = {
+    punch: {
+      untrained: { commonFolk: "1d2", dwarfFolk: "1d2", weeFolk: "1",   giantFolk: "1d3" },
+      trained:   { commonFolk: "1d4", dwarfFolk: "1d4", weeFolk: "1d2", giantFolk: "1d6" }
+    },
+    kick: {
+      untrained: { commonFolk: "1d3", dwarfFolk: "1d3", weeFolk: "1d2", giantFolk: "1d4" },
+      trained:   { commonFolk: "1d6", dwarfFolk: "1d6", weeFolk: "1d4", giantFolk: "1d8" }
+    }
+  };
+
+  unarmedDamageFormula(kind) {
+    const stature = (this.type === "character") ? this.system.stature : "commonFolk";
+    const wsKey = (kind === "kick") ? "kickAttack" : "handToHand";
+    const trained = this.hasWeaponSkill(wsKey) ? "trained" : "untrained";
+    const table = this.constructor.UNARMED_DAMAGE[kind]?.[trained];
+    return table?.[stature] || table?.commonFolk || "1d2";
+  }
+
+  /**
+   * The character's innate unarmed attacks (Punch, Kick) as virtual "weapon"
+   * entries for the Ready Weapons block. These are always available and can't
+   * be deleted; damage follows Stature and Weapon Skill possession (p.48).
+   */
+  get innateAttacks() {
+    const build = (kind, label, wsKey, img) => ({
+      innate: true, kind, id: `innate-${kind}`,
+      name: label,
+      img,
+      weaponSkill: wsKey,
+      displayDamage: this.unarmedDamageFormula(kind),
+      trained: this.hasWeaponSkill(wsKey)
+    });
+    return [
+      build("punch", "Punch (unarmed)", "handToHand", "icons/svg/combat.svg"),
+      build("kick", "Kick (unarmed)", "kickAttack", "icons/svg/combat.svg")
+    ];
+  }
+
   /** The character's Class item, if one has been dropped on the sheet. */
   get classItem() {
     return this.items.find(i => i.type === "class") ?? null;
+  }
+
+  /** Build a synthetic weapon-like object for an innate attack (Punch/Kick). */
+  #innateWeapon(kind) {
+    const wsKey = (kind === "kick") ? "kickAttack" : "handToHand";
+    const label = (kind === "kick") ? "Kick (unarmed)" : "Punch (unarmed)";
+    return {
+      innate: true,
+      name: label,
+      system: { weaponSkill: wsKey },
+      innateDamage: this.unarmedDamageFormula(kind)
+    };
+  }
+
+  /** Roll an unarmed attack (p.48) through the normal attack pipeline. */
+  async rollUnarmedAttack(kind, targetActor = null, options = {}) {
+    return this.rollAttack(this.#innateWeapon(kind), targetActor, options);
+  }
+
+  /** Roll unarmed damage directly (Stature + Weapon Skill dependent). */
+  async rollUnarmedDamage(kind) {
+    const formula = this.constructor.graceFormula(this.unarmedDamageFormula(kind));
+    const dam = this.system.combat?.damageBonus || 0;
+    const roll = new Roll(`${formula} + @dam`, { dam });
+    await roll.evaluate();
+    const label = (kind === "kick") ? "Kick" : "Punch";
+    return roll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `${this.name} - ${label} Damage (${this.hasWeaponSkill(kind === "kick" ? "kickAttack" : "handToHand") ? "trained" : "untrained"})`
+    });
   }
 
   /** Apply the Grace Effect reroll modifier to a die formula if enabled. */
@@ -837,12 +923,17 @@ export class HolyLandsActor extends Actor {
     const tableKey = this.blessingTableKey;
     if (!tableKey) { ui.notifications.warn("This character's class has no Blessing table."); return; }
 
-    const entitled = Math.floor((this.system.faith?.max || 0) / 5) * 2;
+    // Starting entitlement (p.60) is a FLAT 2 if Faith >= 5, else 0 - not
+    // scaled by Faith. Additional Blessings come from level-up increments
+    // (p.62), which pass an explicit count. If no count is given, use the
+    // outstanding STARTING entitlement.
+    const faithMax = this.system.faith?.max || 0;
+    const startingEntitled = (faithMax >= 5) ? 2 : 0;
     const have = this.items.filter(i => i.type === "blessing");
     const haveNames = new Set(have.map(i => i.name.toLowerCase()));
-    const outstanding = (count !== null) ? count : Math.max(0, entitled - have.length);
+    const outstanding = (count !== null) ? count : Math.max(0, startingEntitled - have.length);
     if (outstanding <= 0) {
-      ui.notifications.info(`${this.name} already has all ${entitled} entitled Blessings.`);
+      ui.notifications.info(`${this.name} is not currently entitled to more Blessings (starting entitlement is ${startingEntitled}).`);
       return;
     }
 
@@ -873,12 +964,17 @@ export class HolyLandsActor extends Actor {
     }
 
     if (toCreate.length) await this.createEmbeddedDocuments("Item", toCreate);
+    // Mark that starting Blessings have been granted (switches the sheet
+    // target from the flat-2 starting rule to the lifetime figure).
+    if (!this.system.creation?.blessingsGranted) {
+      await this.update({ "system.creation.blessingsGranted": true });
+    }
 
     return ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
       flavor: `<strong>${this.name} - Blessings (${this.classItem?.system.blessingsType ?? tableKey})</strong><br>`
         + lines.join("<br>")
-        + `<br><em>Now has ${have.length + toCreate.length} of ${entitled} entitled Blessings.</em>`,
+        + `<br><em>Gained ${toCreate.length} Blessing${toCreate.length === 1 ? "" : "s"} (now has ${have.length + toCreate.length}).</em>`,
       rolls
     });
   }
@@ -986,7 +1082,8 @@ export class HolyLandsActor extends Actor {
     const faithRoll = new Roll(this.constructor.graceFormula(cls.system.faithPerLevelDie || "1d4"));
     await faithRoll.evaluate();
 
-    const newFaithMax = (this.system.faith.max || 0) + faithRoll.total;
+    const oldFaithMax = this.system.faith.max || 0;
+    const newFaithMax = oldFaithMax + faithRoll.total;
     await this.update({
       "system.level": newLevel,
       "system.life.max": (this.system.life.max || 0) + lifeRoll.total,
@@ -995,11 +1092,13 @@ export class HolyLandsActor extends Actor {
       "system.faith.value": (this.system.faith.value || 0) + faithRoll.total
     });
 
-    const entitledBlessings = Math.floor(newFaithMax / 5) * 2;
-    const heldBlessings = this.items.filter(i => i.type === "blessing").length;
-    const blessingNote = (heldBlessings < entitledBlessings)
-      ? `Blessings: entitled to ${entitledBlessings} (2 per 5 max Faith), currently have ${heldBlessings} - may select ${entitledBlessings - heldBlessings} more.`
-      : `Blessings: entitled to ${entitledBlessings} (2 per 5 max Faith), currently have ${heldBlessings}.`;
+    // Blessings on level-up (p.62): two new Blessings for each increment of
+    // five (5) max Faith crossed by this level's Faith gain.
+    const incrementsCrossed = Math.floor(newFaithMax / 5) - Math.floor(oldFaithMax / 5);
+    const newBlessings = Math.max(0, incrementsCrossed) * 2;
+    const blessingNote = (newBlessings > 0)
+      ? `Blessings: crossed a Faith increment of 5 - gain ${newBlessings} new Blessing${newBlessings === 1 ? "" : "s"} (use Roll Blessings).`
+      : `Blessings: no new Blessings this level (none gained until max Faith next crosses a multiple of 5).`;
     return ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
       flavor: `<strong>${this.name} reaches Level ${newLevel}!</strong> (${cls.name})<br>`

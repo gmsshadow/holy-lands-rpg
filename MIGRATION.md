@@ -796,3 +796,19 @@ These are deliberate changes, flagged for review:
   provided.
 - This completes the earlier gap where Talent/Craft picks drew from the
   whole compendium rather than the class list.
+
+## v2.32.0 — Adventurer/Fighter skill selection (all at +2)
+
+- **ClassData** gains basicSkillList - the Adventurer/Fighter combined skill
+  pool (p.58). Populated: Adventurer 34 skills, Fighter 32 skills.
+- These two classes work differently: instead of Gifts at +3 and Talents/
+  Crafts at +2/+1, they pick 7 Gifts + 5 Talents + 3 Crafts from ONE pool,
+  all at +2 PF. A dedicated "Choose Skills" banner and picker on the Skills
+  tab handles this - 15 dropdowns (7/5/3) from the pool, duplicates
+  prevented, granted into the right sections all at +2. Locks via the same
+  creation.talentsCraftsChosen flag (also sets giftsGranted).
+- Cleared the old grantedGifts data on Adventurer/Fighter so only the
+  combined picker shows for them (not the standard +3 Gift-grant banner).
+- All 48 unique skills across both pools resolve against the compendium.
+- Completes Step 6 for all 13 classes: 11 use the standard Gift-grant +
+  Talent/Craft picker, Adventurer and Fighter use the all-at-+2 pool picker.

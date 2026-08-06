@@ -175,6 +175,12 @@ export class ClassData extends foundry.abstract.TypeDataModel {
       // character picks 5 Talents (+2 PF) then 3 Crafts (+1 PF) from this
       // list. Stored as a newline-separated list of skill names.
       talentCraftList: new fields.StringField({ required: true, initial: "" }),
+
+      // Adventurer/Fighter variant (p.58): a single pool from which the
+      // character picks 7 Gifts + 5 Talents + 3 Crafts, ALL at +2 PF. When
+      // set, this list drives that combined picker instead of the standard
+      // Gift-grant + Talent/Craft flow.
+      basicSkillList: new fields.StringField({ required: true, initial: "" }),
       startingEquipment: new fields.StringField({ required: true, initial: "" }),
 
       // Structured starting kit for Step 9 auto-grant. Each entry:

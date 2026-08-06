@@ -20,7 +20,7 @@
       "giantFolk"
     ],
     "blessingsType": "Blessings of Fortune",
-    "grantedGifts": "Choose skills freely with a PF of +2 (see p.65)",
+    "grantedGifts": "",
     "startingEquipment": "Auto-grant available (Step 9). Verify against Genesis Ch7.",
     "primaryAttribute": "",
     "primaryMin": 0,
@@ -148,7 +148,8 @@
     "coinGoldDie": "3d4",
     "coinGoldMult": 10,
     "coinSilverDie": "1d4",
-    "coinSilverMult": 3
+    "coinSilverMult": 3,
+    "basicSkillList": "Appraise\nBuild/Construct\nCamp\nCombat Abilities\nComedy/Storytelling\nCook\nCraft/Tinker\nCreatures and Beasts\nCS Ground Fight\nCult Knowledge\nDancing\nDemonology\nHerbal Science\nHorsemanship\nMedical\nNavigation\nPick Locks\nPlay Wind Instrument\nPlay Stringed Instrument\nPolitical Science\nPreach\nSacred Studies\nSeafaring\nSignaling\nSinging\nSneak\nSpeak addLG\nSwimming\nTrap Works\nWeaponry\nWS Hand to Hand\nWS Light Arms\nWS Missiles\nWS Thrown"
   },
   "effects": [],
   "folder": null,

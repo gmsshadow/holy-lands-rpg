@@ -51,6 +51,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       grantGifts: HolyLandsActorSheet.#onGrantGifts,
       addSkill: HolyLandsActorSheet.#onAddSkill,
       chooseTalentsCrafts: HolyLandsActorSheet.#onChooseTalentsCrafts,
+      chooseBasicSkills: HolyLandsActorSheet.#onChooseBasicSkills,
       unlockTalentsCrafts: HolyLandsActorSheet.#onUnlockTalentsCrafts,
       applyAttrBonus: HolyLandsActorSheet.#onApplyAttrBonus,
       addMiracle: HolyLandsActorSheet.#onAddMiracle,
@@ -168,6 +169,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     }
     context.hasClassGifts = !!this.actor.classItem?.system.grantedGifts?.trim();
     context.hasTalentCraftList = !!this.actor.talentCraftList;
+    context.hasBasicSkillList = !!this.actor.basicSkillList;
     context.talentsCraftsChosen = !!this.actor.system.creation?.talentsCraftsChosen;
     context.statures = {
       weeFolk: "WeeFolk",
@@ -636,6 +638,69 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
   static async #onUnlockTalentsCrafts(event, target) {
     return this.actor.unlockTalentsCrafts();
+  }
+
+  /**
+   * Adventurer/Fighter skill picker (p.58): 7 Gifts, 5 Talents, 3 Crafts from
+   * one pool, all at +2 PF, each skill chosen once.
+   */
+  static async #onChooseBasicSkills(event, target) {
+    const list = this.actor.basicSkillList;
+    if (!list) {
+      ui.notifications.warn("This class doesn't use the combined Adventurer/Fighter skill pool.");
+      return;
+    }
+
+    const opts = () => `<option value="">- choose -</option>` +
+      list.map(n => `<option value="${foundry.utils.escapeHTML(n)}">${foundry.utils.escapeHTML(n)}</option>`).join("");
+    const rows = (kind, n) => Array.from({ length: n }, (_, i) =>
+      `<div class="form-group"><label>${kind} ${i + 1}:</label><select name="${kind.toLowerCase()}_${i}" class="tc-pick">${opts()}</select></div>`).join("");
+
+    const sync = `<script>(function(){
+      const root = document.currentScript.parentElement;
+      const picks = () => Array.from(root.querySelectorAll('.tc-pick'));
+      function refresh(){
+        const chosen = picks().map(s=>s.value).filter(Boolean);
+        picks().forEach(sel=>{
+          Array.from(sel.options).forEach(o=>{
+            if(!o.value) return;
+            o.disabled = chosen.includes(o.value) && (sel.value !== o.value);
+          });
+        });
+      }
+      picks().forEach(s=>s.addEventListener('change', refresh));
+      refresh();
+    })();</script>`;
+
+    const result = await DialogV2.wait({
+      window: { title: `${this.actor.classItem?.name} - Choose Skills (all +2 PF)` },
+      content: `<p>Choose <strong>7 Gifts</strong>, <strong>5 Talents</strong>, and <strong>3 Crafts</strong> from the ${this.actor.classItem?.name} pool. All start at +2 PF; each skill may be chosen once.</p>
+        <fieldset><legend>Gifts (7)</legend>${rows("Gift", 7)}</fieldset>
+        <fieldset><legend>Talents (5)</legend>${rows("Talent", 5)}</fieldset>
+        <fieldset><legend>Crafts (3)</legend>${rows("Craft", 3)}</fieldset>${sync}`,
+      buttons: [
+        { action: "grant", label: "Grant", default: true, callback: (event, button) => {
+          const f = button.form.elements;
+          const pick = (kind, n) => Array.from({ length: n }, (_, i) => f[`${kind}_${i}`].value).filter(Boolean);
+          return { gifts: pick("gift", 7), talents: pick("talent", 5), crafts: pick("craft", 3) };
+        } },
+        { action: "cancel", label: "Cancel" }
+      ],
+      rejectClose: false
+    });
+    if (!result || result === "cancel") return;
+
+    const { gifts, talents, crafts } = result;
+    if (gifts.length !== 7 || talents.length !== 5 || crafts.length !== 3) {
+      ui.notifications.warn(`Select exactly 7 Gifts, 5 Talents, 3 Crafts (got ${gifts.length}, ${talents.length}, ${crafts.length}).`);
+      return;
+    }
+    const all = [...gifts, ...talents, ...crafts];
+    if (new Set(all.map(x => x.toLowerCase())).size !== all.length) {
+      ui.notifications.warn("Each skill may only be chosen once.");
+      return;
+    }
+    return this.actor.grantBasicSkills(gifts, talents, crafts);
   }
 
   static async #onRollDetails(event, target) {

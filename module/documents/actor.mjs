@@ -1054,6 +1054,75 @@ export class HolyLandsActor extends Actor {
     ui.notifications.info(`${this.name}: Talents & Crafts choice unlocked.`);
   }
 
+  /**
+   * The Adventurer/Fighter combined skill pool (p.58), or null. These classes
+   * pick 7 Gifts + 5 Talents + 3 Crafts from one list, all at +2 PF.
+   */
+  get basicSkillList() {
+    const raw = this.classItem?.system.basicSkillList || "";
+    if (!raw.trim()) return null;
+    return raw.split("\n").map(x => x.trim().replace(/\*$/, "")).filter(Boolean);
+  }
+
+  /**
+   * Grant the Adventurer/Fighter skill selection (p.58): 7 Gifts, 5 Talents,
+   * 3 Crafts - all at +2 PF - into their correct sections. Reuses the same
+   * creation lock as the standard Talent/Craft flow.
+   * @param {string[]} gifts   7 skill names.
+   * @param {string[]} talents 5 skill names.
+   * @param {string[]} crafts  3 skill names.
+   */
+  async grantBasicSkills(gifts, talents, crafts) {
+    if (this.type !== "character") return;
+    if (this.system.creation?.talentsCraftsChosen) {
+      ui.notifications.warn("Skills have already been chosen for this character.");
+      return;
+    }
+
+    const pack = game.packs.get("holy-lands-rpg.skills");
+    const packDocs = pack ? await pack.getDocuments() : [];
+    const findSkill = name => packDocs.find(d => d.name.toLowerCase() === name.toLowerCase());
+    const existing = new Set(this.items.filter(i => i.type === "skill").map(i => i.name.toLowerCase()));
+
+    const build = (name, section) => {
+      const match = findSkill(name);
+      const data = match
+        ? foundry.utils.mergeObject(match.toObject(), { system: { skillType: section, pf: 2 } })
+        : { name, type: "skill", img: "icons/svg/book.svg",
+            system: { skillType: section, pf: 2, combatAbilities: /combat\s*abilit/i.test(name), isCombatSkill: /^cs\s/i.test(name) } };
+      delete data._id;
+      return data;
+    };
+
+    const toCreate = [];
+    const skipped = [];
+    const add = (names, section) => {
+      for (const name of names) {
+        if (existing.has(name.toLowerCase())) { skipped.push(name); continue; }
+        toCreate.push(build(name, section));
+        existing.add(name.toLowerCase());
+      }
+    };
+    add(gifts, "gift");
+    add(talents, "talent");
+    add(crafts, "craft");
+
+    if (toCreate.length) await this.createEmbeddedDocuments("Item", toCreate);
+    await this.update({
+      "system.creation.talentsCraftsChosen": true,
+      "system.creation.giftsGranted": true
+    });
+
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} - Step 6: Skills (${this.classItem?.name})</strong> - all at +2 PF<br>`
+        + `Gifts: ${gifts.join(", ")}<br>`
+        + `Talents: ${talents.join(", ")}<br>`
+        + `Crafts: ${crafts.join(", ")}`
+        + (skipped.length ? `<br><em>Already held (skipped): ${skipped.join(", ")}</em>` : "")
+    });
+  }
+
   /** Rac/GM correction: unlock the starting Life & Faith roll. */
   async unlockStartingRoll() {
     if (!game.user.isGM) {

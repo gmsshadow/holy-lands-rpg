@@ -20,7 +20,7 @@
       "giantFolk"
     ],
     "blessingsType": "Blessings of Courage",
-    "grantedGifts": "Blacksmith\nBowsmith\nBuild/Construct\nCombat Abilities\nWeaponry\nWS (choice)",
+    "grantedGifts": "",
     "startingEquipment": "Auto-grant available (Step 9). Verify against Genesis Ch7.",
     "primaryAttribute": "",
     "primaryMin": 0,
@@ -155,7 +155,8 @@
     "coinGoldDie": "3d4",
     "coinGoldMult": 10,
     "coinSilverDie": "1d4",
-    "coinSilverMult": 3
+    "coinSilverMult": 3,
+    "basicSkillList": "Blacksmith\nBowsmith\nBuild/Construct\nCamp\nCombat Abilities\nCook\nCraft/Tinker\nCS Grapple\nCS Grapple Escape\nCS Ground Fight\nCS Tackling\nHorsemanship\nHP: Hearing\nIntimidation\nIrregular Sleep\nLight Sleep\nNavigation\nPlay Wind Instrument\nRepair Light Armor\nSiege Engines\nSignaling\nSneak\nSpeak addLG\nSwimming\nWeaponry\nWS Hand to Hand\nWS Heavy Arms\nWS Kick Attack\nWS Light Arms\nWS Missiles\nWS Paired Weapons\nWS Thrown"
   },
   "effects": [],
   "folder": null,

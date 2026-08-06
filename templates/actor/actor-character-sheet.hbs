@@ -208,6 +208,20 @@
 
   <div class="tab skills {{tabs.skills.cssClass}}" data-group="primary" data-tab="skills">
     <p class="hint">Drag skills from a compendium, or use the Add buttons. Open a skill to set its PF and links.</p>
+    {{#if hasBasicSkillList}}
+    {{#unless talentsCraftsChosen}}
+    <div class="step6-banner">
+      <span>Step 6: choose 7 Gifts, 5 Talents &amp; 3 Crafts (all +2) from the class pool?</span>
+      <button type="button" data-action="chooseBasicSkills" title="Adventurer/Fighter: pick all skills from one pool, all at +2 PF">
+        <i class="fas fa-list-check"></i> Choose Skills
+      </button>
+    </div>
+    {{else}}
+    {{#if isGM}}
+    <p class="hint"><a data-action="unlockTalentsCrafts"><i class="fas fa-lock-open"></i> unlock skill choice</a></p>
+    {{/if}}
+    {{/unless}}
+    {{/if}}
     {{#if hasClassGifts}}
     {{#unless giftsGranted}}
     <div class="step6-banner">

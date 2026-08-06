@@ -879,3 +879,12 @@ These are deliberate changes, flagged for review:
   exception on their last step), [3,0,0,0] / [4,2,0] / lone +2 invalid,
   perfect halving [8,4,2,1] valid. Verified across 16 distributions.
 - Warning wording notes the next-lowest must be at least half (rounded up).
+
+## v2.38.0 — Updated system background artwork
+
+- Replaced the system background (assets/images/background.jpg) with the new
+  wide landscape artwork (1024x595) - a cleric with a crucifix staff, an
+  archer and a bowman before a Gothic cathedral, with the Holy Lands RPG
+  logo. The 16:9-ish ratio suits the Foundry setup-screen banner far better
+  than the previous square image, which was centre-cropped. Same filename
+  and path, so the background/media entries in system.json are unchanged.

@@ -840,3 +840,17 @@ These are deliberate changes, flagged for review:
 - Warnings are soft (non-blocking), consistent with the other creation-step
   validations, and render in the existing warning slots - no sheet layout
   change.
+
+## v2.35.0 — Rule of Halves now applies down the whole chain
+
+- Corrected the Combat Abilities / Weapon Skills Rule of Halves: it now
+  checks EVERY bonus against the next lowest (down the sorted chain), not
+  just the top two. So [4,2,1] passes but [4,2,0]-style over-concentration
+  and any mid-chain break is caught.
+- Unassigned (zero) actions are ignored, so partial distributions like +1 to
+  three actions, or a single lone bonus, don't wrongly flag - the rule
+  governs how ASSIGNED points relate to each other.
+- No "+7 before it applies" caveat here (that's a general-Skill rule, not a
+  Combat Ability/Weapon Skill one), so it applies from the first point.
+- Verified across 11 distributions including perfect halving [8,4,2,1]
+  (valid), [3,1] (violation), even spreads, and lone bonuses.

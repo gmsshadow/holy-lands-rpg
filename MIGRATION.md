@@ -888,3 +888,9 @@ These are deliberate changes, flagged for review:
   logo. The 16:9-ish ratio suits the Foundry setup-screen banner far better
   than the previous square image, which was centre-cropped. Same filename
   and path, so the background/media entries in system.json are unchanged.
+
+## v2.39.0 — Skills sorted alphabetically on the character sheet
+
+- The Gifts, Talents, and Crafts columns now list their skills in
+  alphabetical order instead of insertion order, so they're much easier to
+  scan and find. Applies to all three columns independently.

@@ -233,9 +233,11 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     context.blessings = buckets.blessing;
 
     // Skill items grouped into the three paper-sheet sections.
-    context.gifts = buckets.skill.filter(i => i.system.skillType === "gift");
-    context.talents = buckets.skill.filter(i => i.system.skillType === "talent");
-    context.crafts = buckets.skill.filter(i => i.system.skillType === "craft");
+    // Sort each skill column alphabetically so they're easy to scan.
+    const byName = (a, b) => a.name.localeCompare(b.name);
+    context.gifts = buckets.skill.filter(i => i.system.skillType === "gift").sort(byName);
+    context.talents = buckets.skill.filter(i => i.system.skillType === "talent").sort(byName);
+    context.crafts = buckets.skill.filter(i => i.system.skillType === "craft").sort(byName);
   }
 
   /** @override */

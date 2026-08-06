@@ -854,3 +854,28 @@ These are deliberate changes, flagged for review:
   Combat Ability/Weapon Skill one), so it applies from the first point.
 - Verified across 11 distributions including perfect halving [8,4,2,1]
   (valid), [3,1] (violation), even spreads, and lone bonuses.
+
+## v2.36.0 — Rule of Halves uses integer halving down the chain
+
+- Final correct Rule of Halves for Combat Abilities and Weapon Skills: walk
+  every adjacent pair down the sorted Bonuses; each must be at least HALF of
+  the one above it, ROUNDED DOWN. So 0 legally counts as half of 1
+  (floor(1/2)=0) but not as half of 2+ (floor(2/2)=1).
+- This is the only rule consistent with all three handbook examples AND the
+  mid-chain requirement: [2,1,0,0] and [1,1,1,0] are valid; [3,0,0,0] fails
+  (0 < floor(3/2)=1); [4,2,0] fails (0 < floor(2/2)=1); [8,4,2,1] passes.
+  Zeros are kept in the chain (they count), resolving the earlier
+  zero-handling back-and-forth.
+- Warning wording updated to state the needed minimum for the next-lowest
+  Bonus rather than a "twice" ceiling.
+
+## v2.37.0 — Rule of Halves rounds UP (at least half), with 1-over-0 exception
+
+- Corrected the rounding: each Bonus down the chain must be at least half of
+  the one above it ROUNDED UP - next >= ceil(higher/2) - not rounded down.
+  So [5,2,...] now correctly FAILS (needs [5,3,...]); [7,3,...] fails (needs
+  +4). The sole exception is the 1->0 step: a +1 may sit above a +0.
+- All prior cases still hold: [2,1,0,0] and [1,1,1,0] valid (via the 1->0
+  exception on their last step), [3,0,0,0] / [4,2,0] / lone +2 invalid,
+  perfect halving [8,4,2,1] valid. Verified across 16 distributions.
+- Warning wording notes the next-lowest must be at least half (rounded up).

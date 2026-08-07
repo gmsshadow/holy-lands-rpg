@@ -133,4 +133,15 @@ export class NpcData extends foundry.abstract.TypeDataModel {
         : (table?.[category] ?? 10);
     }
   }
+
+  /**
+   * Notable skills as embedded skill items (drag-dropped from compendia or
+   * added custom), sorted alphabetically. Replaces the old free-text
+   * ArrayField; that data is migrated to items by a one-time hook.
+   */
+  get notableSkills() {
+    return this.parent.items
+      .filter(i => i.type === "skill")
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
 }

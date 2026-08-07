@@ -35,6 +35,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       declareRetreat: HolyLandsActorSheet.#onDeclareRetreat,
       npcSkillAdd: HolyLandsActorSheet.#onNpcSkillAdd,
       npcSkillDelete: HolyLandsActorSheet.#onNpcSkillDelete,
+      addCustomSkill: HolyLandsActorSheet.#onAddCustomSkill,
       levelUp: HolyLandsActorSheet.#onLevelUp,
       rollStartingLifeFaith: HolyLandsActorSheet.#onRollStartingLifeFaith,
       rollCreationAttributes: HolyLandsActorSheet.#onRollCreationAttributes,
@@ -202,6 +203,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       demon: "Demon"
     };
     context.isMonster = this.actor.system.npcKind === "monster";
+    context.notableSkills = this.actor.system.notableSkills;
   }
 
   /** Organize embedded items for the sheet. */
@@ -252,12 +254,6 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       }
     }
 
-    // NPC CS skills are an ArrayField: nameless inputs, rebuilt on change
-    // (numeric-key form paths don't merge reliably into arrays).
-    for (const input of this.element.querySelectorAll(".npc-skill-field")) {
-      input.addEventListener("change", this.#onNpcSkillChange.bind(this));
-    }
-
     // Character string-array rows (Sins, Phobias): same rebuild pattern.
     for (const input of this.element.querySelectorAll(".char-array-field")) {
       input.addEventListener("change", this.#onCharArrayChange.bind(this));
@@ -273,17 +269,6 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     if (arr[index] === undefined) return;
     arr[index] = input.value;
     await this.actor.update({ [`system.${path}`]: arr });
-  }
-
-  /** Persist an edit to one CS skill row. */
-  async #onNpcSkillChange(event) {
-    const input = event.currentTarget;
-    const index = Number(input.dataset.index);
-    const field = input.dataset.field;
-    const skills = foundry.utils.deepClone(this.actor.system.skills ?? []);
-    if (!skills[index]) return;
-    skills[index][field] = (field === "value") ? (Number(input.value) || 0) : input.value;
-    await this.actor.update({ "system.skills": skills });
   }
 
   /** Provide standard Item drag data. */
@@ -874,6 +859,17 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     const df = await this.#getDifficultyFactor();
     if (df === null) return;
     return this.actor.rollSkill(item.id, df);
+  }
+
+  /** Create a blank custom skill item (NPC Notable Skills), then open it. */
+  static async #onAddCustomSkill(event, target) {
+    const created = await this.actor.createEmbeddedDocuments("Item", [{
+      name: "New Skill",
+      type: "skill",
+      img: "icons/svg/book.svg",
+      system: { skillType: "craft", pf: 0 }
+    }]);
+    return created?.[0]?.sheet?.render(true);
   }
 
   static async #onRollSave(event, target) {

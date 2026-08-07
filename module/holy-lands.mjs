@@ -162,6 +162,36 @@ Hooks.once("ready", async function() {
     await actor.update({ "system.skills": null }, { diff: false, recursive: false });
     ui.notifications?.info(`Holy Lands: migrated ${toCreate.length} skills to items for ${actor.name}.`);
   }
+
+  // NPC Notable Skills: legacy free-text ArrayField -> skill items so they
+  // support drag-drop from compendia and share the item-based skill UI.
+  for (const actor of game.actors) {
+    if (actor.type !== "npc") continue;
+    const legacy = actor._source?.system?.skills;
+    if (!Array.isArray(legacy) || !legacy.length) continue;
+
+    const toCreate = [];
+    for (const entry of legacy) {
+      const name = (entry?.name || "").trim();
+      if (!name) continue;
+      toCreate.push({
+        name,
+        type: "skill",
+        img: "icons/svg/book.svg",
+        system: {
+          skillType: "craft",
+          pf: entry.value || 0,
+          isCombatSkill: /^cs\s/i.test(name)
+        }
+      });
+    }
+    if (toCreate.length) {
+      await actor.createEmbeddedDocuments("Item", toCreate);
+      console.log(`Holy Lands RPG | Migrated ${toCreate.length} notable skills to items for ${actor.name}`);
+    }
+    await actor.update({ "system.skills": null }, { diff: false, recursive: false });
+    ui.notifications?.info(`Holy Lands: migrated ${toCreate.length} notable skills to items for ${actor.name}.`);
+  }
 });
 
 /* -------------------------------------------- */

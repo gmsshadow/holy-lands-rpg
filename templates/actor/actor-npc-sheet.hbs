@@ -82,21 +82,21 @@
     <span class="hint">Leave override blank to use nDEF + equipped armor.</span>
   </div>
 
-  <h3>Notable Skills and Abilities (CS)</h3>
-  <div class="skills-list npc-cs-list">
-    {{#each system.skills as |skill index|}}
-    <div class="skill">
-      <input type="text" class="npc-skill-field" data-index="{{index}}" data-field="name" value="{{skill.name}}" placeholder="Skill or ability"/>
-      <span class="skill-pf-plus">+</span>
-      <input type="number" class="npc-skill-field skill-pf" data-index="{{index}}" data-field="value" value="{{skill.value}}"/>
-      <button type="button" data-action="roll" data-roll="1d20 + {{skill.value}}" data-label="{{skill.name}}">
-        <i class="fas fa-dice-d20"></i>
-      </button>
-      <a class="item-control" data-action="npcSkillDelete" data-index="{{index}}" title="Remove"><i class="fas fa-trash"></i></a>
-    </div>
+  <h3>Notable Skills and Abilities</h3>
+  <p class="hint">Drag skills from a compendium, or add a custom one. Open a skill to set its PF and links.</p>
+  <ol class="skill-item-list npc-cs-list">
+    {{#each notableSkills as |item|}}
+    <li class="item skill-row" data-item-id="{{item.id}}">
+      <span class="skill-name">{{item.name}}</span>
+      <span class="skill-pf">+{{item.system.pf}}</span>
+      <a class="item-control" data-action="rollSkill" data-item-id="{{item.id}}" title="Roll"><i class="fas fa-dice-d20"></i></a>
+      <a class="item-control" data-action="itemEdit" title="Edit"><i class="fas fa-edit"></i></a>
+      <a class="item-control" data-action="itemDelete" title="Delete"><i class="fas fa-trash"></i></a>
+    </li>
     {{/each}}
-    <a class="item-control" data-action="npcSkillAdd" title="Add skill"><i class="fas fa-plus"></i> Add skill</a>
-  </div>
+  </ol>
+  <a class="item-control" data-action="addCustomSkill" title="Add a custom skill"><i class="fas fa-plus"></i> Add custom skill</a>
+
 
   <h3>Weapon Skills (WS)</h3>
   <div class="active-ws-bar">

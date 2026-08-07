@@ -894,3 +894,18 @@ These are deliberate changes, flagged for review:
 - The Gifts, Talents, and Crafts columns now list their skills in
   alphabetical order instead of insertion order, so they're much easier to
   scan and find. Applies to all three columns independently.
+
+## v2.40.0 — NPC Notable Skills are now item-based (drag-drop + custom)
+
+- Rewrote the NPC "Notable Skills and Abilities" section to use skill ITEMS
+  like the PC sheet, instead of a free-text ArrayField. This means you can
+  drag skills straight from a compendium onto an NPC, and they carry their
+  links (weapon skill, combat ability, etc). Each row has a roll, edit, and
+  delete control, sorted alphabetically.
+- "Add custom skill" creates a blank skill item and opens it, so bespoke
+  monster abilities are still easy to make.
+- One-time migration converts any existing NPC's free-text notable skills
+  into skill items (name + PF preserved, CS-prefixed ones flagged) on first
+  load by a GM, so nothing is lost.
+- rollSkill/itemEdit/itemDelete already worked for any actor type, so NPC
+  skill rows reuse them directly.

@@ -1,0 +1,26 @@
+{
+  "_id": "W6H5PqaoDFcyiL42",
+  "_key": "!items!W6H5PqaoDFcyiL42",
+  "name": "Pistol Crossbow Bolts (half dozen)",
+  "type": "equipment",
+  "img": "icons/svg/target.svg",
+  "system": {
+    "description": "",
+    "quantity": 6,
+    "weight": 0,
+    "cost": {
+      "gold": 5,
+      "silver": 0
+    },
+    "costWee": 4,
+    "costGiant": 7,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

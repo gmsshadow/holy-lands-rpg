@@ -1,0 +1,26 @@
+{
+  "_id": "mDEDaDDnTjp1D44c",
+  "_key": "!items!mDEDaDDnTjp1D44c",
+  "name": "Longbow Arrows (dozen)",
+  "type": "equipment",
+  "img": "icons/svg/target.svg",
+  "system": {
+    "description": "",
+    "quantity": 12,
+    "weight": 0,
+    "cost": {
+      "gold": 20,
+      "silver": 0
+    },
+    "costWee": 14,
+    "costGiant": 29,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

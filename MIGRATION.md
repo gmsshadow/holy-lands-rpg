@@ -931,3 +931,15 @@ These are deliberate changes, flagged for review:
 - Removed the plain **Mounted Archery** skill from the compendium - it isn't
   a real rules entry; only the CS version (CS Mounted Archery, Chapter 4)
   exists. No class list referenced the plain one. Skills compendium is now 95.
+
+## v2.43.0 — Ammunition added to the equipment compendium
+
+- Added the 7 ammunition types (Genesis Ch8) that were deferred back in
+  v2.15.0: Common Arrows, Horsemans Bow Arrows, Longbow Arrows (per dozen);
+  Crossbow Bolts, Pistol Crossbow Bolts, Heavy Crossbow Bolts (per half
+  dozen); and Blowgun Darts (per three). Each carries its common/dwarf cost
+  plus the [wee | giant] stature brackets, and its bundle quantity.
+- EquipmentData gains optional costWee/costGiant stature cost brackets (0 =
+  not bracketed) so ammo - and any other stature-priced gear - prices
+  correctly; the equipment item sheet now exposes them.
+- Equipment compendium is now 81 items.

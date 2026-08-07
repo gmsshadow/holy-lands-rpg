@@ -1,0 +1,26 @@
+{
+  "_id": "yGrSgkeuCjFDv8wf",
+  "_key": "!items!yGrSgkeuCjFDv8wf",
+  "name": "Horsemans Bow Arrows (dozen)",
+  "type": "equipment",
+  "img": "icons/svg/target.svg",
+  "system": {
+    "description": "",
+    "quantity": 12,
+    "weight": 0,
+    "cost": {
+      "gold": 11,
+      "silver": 0
+    },
+    "costWee": 8,
+    "costGiant": 16,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

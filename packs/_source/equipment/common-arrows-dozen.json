@@ -1,0 +1,26 @@
+{
+  "_id": "3zLAhT9VBmf70Oyi",
+  "_key": "!items!3zLAhT9VBmf70Oyi",
+  "name": "Common Arrows (dozen)",
+  "type": "equipment",
+  "img": "icons/svg/target.svg",
+  "system": {
+    "description": "",
+    "quantity": 12,
+    "weight": 0,
+    "cost": {
+      "gold": 17,
+      "silver": 0
+    },
+    "costWee": 12,
+    "costGiant": 24,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

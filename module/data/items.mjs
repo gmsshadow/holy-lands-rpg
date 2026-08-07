@@ -77,6 +77,10 @@ export class EquipmentData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
       ...baseItemSchema(),
+      // Optional stature cost brackets (common/dwarf is the base cost.gold);
+      // used by ammunition and any other stature-priced gear. 0 = not bracketed.
+      costWee: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
+      costGiant: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
       equipped: new fields.BooleanField({ required: true, initial: false })
     };
   }

@@ -1,0 +1,26 @@
+{
+  "_id": "x9pQhh8MdJPfhMIu",
+  "_key": "!items!x9pQhh8MdJPfhMIu",
+  "name": "Blowgun Darts (per three)",
+  "type": "equipment",
+  "img": "icons/svg/target.svg",
+  "system": {
+    "description": "",
+    "quantity": 3,
+    "weight": 0,
+    "cost": {
+      "gold": 2,
+      "silver": 0
+    },
+    "costWee": 1,
+    "costGiant": 3,
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {}
+}

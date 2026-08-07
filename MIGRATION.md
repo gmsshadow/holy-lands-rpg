@@ -909,3 +909,13 @@ These are deliberate changes, flagged for review:
   load by a GM, so nothing is lost.
 - rollSkill/itemEdit/itemDelete already worked for any actor type, so NPC
   skill rows reuse them directly.
+
+## v2.41.0 — Two missing skills added to the compendium
+
+- Added **CS Mounted Archery** (p.35) - the combat-skill version (fire while
+  riding, replaces WS Missiles ATT), flagged isCombatSkill with prerequisite
+  "Horsemanship, WS Missiles". Distinct from the existing plain "Mounted
+  Archery" skill.
+- Added **Miracles: Clerical** (p.40) - the Clerical counterpart to the
+  existing "Miracles: High" skill.
+- Skills compendium is now 96 items.

@@ -919,3 +919,15 @@ These are deliberate changes, flagged for review:
 - Added **Miracles: Clerical** (p.40) - the Clerical counterpart to the
   existing "Miracles: High" skill.
 - Skills compendium is now 96 items.
+
+## v2.42.0 — NPC Miracles/Blessings section; removed stray Mounted Archery
+
+- Added **Miracles** and **Blessings** sections to the NPC sheet (after
+  Armor). Both are item-based: drag from the Miracles/Blessings compendia or
+  create custom ones, each with a cast/use button (deducts Faith, which NPCs
+  already track), edit, and delete. Mainly for Christian NPCs - evil clerics,
+  saints, and the like. castMiracle/useBlessing already worked for any actor
+  type.
+- Removed the plain **Mounted Archery** skill from the compendium - it isn't
+  a real rules entry; only the CS version (CS Mounted Archery, Chapter 4)
+  exists. No class list referenced the plain one. Skills compendium is now 95.

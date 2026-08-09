@@ -962,3 +962,20 @@ These are deliberate changes, flagged for review:
   is forced on a damage roll - the Rac decides when a blow warrants it.
 - Round-scoped conditions expire automatically when the combat tracker
   advances the Round.
+
+## v2.45.0 — Added Book of Life and Book of the Dead to documentation
+
+- Added HLRPG_BookLife.pdf and HLRPG_BookDead.pdf to documentation/ for
+  reference. These are likely relevant to the upcoming rest/recovery and
+  death/coma workflow.
+
+## v2.46.0 — Difficulty Factor is now a named dropdown
+
+- The Difficulty Factor prompt (used by skill, ability, and save-override
+  rolls) now offers the named tiers from the book instead of a free-number
+  field: Simple (DF 7), Easy (DF 14), Moderate (DF 21), High (DF 28),
+  Extreme (DF 35). Moderate is the default.
+- A "Custom..." option remains for edge cases, revealing a number field, so
+  the Rac can still set an arbitrary DF when needed.
+- Derived save DFs (NPC category, fixed PC saves) are unchanged - they're
+  computed, not manually entered.

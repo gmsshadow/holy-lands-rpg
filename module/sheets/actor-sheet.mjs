@@ -11,6 +11,15 @@ const TextEditorImpl = foundry.applications.ux.TextEditor.implementation;
 export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   /** @override */
+  /** Named Difficulty Factor tiers (Genesis). Used by the DF picker. */
+  static DF_TIERS = [
+    { label: "Simple", df: 7 },
+    { label: "Easy", df: 14 },
+    { label: "Moderate", df: 21 },
+    { label: "High", df: 28 },
+    { label: "Extreme", df: 35 }
+  ];
+
   static DEFAULT_OPTIONS = {
     classes: ["holy-lands-rpg", "sheet", "actor"],
     position: { width: 720, height: 800 },
@@ -1153,24 +1162,46 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   }
 
   /**
-   * Ask the user for a Difficulty Factor.
+   * Ask the user for a Difficulty Factor via the named tiers (Genesis: Simple
+   * 7, Easy 14, Moderate 21, High 28, Extreme 35), with a Custom option for
+   * edge cases.
    * @returns {Promise<number|null>} The DF, or null if cancelled.
    */
   async #getDifficultyFactor() {
-    const df = await DialogV2.prompt({
+    const tiers = HolyLandsActorSheet.DF_TIERS;
+    const options = tiers
+      .map(t => `<option value="${t.df}"${t.df === 21 ? " selected" : ""}>${t.label} (DF ${t.df})</option>`)
+      .join("") + `<option value="custom">Custom...</option>`;
+    const result = await DialogV2.wait({
       window: { title: "Difficulty Factor" },
       content: `
         <div class="form-group">
-          <label>Enter Difficulty Factor (DF):</label>
-          <input type="number" name="df" value="10" autofocus/>
-        </div>`,
-      ok: {
-        label: "Roll",
-        callback: (event, button) => Number(button.form.elements.df.value)
-      },
+          <label>Difficulty:</label>
+          <select name="df" autofocus>${options}</select>
+        </div>
+        <div class="form-group df-custom" style="display:none;">
+          <label>Custom DF:</label>
+          <input type="number" name="dfCustom" value="21"/>
+        </div>
+        <script>(function(){
+          const root = document.currentScript.parentElement;
+          const sel = root.querySelector('select[name=df]');
+          const custom = root.querySelector('.df-custom');
+          sel.addEventListener('change', () => {
+            custom.style.display = (sel.value === 'custom') ? '' : 'none';
+          });
+        })();</script>`,
+      buttons: [
+        { action: "roll", label: "Roll", default: true, callback: (event, button) => {
+          const v = button.form.elements.df.value;
+          return (v === "custom") ? Number(button.form.elements.dfCustom.value) : Number(v);
+        } },
+        { action: "cancel", label: "Cancel" }
+      ],
       rejectClose: false
     });
-    return (typeof df === "number" && Number.isFinite(df)) ? df : null;
+    if (result === "cancel" || result === undefined || result === null) return null;
+    return Number.isFinite(result) ? result : null;
   }
 
   /**

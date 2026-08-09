@@ -1611,6 +1611,22 @@ export class HolyLandsActor extends Actor {
     const advBonus = this.getCombatFlag("advNat20") ? 3 : 0;
     const totalBonus = actionBonus + advBonus + (modifier || 0);
 
+    // RANGED COMBAT (Book of Life p.14 / Combat Handbook p.28): missiles (and
+    // thrown vs an unaware target) don't use the Dodge/Defend loop. From a
+    // table-play standpoint the Rac establishes the numbers BEFORE the dice
+    // are thrown: set the DF (range/movement) and the target's shield stance,
+    // combine with tDEF, and the player rolls once against the higher gate.
+    // (Beating both gates separately is identical to beating the higher one,
+    // since a single roll is compared to both.)
+    const weaponSkillIsMissile = (weaponSkill === "missile");
+    const weaponSkillIsThrown = (weaponSkill === "thrown");
+    if (targetActor && (weaponSkillIsMissile || weaponSkillIsThrown)) {
+      return this._rangedAttackFlow(weapon, targetActor, {
+        totalBonus, atrCost, mode, multiplier, modeLabel, weaponSkill,
+        isThrown: weaponSkillIsThrown
+      });
+    }
+
     const roll = new Roll("1d20 + @bonus", { bonus: totalBonus });
     await roll.evaluate();
 
@@ -1671,38 +1687,6 @@ export class HolyLandsActor extends Actor {
       attackTotal, isNat20, mode, multiplier, free, isCounter,
       atrCost, weaponSkill
     };
-
-    // RANGED COMBAT (Book of Life p.14 / Combat Handbook p.28): WS Missiles
-    // (and WS Thrown vs an unaware/slow target) fire too fast to Dodge or
-    // Defend. Instead of the defense loop, the shot - having beaten tDEF -
-    // must ALSO beat a Rac-set DF, plus the target's shield DEF (passive) or
-    // shield DEF + Combat Abilities DEF (active). No defense roll is made.
-    const isMissile = (weaponSkill === "missile");
-    const isThrown = (weaponSkill === "thrown");
-    if (isMissile) {
-      return this._resolveRangedAttack(weapon, targetActor, attackContext, roll, { isThrown: false });
-    }
-    if (isThrown) {
-      // Thrown uses the ranged DF path only vs an unaware/slow target who
-      // can't Dodge/Defend (Book of Life p.14); otherwise it's normal melee-
-      // style defense. Ask the Rac which applies.
-      const unaware = await foundry.applications.api.DialogV2.wait({
-        window: { title: "Thrown Attack" },
-        content: `<p>Is ${targetActor.name} unaware or too slow to Dodge/Defend this thrown attack?</p>
-          <p class="hint">If so, it resolves like a missile (beat a Rac-set DF). If they can react, they Dodge or Defend normally.</p>`,
-        buttons: [
-          { action: "ranged", label: "Unaware - use DF", default: true },
-          { action: "defend", label: "Can react - Dodge/Defend" },
-          { action: "cancel", label: "Cancel" }
-        ],
-        rejectClose: false
-      });
-      if (!unaware || unaware === "cancel") { await this.spendActionAtR(atrCost); return; }
-      if (unaware === "ranged") {
-        return this._resolveRangedAttack(weapon, targetActor, attackContext, roll, { isThrown: true });
-      }
-      // else fall through to normal defense below
-    }
 
     await ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
@@ -1766,21 +1750,49 @@ export class HolyLandsActor extends Actor {
   }
 
   /**
-   * Resolve a ranged attack (Book of Life p.14 / Combat Handbook p.28). The
-   * shot has already beaten tDEF (Step 1). Step 2: it must also beat a Rac-set
-   * DF, to which the target's shield adds its DEF Bonus (passive), or shield
-   * DEF + the target's Combat Abilities DEF Bonus (active defense vs a
-   * known-origin missile). Cover can add a further +1..+5. No defense roll is
-   * made. Both steps are checked separately.
+   * Ranged attack flow (Book of Life p.14 / Combat Handbook p.28), ordered for
+   * table play: establish the numbers FIRST, then roll once.
+   *   1. Read the target's tDEF and shield.
+   *   2. Rac sets the DF (range/movement/weather) and the shield stance:
+   *        - passive (held toward fire): DF + shield DEF
+   *        - active (aware, known origin): DF + shield DEF + target's CA DEF
+   *      plus optional cover (+1..+5).
+   *   3. The effective target is the HIGHER of tDEF and the effective DF -
+   *      beating both separately is identical to beating the higher, since one
+   *      roll is compared to both. "Beat" is strict (ties go to the defender).
+   *   4. The player rolls once against that target.
+   * Missiles always use this path; thrown uses it only vs an unaware/slow
+   * target (the Rac is asked), else it falls back to normal Dodge/Defend.
    */
-  async _resolveRangedAttack(weapon, defender, attackContext, roll, { isThrown = false } = {}) {
-    const { attackTotal, mode, multiplier, atrCost, weaponSkill, isNat20 } = attackContext;
+  async _rangedAttackFlow(weapon, defender, ctx) {
+    const { totalBonus, atrCost, mode, multiplier, modeLabel, weaponSkill, isThrown } = ctx;
     const weaponName = weapon?.name || (isThrown ? "Thrown" : "Missile");
+
+    // Thrown: confirm the target can't Dodge/Defend, else use the melee loop.
+    if (isThrown) {
+      const unaware = await foundry.applications.api.DialogV2.wait({
+        window: { title: "Thrown Attack" },
+        content: `<p>Is ${defender.name} unaware or too slow to Dodge/Defend this thrown attack?</p>
+          <p class="hint">If so, it resolves like a missile (beat a Rac-set DF). If they can react, they Dodge or Defend normally.</p>`,
+        buttons: [
+          { action: "ranged", label: "Unaware - use DF", default: true },
+          { action: "defend", label: "Can react - Dodge/Defend" },
+          { action: "cancel", label: "Cancel" }
+        ],
+        rejectClose: false
+      });
+      if (!unaware || unaware === "cancel") return;
+      if (unaware === "defend") {
+        // Fall back to the normal melee attack path (with the same bonus).
+        return this._meleeAttackFromRanged(weapon, defender, ctx);
+      }
+    }
+
     const tDEF = defender.system?.defense?.tDEF || 4;
     const shieldDef = defender.equippedShieldDefBonus;
     const defenderDEF = defender.system?.combat?.defendBonus || 0;
 
-    // Rac sets the base DF (range/movement/lighting/weather) and shield stance.
+    // Rac establishes the DF and shield stance BEFORE the roll.
     const DF_TIERS = [
       { label: "Simple", df: 7 }, { label: "Easy", df: 14 }, { label: "Moderate", df: 21 },
       { label: "High", df: 28 }, { label: "Extreme", df: 35 }
@@ -1799,14 +1811,14 @@ export class HolyLandsActor extends Actor {
 
     const result = await foundry.applications.api.DialogV2.wait({
       window: { title: `Ranged Attack - ${defender.name}` },
-      content: `<p>${this.name}'s shot beats armor (roll ${attackTotal} vs tDEF ${tDEF}). Set the Difficulty to hit:</p>
+      content: `<p>${this.name} takes aim at ${defender.name} (armor tDEF ${tDEF}). Set the shot's Difficulty before rolling:</p>
         <div class="form-group"><label>Difficulty (range, movement, etc.):</label><select name="df" autofocus>${tierOpts}</select></div>
         <div class="form-group df-custom" style="display:none;"><label>Custom DF:</label><input type="number" name="dfCustom" value="7"/></div>
         ${shieldNote}
         <div class="form-group"><label>Cover (optional +1..+5 to DF):</label><input type="number" name="cover" value="0" min="0" max="5"/></div>
         <script>(function(){const r=document.currentScript.parentElement;const s=r.querySelector('select[name=df]');const c=r.querySelector('.df-custom');s.addEventListener('change',()=>{c.style.display=s.value==='custom'?'':'none';});})();</script>`,
       buttons: [
-        { action: "resolve", label: "Resolve", default: true, callback: (event, button) => {
+        { action: "resolve", label: "Set target & roll", default: true, callback: (event, button) => {
           const f = button.form.elements;
           const baseDf = (f.df.value === "custom") ? Number(f.dfCustom.value) : Number(f.df.value);
           const shieldMode = f.shield ? f.shield.value : "none";
@@ -1817,38 +1829,103 @@ export class HolyLandsActor extends Actor {
       ],
       rejectClose: false
     });
+    if (!result || result === "cancel") return;
 
-    if (!result || result === "cancel") {
-      await this.spendActionAtR(atrCost);
-      return;
-    }
+    // Compute the effective DF and the single target number (higher gate).
+    let effDF = result.baseDf + (result.cover || 0);
+    const dfParts = [`DF ${result.baseDf}`];
+    if (result.cover) dfParts.push(`cover +${result.cover}`);
+    if (result.shieldMode === "passive") { effDF += shieldDef; dfParts.push(`shield +${shieldDef}`); }
+    else if (result.shieldMode === "active") { effDF += shieldDef + defenderDEF; dfParts.push(`shield +${shieldDef}`, `DEF +${defenderDEF}`); }
 
-    // Compute the effective DF (Step 2 target number).
-    let df = result.baseDf + (result.cover || 0);
-    const parts = [`DF ${result.baseDf}`];
-    if (result.cover) parts.push(`cover +${result.cover}`);
-    if (result.shieldMode === "passive") { df += shieldDef; parts.push(`shield +${shieldDef}`); }
-    else if (result.shieldMode === "active") { df += shieldDef + defenderDEF; parts.push(`shield +${shieldDef}`, `DEF +${defenderDEF}`); }
+    const target = Math.max(tDEF, effDF);
+    const targetSource = (effDF >= tDEF) ? `${dfParts.join(" + ")} = ${effDF}` : `tDEF ${tDEF}`;
 
-    const beatsDF = isNat20 || (attackTotal > df);
+    // Now roll once against the established target.
+    const roll = new Roll("1d20 + @bonus", { bonus: totalBonus });
+    await roll.evaluate();
+    let natRoll = null;
+    for (const term of roll.terms) { if (term.results?.length) { natRoll = term.results[0].result; break; } }
+    const isNat20 = natRoll === 20;
+    const isNat1 = natRoll === 1;
+    let attackTotal = roll.total;
+    // Condition Half Roll (Stunned/Dazed) applies to the attacker's shot too.
+    if (this.conditionHalfRolls && !isNat1) attackTotal = Math.ceil((natRoll ?? 0) / 2) + totalBonus;
+
     await this.spendActionAtR(atrCost);
 
-    if (!beatsDF) {
+    // Nat 1 always misses; Nat 20 always hits; else beat the target (strict).
+    const hit = !isNat1 && (isNat20 || (attackTotal > target));
+
+    if (!hit) {
       return ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: this }),
-        flavor: `${weaponName} Attack: ${attackTotal} beats tDEF ${tDEF}, but must also beat ${parts.join(" + ")} = ${df} - <strong>Miss</strong> (glances off / falls short).`,
+        flavor: `${weaponName}${modeLabel} Attack: ${attackTotal}${isNat1 ? " <strong>(Natural 1)</strong>" : ""} vs target ${target} (tDEF ${tDEF}; ${targetSource}) - <strong>Miss</strong>.`,
         rolls: [roll]
       });
     }
 
     await ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: `${weaponName} Attack: ${attackTotal} beats tDEF ${tDEF} AND ${parts.join(" + ")} = ${df} - <strong>Hit!</strong>`,
+      flavor: `${weaponName}${modeLabel} Attack: ${attackTotal}${isNat20 ? " <strong>(Natural 20!)</strong>" : ""} vs target ${target} (tDEF ${tDEF}; ${targetSource}) - <strong>Hit!</strong>`,
       rolls: [roll]
     });
 
-    // On a hit, resolve damage (reusing the standard damage path).
+    // On a hit, resolve damage via the standard path.
+    const attackContext = { attackTotal, isNat20, mode, multiplier, free: false, isCounter: false, atrCost, weaponSkill };
     return this._resolveDamage(weapon, defender, attackContext);
+  }
+
+  /**
+   * Thrown-vs-aware fallback: resolve as a normal melee-style attack. Rolls
+   * once, applies the tDEF gate, then the Dodge/Defend loop.
+   */
+  async _meleeAttackFromRanged(weapon, defender, ctx) {
+    const { totalBonus, atrCost, mode, multiplier, modeLabel, weaponSkill } = ctx;
+    const weaponName = weapon?.name || "Thrown";
+    const roll = new Roll("1d20 + @bonus", { bonus: totalBonus });
+    await roll.evaluate();
+    let natRoll = null;
+    for (const term of roll.terms) { if (term.results?.length) { natRoll = term.results[0].result; break; } }
+    const isNat20 = natRoll === 20;
+    const isNat1 = natRoll === 1;
+    let attackTotal = roll.total;
+    if (this.conditionHalfRolls && !isNat1) attackTotal = Math.ceil((natRoll ?? 0) / 2) + totalBonus;
+
+    if (isNat1) {
+      await this.spendActionAtR(atrCost);
+      await defender.update({ "system.combat.halfDefenseFlag": true }).catch(() => {});
+      return ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        flavor: `${weaponName}${modeLabel} Attack: <strong>Natural 1 - Automatic Failure!</strong>`,
+        rolls: [roll]
+      });
+    }
+
+    const tDEF = defender.system?.defense?.tDEF || 4;
+    if (!isNat20 && (attackTotal <= tDEF)) {
+      await this.spendActionAtR(atrCost);
+      return ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        flavor: `${weaponName}${modeLabel} Attack: ${attackTotal} vs tDEF ${tDEF} - <strong>Attack Failed (armor holds)</strong>`,
+        rolls: [roll]
+      });
+    }
+
+    await ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `${weaponName}${modeLabel} Attack: ${attackTotal}${isNat20 ? " (Natural 20!)" : ""} vs tDEF ${tDEF} - beats armor, ${defender.name} must Dodge or Defend!`,
+      rolls: [roll]
+    });
+
+    const attackContext = { attackTotal, isNat20, mode, multiplier, free: false, isCounter: false, atrCost, weaponSkill };
+    let defenseChoice = "defend";
+    if (defender.getCombatFlag("retreating")) defenseChoice = "dodge";
+    else if (defender.isOwner) {
+      defenseChoice = await this._promptDefenseChoice(defender);
+      if (!defenseChoice) { await this.spendActionAtR(atrCost); return; }
+    }
+    return this._resolveDefense(weapon, defender, attackContext, defenseChoice);
   }
 
   /** Resolve defense roll and determine hit/miss. */

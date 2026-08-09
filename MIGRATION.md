@@ -1000,3 +1000,21 @@ These are deliberate changes, flagged for review:
   DF 7 + shield 3 = 10). The Combat Handbook's stray "a 12 glances off"
   aside contradicts its own arithmetic (12 > 10) and is treated as an
   erratum.
+
+## v2.48.0 — Ranged combat reordered for table play (set target, then roll)
+
+- Ranged attacks now establish the numbers BEFORE the dice are thrown, which
+  matches how a table actually plays: on firing, the Rac is prompted for the
+  DF and the target's shield stance (none/passive/active) plus cover, the
+  effective DF is combined with tDEF, and the player then rolls once against
+  the higher of the two gates.
+- This is mechanically identical to the previous "beat both gates
+  separately" (a single roll compared to both gates = beating the higher),
+  but reads correctly in play: "you need to beat 12" is stated before the
+  roll, not after.
+- Confirmed against both worked examples, including the Combat Handbook's
+  ork: with its (omitted) +2 active-defense DEF restored, the active DF is
+  7+3+2=12 and a roll of 12 correctly glances off (ties go to the defender /
+  strict beat), reconciling the book's example.
+- Thrown-vs-aware still falls back to the normal Dodge/Defend loop; Half Roll
+  conditions and Nat 1/20 handling carried into the new flow.

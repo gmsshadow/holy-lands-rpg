@@ -33,6 +33,9 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       useBlessing: HolyLandsActorSheet.#onUseBlessing,
       forfeitAdvantage: HolyLandsActorSheet.#onForfeitAdvantage,
       declareRetreat: HolyLandsActorSheet.#onDeclareRetreat,
+      applyCondition: HolyLandsActorSheet.#onApplyCondition,
+      clearCondition: HolyLandsActorSheet.#onClearCondition,
+      rollInjury: HolyLandsActorSheet.#onRollInjury,
       npcSkillAdd: HolyLandsActorSheet.#onNpcSkillAdd,
       npcSkillDelete: HolyLandsActorSheet.#onNpcSkillDelete,
       addCustomSkill: HolyLandsActorSheet.#onAddCustomSkill,
@@ -107,6 +110,14 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
     // Tab state (active classes on first render; changeTab handles the rest)
     context.tabs = this.#prepareTabs();
+
+    // Active conditions (Critical Injuries) - for both actor types.
+    const CONDITIONS = actor.constructor.CONDITIONS;
+    context.activeConditions = Object.keys(actor.conditions ?? {}).map(k => ({
+      key: k,
+      label: CONDITIONS[k]?.label ?? k,
+      note: CONDITIONS[k]?.note ?? ""
+    }));
 
     if (actor.type === "character") this.#prepareCharacterContext(context);
     if (actor.type === "npc") this.#prepareNpcContext(context);
@@ -907,6 +918,35 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
   static async #onDeclareRetreat(event, target) {
     return this.actor.declareRetreat();
+  }
+
+  /** Apply a condition chosen from a picker. */
+  static async #onApplyCondition(event, target) {
+    const CONDITIONS = this.actor.constructor.CONDITIONS;
+    const options = Object.entries(CONDITIONS)
+      .map(([k, def]) => `<option value="${k}">${def.label}</option>`).join("");
+    const chosen = await foundry.applications.api.DialogV2.wait({
+      window: { title: `Apply Condition - ${this.actor.name}` },
+      content: `<p>Critical Injuries are a Rac tool (Combat Handbook 11). Apply which condition?</p>
+        <div class="form-group"><label>Condition:</label><select name="cond" autofocus>${options}</select></div>`,
+      buttons: [
+        { action: "apply", label: "Apply", default: true, callback: (e, b) => b.form.elements.cond.value },
+        { action: "cancel", label: "Cancel" }
+      ],
+      rejectClose: false
+    });
+    if (!chosen || chosen === "cancel") return;
+    return this.actor.applyCondition(chosen);
+  }
+
+  static async #onClearCondition(event, target) {
+    const key = target.dataset.condition;
+    if (key) return this.actor.clearCondition(key);
+    return this.actor.clearAllConditions();
+  }
+
+  static async #onRollInjury(event, target) {
+    return this.actor.rollInjurySeverity();
   }
 
   static async #onNpcSkillAdd(event, target) {

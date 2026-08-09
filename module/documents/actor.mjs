@@ -160,6 +160,144 @@ export class HolyLandsActor extends Actor {
     return this.setFlag("holy-lands-rpg", "roundWeaponSkill", key);
   }
 
+  /* -------------------------------------------- */
+  /*  Conditions (Critical Injuries)              */
+  /* -------------------------------------------- */
+
+  /**
+   * Condition definitions (Combat Handbook, Section 11). Each has a default
+   * duration in Rounds (null = indefinite / needs recovery) and the effects
+   * it imposes. "halfRolls" makes the actor's rolls Half Rolls; "noBonuses"
+   * additionally strips Bonuses (the Dazed "Critical Half Rolls"); "noActions"
+   * means the actor can't act. Broken/Terminal are day-scale narrative states.
+   */
+  static CONDITIONS = {
+    stunned:      { label: "Stunned", rounds: 1, halfRolls: true },
+    dazed:        { label: "Dazed", rounds: 3, halfRolls: true, noBonuses: true, note: "Critical Half Rolls (no Bonuses) 1 Round, then Half Rolls 2 more" },
+    unconscious:  { label: "Unconscious", rounds: null, noActions: true, note: "No actions for 1d4 Rounds; vulnerable to follow-up" },
+    broken:       { label: "Broken", rounds: null, noActions: true, note: "Unconscious + a body part disabled; treat within 1d4 days or Terminal" },
+    terminal:     { label: "Terminal", rounds: null, note: "Dying: cannot regain Life; death in 1d4 days without a Miracle or advanced healing" }
+  };
+
+  /** Currently active conditions: { key: { appliedRound, expiresRound|null } }. */
+  get conditions() {
+    return this.getFlag("holy-lands-rpg", "conditions") ?? {};
+  }
+
+  /** Whether a given condition is currently active. */
+  hasCondition(key) {
+    return !!this.conditions[key];
+  }
+
+  /**
+   * True if the actor's rolls are currently Half Rolls due to a condition
+   * (Stunned or Dazed). Combat rolls consult this.
+   */
+  get conditionHalfRolls() {
+    const active = this.conditions;
+    return Object.keys(active).some(k => this.constructor.CONDITIONS[k]?.halfRolls);
+  }
+
+  /** True if the actor cannot act (Unconscious/Broken). */
+  get conditionNoActions() {
+    const active = this.conditions;
+    return Object.keys(active).some(k => this.constructor.CONDITIONS[k]?.noActions);
+  }
+
+  /**
+   * Apply a condition. Round-scoped ones (Stunned/Dazed) get an expiry based
+   * on the current combat Round; day-scale ones (Unconscious/Broken/Terminal)
+   * persist until cleared. Posts a chat notice.
+   */
+  async applyCondition(key) {
+    const def = this.constructor.CONDITIONS[key];
+    if (!def) return;
+    const currentRound = game.combat?.round ?? 0;
+    const conditions = foundry.utils.deepClone(this.conditions);
+    conditions[key] = {
+      appliedRound: currentRound,
+      expiresRound: def.rounds ? currentRound + def.rounds : null
+    };
+    await this.setFlag("holy-lands-rpg", "conditions", conditions);
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} is ${def.label}!</strong>${def.note ? `<br><em>${def.note}</em>` : ""}`
+    });
+  }
+
+  /** Remove a condition. */
+  async clearCondition(key) {
+    const conditions = foundry.utils.deepClone(this.conditions);
+    if (!conditions[key]) return;
+    delete conditions[key];
+    await this.setFlag("holy-lands-rpg", "conditions", conditions);
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<em>${this.name} is no longer ${this.constructor.CONDITIONS[key]?.label ?? key}.</em>`
+    });
+  }
+
+  /** Remove all conditions. */
+  async clearAllConditions() {
+    if (Object.keys(this.conditions).length === 0) return;
+    await this.unsetFlag("holy-lands-rpg", "conditions");
+  }
+
+  /**
+   * Tick round-scoped conditions at the start of a new Round: expire any whose
+   * expiresRound has passed. Dazed steps down to Stunned after its first Round
+   * (Critical Half Rolls 1R -> Half Rolls 2 more), modelled as: Dazed for all
+   * 3 Rounds but its noBonuses only applies on the first. We keep it simple -
+   * Dazed lasts 3 Rounds; the "no Bonuses first Round" is noted for the Rac.
+   */
+  async tickConditions() {
+    const currentRound = game.combat?.round ?? 0;
+    const conditions = foundry.utils.deepClone(this.conditions);
+    let changed = false;
+    const expired = [];
+    for (const [key, data] of Object.entries(conditions)) {
+      if (data.expiresRound !== null && currentRound >= data.expiresRound) {
+        delete conditions[key];
+        expired.push(this.constructor.CONDITIONS[key]?.label ?? key);
+        changed = true;
+      }
+    }
+    if (changed) {
+      await this.setFlag("holy-lands-rpg", "conditions", conditions);
+      if (expired.length) {
+        await ChatMessage.create({
+          speaker: ChatMessage.getSpeaker({ actor: this }),
+          flavor: `<em>${this.name} recovers from: ${expired.join(", ")}.</em>`
+        });
+      }
+    }
+  }
+
+  /**
+   * Roll on the Severity of Injury Table (Combat Handbook, Section 11) and
+   * apply the resulting condition. Optional Rac tool - use after a heavy blow.
+   */
+  async rollInjurySeverity() {
+    const roll = new Roll("1d100");
+    await roll.evaluate();
+    const d = roll.total - 1; // 0-99
+    let key, label, effect;
+    if (d <= 29) { key = null; label = "Damaged"; effect = "No extra effect beyond Damage"; }
+    else if (d <= 54) { key = "stunned"; label = "Stunned"; effect = "Half Rolls for 1 Round"; }
+    else if (d <= 69) { key = "dazed"; label = "Dazed"; effect = "Critical Half Rolls 1R, then Half Rolls 2R"; }
+    else if (d <= 84) { key = "unconscious"; label = "Unconscious"; effect = "No actions for 1d4 Rounds; wakes up Dazed"; }
+    else if (d <= 89) { key = "broken"; label = "Broken"; effect = "Unconscious; body part disabled; treat within 1d4 days or Terminal"; }
+    else { key = "terminal"; label = "Terminal"; effect = "Immediately Broken; no Life recovery; death in 1d4 days without aid"; }
+
+    await ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} - Injury Severity (d%=${d})</strong>: <strong>${label}</strong><br><em>${effect}</em>`,
+      rolls: [roll]
+    });
+    if (key) await this.applyCondition(key);
+    return { key, label };
+  }
+
   /** Forfeit Advantage: double the next Dodge/Defend Bonus this Round. */
   async forfeitAdvantage() {
     await this.setCombatFlag("forfeitAdvantage", true);
@@ -1401,6 +1539,13 @@ export class HolyLandsActor extends Actor {
       return;
     }
 
+    // Unconscious/Broken characters cannot take actions (Combat Handbook 11).
+    if (!free && this.conditionNoActions) {
+      const active = Object.keys(this.conditions).map(k => this.constructor.CONDITIONS[k]?.label).filter(Boolean);
+      ui.notifications.warn(`${this.name} cannot act (${active.join(", ")}).`);
+      return;
+    }
+
     // Attacking with a weapon makes that Weapon Skill the active attack type
     // (so the sheet/tracker AtR follows what you're actually using). Free
     // counters don't change your chosen stance.
@@ -1457,13 +1602,20 @@ export class HolyLandsActor extends Actor {
     const roll = new Roll("1d20 + @bonus", { bonus: totalBonus });
     await roll.evaluate();
 
-    const attackTotal = roll.total;
+    let attackTotal = roll.total;
     let natRoll = null;
     for (const term of roll.terms) {
       if (term.results?.length) { natRoll = term.results[0].result; break; }
     }
     const isNat20 = !free && (natRoll === 20);
     const isNat1 = natRoll === 1;
+
+    // Condition Half Roll (Stunned/Dazed): halve the natural die, round up,
+    // before Bonuses (Combat Handbook Section 11). A Nat 1 stays a failure.
+    const attackerHalf = this.conditionHalfRolls;
+    if (attackerHalf && !isNat1) {
+      attackTotal = Math.ceil((natRoll ?? 0) / 2) + totalBonus;
+    }
 
     const bonusNote = advBonus ? " [+3 Advantage]" : "";
     const weaponName = weapon?.name || "Unarmed";
@@ -1601,11 +1753,14 @@ export class HolyLandsActor extends Actor {
     const isNat1Defense = !free && (natRollDefense === 1);
 
     // Half Roll: halve the NATURAL die (round up) before adding Bonuses (Ch1).
+    // Triggered by the off-balance flag OR an active Stunned/Dazed condition.
     let finalDefenseTotal = defenseRoll.total;
-    if (defender.system.combat?.halfDefenseFlag) {
+    if (defender.system.combat?.halfDefenseFlag || defender.conditionHalfRolls) {
       finalDefenseTotal = Math.ceil((natRollDefense ?? 0) / 2) + defenderBonus;
       notes.push("Half Roll");
-      await defender.update({ "system.combat.halfDefenseFlag": false });
+      if (defender.system.combat?.halfDefenseFlag) {
+        await defender.update({ "system.combat.halfDefenseFlag": false });
+      }
     }
     const noteText = notes.length ? ` (${notes.join(", ")})` : "";
 

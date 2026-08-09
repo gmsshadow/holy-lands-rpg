@@ -338,6 +338,22 @@
       </span>
     </div>
 
+    <div class="conditions-bar">
+      <span class="conditions-label">Conditions:</span>
+      {{#each activeConditions}}
+      <span class="condition-chip" title="{{this.note}}">
+        {{this.label}}
+        <a data-action="clearCondition" data-condition="{{this.key}}" title="Clear"><i class="fas fa-xmark"></i></a>
+      </span>
+      {{else}}
+      <span class="hint">none</span>
+      {{/each}}
+      <span class="condition-controls">
+        <a data-action="applyCondition" title="Apply a condition (Rac)"><i class="fas fa-plus"></i></a>
+        <a data-action="rollInjury" title="Roll on the Severity of Injury table"><i class="fas fa-dice-d20"></i> Injury</a>
+      </span>
+    </div>
+
     <h3>Defense</h3>
     <div class="defense-stats">
       <div class="stat">

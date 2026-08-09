@@ -98,7 +98,16 @@ export class HolyLandsCombat extends Combat {
       if (combatant.actor?.clearRoundCombatFlags) await combatant.actor.clearRoundCombatFlags();
     }
 
-    return super.nextRound();
+    const result = await super.nextRound();
+
+    // After the Round number advances, expire any conditions whose duration
+    // has elapsed (Stunned/Dazed). Day-scale ones (Unconscious/Broken/
+    // Terminal) persist until cleared by the Rac / recovery.
+    for (const combatant of this.combatants) {
+      if (combatant.actor?.tickConditions) await combatant.actor.tickConditions();
+    }
+
+    return result;
   }
 
   /**

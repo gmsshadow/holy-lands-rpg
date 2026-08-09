@@ -943,3 +943,22 @@ These are deliberate changes, flagged for review:
   not bracketed) so ammo - and any other stature-priced gear - prices
   correctly; the equipment item sheet now exposes them.
 - Equipment compendium is now 81 items.
+
+## v2.44.0 — Critical Injuries & Conditions (Combat Handbook 11)
+
+- New conditions system: Stunned, Dazed, Unconscious, Broken, Terminal, each
+  with its Combat Handbook effect. Stored per-actor with Round-based expiry
+  for the short ones (Stunned 1R, Dazed 3R); the day-scale ones (Unconscious/
+  Broken/Terminal) persist until cleared.
+- **Effects are wired into combat:** Stunned/Dazed make the actor's attack
+  and defense rolls Half Rolls (halve the natural die, round up, before
+  Bonuses); Unconscious/Broken block the actor from attacking. A conditions
+  bar on both the PC and NPC sheets shows active conditions with one-click
+  clear.
+- **Rac-driven, per the handbook's intent** (Critical Injuries are optional,
+  not automatic): an "Apply condition" picker and a "Roll Injury" button that
+  rolls the Severity of Injury table (30-54 Stunned, 55-69 Dazed, 70-84
+  Unconscious, 75-89 Broken, 90-99 Terminal) and applies the result. Nothing
+  is forced on a damage roll - the Rac decides when a blow warrants it.
+- Round-scoped conditions expire automatically when the combat tracker
+  advances the Round.

@@ -349,6 +349,18 @@ export class HolyLandsActor extends Actor {
   }
 
   /**
+   * The DEF Bonus of the actor's equipped shield (stature-adjusted), or 0 if
+   * none. Used for ranged defense (shields add their DEF to the attacker's DF).
+   */
+  get equippedShieldDefBonus() {
+    const stature = (this.type === "character") ? this.system.stature : "commonFolk";
+    const shield = this.items.find(i =>
+      (i.type === "weapon") && i.system.isShield && i.system.equipped);
+    if (!shield) return 0;
+    return shield.system.defendForStature?.(stature) ?? shield.system.defendBonus ?? 0;
+  }
+
+  /**
    * Unarmed attack damage (Genesis p.48). Depends on Stature AND whether the
    * character has the relevant Weapon Skill:
    *   Punching             1d2 [wee 1 | giant 1d3]
@@ -1655,16 +1667,48 @@ export class HolyLandsActor extends Actor {
       });
     }
 
+    const attackContext = {
+      attackTotal, isNat20, mode, multiplier, free, isCounter,
+      atrCost, weaponSkill
+    };
+
+    // RANGED COMBAT (Book of Life p.14 / Combat Handbook p.28): WS Missiles
+    // (and WS Thrown vs an unaware/slow target) fire too fast to Dodge or
+    // Defend. Instead of the defense loop, the shot - having beaten tDEF -
+    // must ALSO beat a Rac-set DF, plus the target's shield DEF (passive) or
+    // shield DEF + Combat Abilities DEF (active). No defense roll is made.
+    const isMissile = (weaponSkill === "missile");
+    const isThrown = (weaponSkill === "thrown");
+    if (isMissile) {
+      return this._resolveRangedAttack(weapon, targetActor, attackContext, roll, { isThrown: false });
+    }
+    if (isThrown) {
+      // Thrown uses the ranged DF path only vs an unaware/slow target who
+      // can't Dodge/Defend (Book of Life p.14); otherwise it's normal melee-
+      // style defense. Ask the Rac which applies.
+      const unaware = await foundry.applications.api.DialogV2.wait({
+        window: { title: "Thrown Attack" },
+        content: `<p>Is ${targetActor.name} unaware or too slow to Dodge/Defend this thrown attack?</p>
+          <p class="hint">If so, it resolves like a missile (beat a Rac-set DF). If they can react, they Dodge or Defend normally.</p>`,
+        buttons: [
+          { action: "ranged", label: "Unaware - use DF", default: true },
+          { action: "defend", label: "Can react - Dodge/Defend" },
+          { action: "cancel", label: "Cancel" }
+        ],
+        rejectClose: false
+      });
+      if (!unaware || unaware === "cancel") { await this.spendActionAtR(atrCost); return; }
+      if (unaware === "ranged") {
+        return this._resolveRangedAttack(weapon, targetActor, attackContext, roll, { isThrown: true });
+      }
+      // else fall through to normal defense below
+    }
+
     await ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
       flavor: `${weaponName}${modeLabel} Attack: ${attackTotal}${bonusNote}${isNat20 ? " <strong>(Natural 20!)</strong>" : ""} vs tDEF ${defenderTDEF} - beats armor, ${targetActor.name} must Dodge or Defend!`,
       rolls: [roll]
     });
-
-    const attackContext = {
-      attackTotal, isNat20, mode, multiplier, free, isCounter,
-      atrCost, weaponSkill
-    };
 
     // Prompt defender for Dodge or Defend (forced Dodge while Retreating).
     let defenseChoice = "defend";
@@ -1719,6 +1763,92 @@ export class HolyLandsActor extends Actor {
     });
 
     return (choice && choice !== "cancel") ? choice : null;
+  }
+
+  /**
+   * Resolve a ranged attack (Book of Life p.14 / Combat Handbook p.28). The
+   * shot has already beaten tDEF (Step 1). Step 2: it must also beat a Rac-set
+   * DF, to which the target's shield adds its DEF Bonus (passive), or shield
+   * DEF + the target's Combat Abilities DEF Bonus (active defense vs a
+   * known-origin missile). Cover can add a further +1..+5. No defense roll is
+   * made. Both steps are checked separately.
+   */
+  async _resolveRangedAttack(weapon, defender, attackContext, roll, { isThrown = false } = {}) {
+    const { attackTotal, mode, multiplier, atrCost, weaponSkill, isNat20 } = attackContext;
+    const weaponName = weapon?.name || (isThrown ? "Thrown" : "Missile");
+    const tDEF = defender.system?.defense?.tDEF || 4;
+    const shieldDef = defender.equippedShieldDefBonus;
+    const defenderDEF = defender.system?.combat?.defendBonus || 0;
+
+    // Rac sets the base DF (range/movement/lighting/weather) and shield stance.
+    const DF_TIERS = [
+      { label: "Simple", df: 7 }, { label: "Easy", df: 14 }, { label: "Moderate", df: 21 },
+      { label: "High", df: 28 }, { label: "Extreme", df: 35 }
+    ];
+    const tierOpts = DF_TIERS.map(t => `<option value="${t.df}"${t.df === 7 ? " selected" : ""}>${t.label} (DF ${t.df})</option>`).join("")
+      + `<option value="custom">Custom...</option>`;
+    const shieldNote = shieldDef > 0
+      ? `<p>Target has a shield (DEF +${shieldDef}).</p>
+         <div class="form-group"><label>Shield use:</label>
+         <select name="shield">
+           <option value="none">Not using shield</option>
+           <option value="passive" selected>Holding toward fire (+${shieldDef} to DF)</option>
+           <option value="active">Actively defending, known origin (+${shieldDef} shield +${defenderDEF} DEF to DF)</option>
+         </select></div>`
+      : `<p><em>Target has no shield equipped.</em></p>`;
+
+    const result = await foundry.applications.api.DialogV2.wait({
+      window: { title: `Ranged Attack - ${defender.name}` },
+      content: `<p>${this.name}'s shot beats armor (roll ${attackTotal} vs tDEF ${tDEF}). Set the Difficulty to hit:</p>
+        <div class="form-group"><label>Difficulty (range, movement, etc.):</label><select name="df" autofocus>${tierOpts}</select></div>
+        <div class="form-group df-custom" style="display:none;"><label>Custom DF:</label><input type="number" name="dfCustom" value="7"/></div>
+        ${shieldNote}
+        <div class="form-group"><label>Cover (optional +1..+5 to DF):</label><input type="number" name="cover" value="0" min="0" max="5"/></div>
+        <script>(function(){const r=document.currentScript.parentElement;const s=r.querySelector('select[name=df]');const c=r.querySelector('.df-custom');s.addEventListener('change',()=>{c.style.display=s.value==='custom'?'':'none';});})();</script>`,
+      buttons: [
+        { action: "resolve", label: "Resolve", default: true, callback: (event, button) => {
+          const f = button.form.elements;
+          const baseDf = (f.df.value === "custom") ? Number(f.dfCustom.value) : Number(f.df.value);
+          const shieldMode = f.shield ? f.shield.value : "none";
+          const cover = Number(f.cover.value) || 0;
+          return { baseDf, shieldMode, cover };
+        } },
+        { action: "cancel", label: "Cancel" }
+      ],
+      rejectClose: false
+    });
+
+    if (!result || result === "cancel") {
+      await this.spendActionAtR(atrCost);
+      return;
+    }
+
+    // Compute the effective DF (Step 2 target number).
+    let df = result.baseDf + (result.cover || 0);
+    const parts = [`DF ${result.baseDf}`];
+    if (result.cover) parts.push(`cover +${result.cover}`);
+    if (result.shieldMode === "passive") { df += shieldDef; parts.push(`shield +${shieldDef}`); }
+    else if (result.shieldMode === "active") { df += shieldDef + defenderDEF; parts.push(`shield +${shieldDef}`, `DEF +${defenderDEF}`); }
+
+    const beatsDF = isNat20 || (attackTotal > df);
+    await this.spendActionAtR(atrCost);
+
+    if (!beatsDF) {
+      return ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        flavor: `${weaponName} Attack: ${attackTotal} beats tDEF ${tDEF}, but must also beat ${parts.join(" + ")} = ${df} - <strong>Miss</strong> (glances off / falls short).`,
+        rolls: [roll]
+      });
+    }
+
+    await ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `${weaponName} Attack: ${attackTotal} beats tDEF ${tDEF} AND ${parts.join(" + ")} = ${df} - <strong>Hit!</strong>`,
+      rolls: [roll]
+    });
+
+    // On a hit, resolve damage (reusing the standard damage path).
+    return this._resolveDamage(weapon, defender, attackContext);
   }
 
   /** Resolve defense roll and determine hit/miss. */

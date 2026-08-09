@@ -979,3 +979,24 @@ These are deliberate changes, flagged for review:
   the Rac can still set an arbitrary DF when needed.
 - Derived save DFs (NPC category, fixed PC saves) are unchanged - they're
   computed, not manually entered.
+
+## v2.47.0 — Ranged combat is now a two-step check (no defense roll)
+
+- Rewrote ranged combat per Book of Life p.14 and Combat Handbook p.28.
+  Missiles (WS Missile) fire too fast to Dodge or Defend, so they no longer
+  go through the melee defense loop. Instead:
+  - Step 1: the shot must beat the target's tDEF (as before).
+  - Step 2: it must ALSO beat a Rac-set Difficulty Factor (range, movement,
+    weather...), to which a held shield adds its DEF Bonus (passive), or
+    shield DEF + the target's Combat Abilities DEF Bonus (active defense vs a
+    known-origin missile). Optional cover adds +1..+5.
+  - Both gates are checked separately (not summed); no defense roll is made.
+    On a hit, damage resolves as normal.
+- WS Thrown uses this DF path only vs an unaware/slow target (the Rac is
+  asked); otherwise it falls back to the normal Dodge/Defend loop.
+- Added equippedShieldDefBonus helper (stature-adjusted) for the shield math.
+- Note: implemented "must beat" as strict greater-than for both gates,
+  matching the Book of Life Theowulf/ork worked example (roll must be ABOVE
+  DF 7 + shield 3 = 10). The Combat Handbook's stray "a 12 glances off"
+  aside contradicts its own arithmetic (12 > 10) and is treated as an
+  erratum.

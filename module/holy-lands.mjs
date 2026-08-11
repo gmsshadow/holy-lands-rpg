@@ -235,6 +235,42 @@ Hooks.on("renderChatMessageHTML", (message, html, context) => {
   else if (term.results?.some(r => r.result === 1)) totalEl.classList.add("critical-failure");
 });
 
+/**
+ * Add an "Apply to targets" button to damage roll cards, so a standalone
+ * damage roll (falling, environmental, or any Roll Damage) can be applied to
+ * one or more actors. Applies to targeted tokens, or the controlled tokens if
+ * none are targeted. GM only.
+ */
+Hooks.on("renderChatMessageHTML", (message, html) => {
+  const dmg = message.getFlag?.("holy-lands-rpg", "damage");
+  if (dmg === undefined || dmg === null) return;
+  if (!game.user.isGM) return;
+  if (html.querySelector(".hlrpg-apply-damage")) return;
+
+  const btn = document.createElement("button");
+  btn.className = "hlrpg-apply-damage";
+  btn.innerHTML = `<i class="fas fa-heart-crack"></i> Apply ${dmg} to target(s)`;
+  btn.style.cssText = "margin-top:4px;width:100%;";
+  btn.addEventListener("click", async () => {
+    // Prefer targeted tokens; fall back to controlled (selected) tokens.
+    let tokens = Array.from(game.user.targets);
+    if (!tokens.length) tokens = canvas.tokens?.controlled ?? [];
+    const actors = tokens.map(t => t.actor).filter(Boolean);
+    if (!actors.length) {
+      ui.notifications.warn("Target or select one or more tokens first, then click Apply.");
+      return;
+    }
+    for (const actor of actors) {
+      if (typeof actor.applyDamage === "function") {
+        await actor.applyDamage(dmg, { source: "Damage" });
+      }
+    }
+  });
+
+  const content = html.querySelector(".message-content");
+  (content ?? html).appendChild(btn);
+});
+
 /* -------------------------------------------- */
 /*  Dice Rolling Utilities                      */
 /* -------------------------------------------- */

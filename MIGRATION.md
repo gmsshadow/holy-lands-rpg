@@ -1068,3 +1068,21 @@ These are deliberate changes, flagged for review:
 - Fixed the same latent bug in tickConditions (round-based auto-expiry of
   Stunned/Dazed), which would have reported recovery while leaving the
   condition in place.
+
+## v2.52.0 — Apply arbitrary damage (or healing) to actors
+
+- New applyDamage(amount, {source, silent}) on actors: applies a fixed amount
+  of Damage (positive) or healing (negative) to Life, flooring at negative max
+  (coma range) and triggering the Save vs Death prompt when Life first falls
+  to 0 or less. Healing caps at max and is blocked while Terminal.
+- **Damage roll cards now have an "Apply to target(s)" button** (GM only):
+  roll damage (e.g. the Roll Damage button, falling, environmental), then
+  click to apply the total to targeted tokens - or selected tokens if none
+  are targeted. Works on multiple targets at once.
+- **Manual "Damage" control** on the sheet's conditions bar prompts for an
+  amount (negative to heal) and a source label, applying it to that actor -
+  for Rac rulings like falling or fire without a roll.
+- Combat damage now routes its Life application through the same shared path,
+  so the coma/death trigger is consistent whether damage comes from an attack
+  or any other source (combat suppresses the duplicate line but keeps the
+  fallen-to-0 prompt).

@@ -51,6 +51,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       setInjury: HolyLandsActorSheet.#onSetInjury,
       brokenToTerminal: HolyLandsActorSheet.#onBrokenToTerminal,
       rollInjuryLocation: HolyLandsActorSheet.#onRollInjuryLocation,
+      applyDamageManual: HolyLandsActorSheet.#onApplyDamageManual,
       npcSkillAdd: HolyLandsActorSheet.#onNpcSkillAdd,
       npcSkillDelete: HolyLandsActorSheet.#onNpcSkillDelete,
       addCustomSkill: HolyLandsActorSheet.#onAddCustomSkill,
@@ -1003,6 +1004,22 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
   static async #onRollInjuryLocation(event, target) {
     return this.actor.rollInjuryLocation();
+  }
+
+  /** Apply an arbitrary amount of damage (or healing, if negative) to this actor. */
+  static async #onApplyDamageManual(event, target) {
+    const result = await foundry.applications.api.DialogV2.wait({
+      window: { title: `Apply Damage - ${this.actor.name}` },
+      content: `<div class="form-group"><label>Damage (negative to heal):</label><input type="number" name="amt" value="0" autofocus/></div>
+        <div class="form-group"><label>Source (optional):</label><input type="text" name="src" value="Damage" placeholder="Falling, fire, ..."/></div>`,
+      buttons: [
+        { action: "apply", label: "Apply", default: true, callback: (e, b) => ({ amt: Number(b.form.elements.amt.value), src: b.form.elements.src.value || "Damage" }) },
+        { action: "cancel", label: "Cancel" }
+      ],
+      rejectClose: false
+    });
+    if (!result || result === "cancel" || !Number.isFinite(result.amt) || result.amt === 0) return;
+    return this.actor.applyDamage(result.amt, { source: result.src });
   }
 
   /** Small helper: prompt for a positive number of hours. */

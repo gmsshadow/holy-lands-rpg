@@ -2357,20 +2357,9 @@ export class HolyLandsActor extends Actor {
 
     await this._applyArmorDegradation(defender, hitAP, finalDamage);
 
-    // Apply damage to life. Life can go negative down to the character's
-    // negative maximum (coma range - Genesis Ch3, "Death and Comas").
-    const currentLife = defender.system.life?.value || 0;
-    const maxLife = defender.system.life?.max || 0;
-    const newLife = Math.max(-maxLife, currentLife - finalDamage);
-    await defender.update({ "system.life.value": newLife });
-    if ((newLife <= 0) && (currentLife > 0)) {
-      await ChatMessage.create({
-        speaker: ChatMessage.getSpeaker({ actor: defender }),
-        flavor: `<strong>${defender.name} has fallen to ${newLife} Life!</strong> A Save vs Death is needed (DF ${defender.system.saves?.death?.df ?? 11}) - success means a coma (lose 1 Life/hour to -${maxLife}), failure means death. Use the Recovery controls on the sheet.`
-      });
-    }
-
-    // Taking Damage costs the defender 1 AtR and ends their Nat 20 Advantage.
+    // Apply damage to Life via the shared path (handles coma/death trigger).
+    // Combat also spends the defender's AtR and ends their Nat 20 Advantage.
+    await defender.applyDamage(finalDamage, { source: "Damage", silent: true });
     if (typeof defender._consumeAtRFromDamage === "function") {
       await defender._consumeAtRFromDamage();
     }
@@ -2436,7 +2425,67 @@ export class HolyLandsActor extends Actor {
     return ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
       flavor: `${weapon?.name || "Unarmed"} Damage${isDouble ? " (Double Damage - Nat 20)" : ""}`,
-      rolls: [roll]
+      rolls: [roll],
+      flags: { "holy-lands-rpg": { damage: roll.total } }
+    });
+  }
+
+  /**
+   * Apply a fixed amount of Damage to this actor's Life, independent of the
+   * attack pipeline (falling, environmental, a Rac ruling, an applied damage
+   * roll, etc.). Life floors at negative max (coma range, Genesis Ch3); when
+   * it first falls to 0 or less, a Save vs Death is prompted. Terminal
+   * characters can't be healed by a negative amount here.
+   * @param {number} amount   Damage (positive) or healing (negative).
+   * @param {object} [options]
+   * @param {string} [options.source]  Label for the chat message ("Falling").
+   * @param {boolean} [options.costAtR] Also spend an AtR (default false; combat
+   *                                    sets this via its own path).
+   */
+  async applyDamage(amount, { source = "Damage", costAtR = false, silent = false } = {}) {
+    const life = this.system.life;
+    if (!life) return;
+    const current = life.value || 0;
+    const max = life.max || 0;
+
+    // Healing (negative amount) is capped at max and blocked while Terminal.
+    if (amount < 0) {
+      if (this.hasCondition?.("terminal")) {
+        ui.notifications.warn(`${this.name} is Terminal and cannot regain Life without a Miracle or advanced healing.`);
+        return;
+      }
+      const healed = Math.min(-amount, max - current);
+      const after = current + Math.max(0, healed);
+      await this.update({ "system.life.value": after });
+      if (silent) return;
+      return ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        flavor: `<strong>${this.name}</strong> recovers ${Math.max(0, healed)} Life (${source}) - now ${after}/${max}.`
+      });
+    }
+
+    const newLife = Math.max(-max, current - amount);
+    await this.update({ "system.life.value": newLife });
+
+    if (costAtR && typeof this._consumeAtRFromDamage === "function") {
+      await this._consumeAtRFromDamage();
+    }
+
+    // The fallen-to-0 death prompt always posts (even in silent mode), since
+    // it's a distinct event, but the routine "takes X" line is suppressed.
+    const fell = (newLife <= 0) && (current > 0);
+    if (fell) {
+      await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        flavor: `<strong>${this.name} has fallen to ${newLife} Life!</strong> A Save vs Death is needed (DF ${this.system.saves?.death?.df ?? 11}) - use the Recovery controls on the sheet.`
+      });
+    }
+    if (silent) return;
+
+    let flavor = `<strong>${this.name}</strong> takes ${amount} ${source} - Life ${newLife}/${max}.`;
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor
     });
   }
 }

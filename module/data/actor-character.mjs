@@ -216,6 +216,33 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
 
   /** Sins and Phobias d20 tables (p.56). */
   static SINS = ["Attachment", "Bitterness", "Cheating", "Control", "Cruelty", "Doubt", "Drunkenness", "Envy", "Gluttony", "Gossip", "Greed", "Laziness", "Lying", "Malice", "Paganism", "Prejudice", "Pride", "Strife", "Theft", "Vanity"];
+
+  /**
+   * Short mechanical effect per Sin (Genesis p.55). "auto: true" means the
+   * system enforces it; otherwise it's a Rac/roleplay reminder.
+   */
+  static SIN_EFFECTS = {
+    Doubt:   { auto: true, text: "+3 to all Faith costs (miracles & blessings)." },
+    Malice:  { auto: true, text: "Half Rolls to Advantage." },
+    Greed:   { auto: true, text: "Half Rolls to all Wisdom checks." },
+    Gossip:  { auto: true, text: "Half Rolls to all Patience checks." },
+    Pride:   { auto: false, text: "Must Save vs Sin before Retreating." },
+    Control: { auto: false, text: "Must Save vs Sin before Retreating." },
+    Strife:  { auto: false, text: "Must Save vs Sin before Retreating; -1 to a Skill after any failed Skill until success." },
+    Paganism:{ auto: false, text: "Loses 1 Faith per day." },
+    Cheating:{ auto: false, text: "-1 per level to cheating-related rolls." },
+    Lying:   { auto: false, text: "-1 per level to lying-related rolls; can't keep story straight." },
+    Gluttony:{ auto: false, text: "-1 per missed meal to all actions until fed; gains 1d6 lbs/level." },
+    Cruelty: { auto: false, text: "Cannot learn new Skills except on levelling up." },
+    Vanity:  { auto: false, text: "Beauty shifts each odd level; obsessed with appearance." },
+    Envy:    { auto: false, text: "Roleplay: cannot abide others being more skilled." },
+    Bitterness:{ auto: false, text: "Roleplay: bitter toward a chosen character each game." },
+    Attachment:{ auto: false, text: "Roleplay: fixates on a protector/companion." },
+    Drunkenness:{ auto: false, text: "Roleplay: preoccupied with drink." },
+    Prejudice:{ auto: false, text: "Roleplay: cannot relate to a chosen race/religion." },
+    Laziness:{ auto: false, text: "Roleplay: gives less effort than needed." },
+    Theft:   { auto: false, text: "Roleplay: compelled to steal high-risk prizes." }
+  };
   static PHOBIAS = ["Being Alone", "Being Followed", "Being Touched", "Blood (of self)", "Bums and Beggars", "Complete Darkness", "Confined Spaces", "Crowds", "Cursed People", "Graveyards", "Heights", "Insects", "Laughter (paranoia)", "Magic/Spellcasters", "Rejection", "Rodents", "Sick/Diseased People", "Silence", "Snakes", "Toads, Frogs, Lizards"];
 
   /** How many Sins/Phobias an AV grants (p.56: VIR -> Sins, WIL -> Phobias). */

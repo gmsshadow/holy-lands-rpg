@@ -87,12 +87,14 @@ export class HolyLandsItem extends Item {
       return;
     }
 
-    const faithCost = this.system.faithCost || 0;
+    const baseCost = this.system.faithCost || 0;
+    const surcharge = actor.sinFaithSurcharge || 0; // Doubt: +3 to all Faith costs
+    const faithCost = baseCost + surcharge;
     const currentFaith = actor.system.faith.value;
 
     // Check if enough faith
     if (currentFaith < faithCost) {
-      ui.notifications.warn("Not enough Faith to cast this miracle!");
+      ui.notifications.warn(`Not enough Faith to cast this miracle!${surcharge ? ` (Doubt adds +${surcharge})` : ""}`);
       return;
     }
 
@@ -133,10 +135,12 @@ export class HolyLandsItem extends Item {
     }
 
     // Blessings cost Faith to perform (default 5 - Genesis Ch11, "Blessings")
-    const blessingCost = this.system.faithCost ?? 5;
+    const baseCost = this.system.faithCost ?? 5;
+    const surcharge = actor.sinFaithSurcharge || 0; // Doubt: +3 to all Faith costs
+    const blessingCost = baseCost + surcharge;
     const currentFaith = actor.system.faith.value;
     if (currentFaith < blessingCost) {
-      ui.notifications.warn(`Not enough Faith to perform this Blessing (costs ${blessingCost} Faith)!`);
+      ui.notifications.warn(`Not enough Faith to perform this Blessing (costs ${blessingCost} Faith${surcharge ? `, incl. +${surcharge} Doubt` : ""})!`);
       return;
     }
     await actor.update({ "system.faith.value": currentFaith - blessingCost });

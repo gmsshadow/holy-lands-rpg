@@ -694,6 +694,13 @@
       {{/each}}
       <a class="item-control" data-action="charArrayAdd" data-array="sins" title="Add sin"><i class="fas fa-plus"></i> Add sin</a>
     </div>
+    {{#if sinEffects.length}}
+    <div class="sin-effects">
+      {{#each sinEffects}}
+      <p class="sin-effect"><strong>{{this.name}}:</strong> {{this.text}} {{#if this.auto}}<span class="sin-auto" title="Enforced automatically">[auto]</span>{{else}}<span class="sin-rac" title="Rac/roleplay - not auto-enforced">[Rac]</span>{{/if}}</p>
+      {{/each}}
+    </div>
+    {{/if}}
 
     <h3>Phobias
       <span class="hint">(WIL grants {{system.detailsValidation.expectedPhobias}})</span>

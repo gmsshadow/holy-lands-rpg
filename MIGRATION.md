@@ -1086,3 +1086,21 @@ These are deliberate changes, flagged for review:
   so the coma/death trigger is consistent whether damage comes from an attack
   or any other source (combat suppresses the duplicate line but keeps the
   fallen-to-0 prompt).
+
+## v2.53.0 — Sins & Phobias effects wired in
+
+- The mechanically-concrete Sins now actually fire (Genesis p.55):
+  - **Doubt** - +3 to all Faith costs (miracles and blessings).
+  - **Malice** - Half Roll to Advantage (halves the natural die, round up).
+  - **Greed** - Half Roll to Wisdom checks (halves effective AV, round down).
+  - **Gossip** - Half Roll to Patience checks (halves effective AV).
+  - **Paganism** - loses 1 Faith per day of rest.
+  - (Pride/Control/Strife's Save-vs-Sin-before-Retreat was already wired.)
+- Added a **Sin effects reminder panel** under the Sins list: it lists each of
+  the character's current Sins with its effect, tagged [auto] (system-
+  enforced) or [Rac] (roleplay/situational - e.g. Cheating, Lying, Gluttony,
+  Cruelty, Envy). This surfaces the inherently narrative Sins the system
+  can't auto-fire, so nothing is silently forgotten.
+- Added SIN_EFFECTS reference and hasSin/sinFaithSurcharge/sinHalvesAdvantage
+  helpers. Phobias remain Rac-adjudicated (situational fear triggers), listed
+  for reference.

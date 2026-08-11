@@ -676,3 +676,12 @@
   border-left: 3px solid #711; border-radius: 3px;
 }
 .holy-lands-rpg .recovery-bar .recovery-label { font-weight: bold; }
+
+/* Sin effects reminder panel */
+.holy-lands-rpg .sin-effects {
+  margin: 4px 0 8px; padding: 4px 8px;
+  background: rgba(80, 40, 90, 0.10); border-left: 3px solid #7a4a8a; border-radius: 3px;
+}
+.holy-lands-rpg .sin-effect { margin: 2px 0; font-size: 0.9em; }
+.holy-lands-rpg .sin-auto { color: #2e7d32; font-weight: bold; }
+.holy-lands-rpg .sin-rac { color: #8a6d3b; font-style: italic; }

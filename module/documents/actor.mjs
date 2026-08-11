@@ -234,6 +234,24 @@ export class HolyLandsActor extends Actor {
     return !!this.conditions[key];
   }
 
+  /** Whether the character has a given Sin (Genesis p.56). */
+  hasSin(sinName) {
+    return (this.system.sins ?? []).includes(sinName);
+  }
+
+  /**
+   * Extra Faith cost imposed by Sins (Genesis p.55): Doubt adds +3 to all
+   * Faith costs (miracles/blessings). Returns the surcharge to add.
+   */
+  get sinFaithSurcharge() {
+    return this.hasSin("Doubt") ? 3 : 0;
+  }
+
+  /** Whether Malice imposes a Half Roll on this character's Advantage rolls. */
+  get sinHalvesAdvantage() {
+    return this.hasSin("Malice");
+  }
+
   /**
    * True if the actor's rolls are currently Half Rolls due to a condition
    * (Stunned or Dazed). Combat rolls consult this.
@@ -444,13 +462,25 @@ export class HolyLandsActor extends Actor {
     const after = before + Math.max(0, restored);
     await this.update({ "system.life.value": after });
 
-    // Faith also recovers with rest (regained through rest/reflection).
+    // Faith recovers with rest; Paganism (p.55) instead loses 1/day.
     const faith = this.system.faith;
     let faithNote = "";
-    if (faith && (faith.value < faith.max)) {
-      const fRestored = Math.min(hours, faith.max - faith.value);
-      await this.update({ "system.faith.value": faith.value + fRestored });
-      faithNote = `, Faith +${fRestored} (now ${faith.value + fRestored}/${faith.max})`;
+    if (faith) {
+      let fValue = faith.value;
+      if (fValue < faith.max) {
+        const fRestored = Math.min(hours, faith.max - fValue);
+        fValue += fRestored;
+        faithNote = `, Faith +${fRestored}`;
+      }
+      if (this.hasSin?.("Paganism") && (hours >= 24)) {
+        const days = Math.floor(hours / 24);
+        const loss = Math.min(days, fValue);
+        if (loss > 0) { fValue -= loss; faithNote += `${faithNote ? "; " : ", "}Paganism -${loss} Faith (${days}d)`; }
+      }
+      if (fValue !== faith.value) {
+        await this.update({ "system.faith.value": fValue });
+        faithNote += ` (now ${fValue}/${faith.max})`;
+      }
     }
 
     return ChatMessage.create({
@@ -1636,12 +1666,20 @@ export class HolyLandsActor extends Actor {
     const roll = new Roll("1d12");
     await roll.evaluate();
 
-    const success = roll.total <= attr.value;
+    // Sin Half Rolls (Genesis p.55): Greed halves Wisdom checks, Gossip
+    // halves Patience checks. For a roll-UNDER d12 check, halving the
+    // effective AV (round down) makes success rarer.
+    let effectiveAV = attr.value;
+    let sinNote = "";
+    if ((attributeKey === "wis") && this.hasSin("Greed")) { effectiveAV = Math.floor(attr.value / 2); sinNote = " [Greed: Half Roll]"; }
+    else if ((attributeKey === "pat") && this.hasSin("Gossip")) { effectiveAV = Math.floor(attr.value / 2); sinNote = " [Gossip: Half Roll]"; }
+
+    const success = roll.total <= effectiveAV;
     const crits = this.criticalRollsEnabled;
     const critSuccess = crits && (roll.total === 1);
     const critFail = crits && (roll.total === 12);
 
-    let flavor = `${attr.label} Check (AV ${attr.value})`;
+    let flavor = `${attr.label} Check (AV ${effectiveAV === attr.value ? attr.value : `${effectiveAV} halved from ${attr.value}`})${sinNote}`;
     if (critSuccess) flavor += " - <strong>Critical Success!</strong>";
     else if (critFail) flavor += " - <strong>Critical Failure!</strong>";
     else if (success) flavor += " - Success";
@@ -1742,6 +1780,15 @@ export class HolyLandsActor extends Actor {
     const advantageBonus = this.system.combat?.advantageBonus || 0;
     const roll = new Roll("1d20 + @bonus", { bonus: advantageBonus });
     await roll.evaluate();
+
+    // Malice imposes a Half Roll on Advantage (Genesis p.55): halve the
+    // natural die (round up) before the Bonus.
+    if (this.sinHalvesAdvantage) {
+      let nat = null;
+      for (const t of roll.terms) { if (t.results?.length) { nat = t.results[0].result; break; } }
+      const halved = Math.ceil((nat ?? 0) / 2) + advantageBonus;
+      return { roll, result: halved, malice: true };
+    }
     return { roll, result: roll.total };
   }
 

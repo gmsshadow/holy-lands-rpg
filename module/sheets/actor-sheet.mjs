@@ -142,6 +142,17 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     }));
     context.hasBroken = !!conds.broken;
     context.brokenIsSet = !!conds.broken?.isSet;
+
+    // Sin effects reminder: annotate the character's current Sins with their
+    // mechanical effect and whether the system auto-enforces it (p.55).
+    if (actor.type === "character") {
+      const SIN_EFFECTS = actor.system.constructor.SIN_EFFECTS ?? {};
+      context.sinEffects = (actor.system.sins ?? [])
+        .map(s => s?.trim())
+        .filter(Boolean)
+        .map(s => ({ name: s, ...(SIN_EFFECTS[s] ?? { auto: false, text: "" }) }))
+        .filter(e => e.text);
+    }
     // Recovery state: at/below 0 Life or already in a coma shows the recovery bar.
     context.inComa = actor.hasCondition?.("coma") ?? false;
     context.isDyingOrComatose = context.inComa || ((actor.system.life?.value ?? 1) <= 0);

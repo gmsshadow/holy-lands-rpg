@@ -203,6 +203,20 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   #prepareCharacterContext(context) {
     context.classItem = this.actor.classItem;
     context.isGM = game.user.isGM;
+
+    // Ability derivation formulas (paper sheet), keyed to the same source
+    // attribute pairs used to compute the mods, so they can't drift apart.
+    const ATTR_ABBR = {
+      int: "INT", wis: "WIS", pat: "PAT", will: "WIL", mem: "MEM", str: "STR",
+      agi: "AGI", spd: "SPD", end: "END", bty: "BTY", cha: "CHA", vir: "VIR"
+    };
+    const abilityPairs = {
+      perception: ["int", "wis"], search: ["int", "pat"], climb: ["will", "str"],
+      jump: ["will", "agi"], balance: ["pat", "agi"], hide: ["wis", "spd"], appeal: ["cha", "vir"]
+    };
+    context.abilityFormulas = Object.fromEntries(
+      Object.entries(abilityPairs).map(([k, [a, b]]) => [k, `\u00BD (${ATTR_ABBR[a]} + ${ATTR_ABBR[b]})`])
+    );
     context.attributesLocked = !!this.actor.system.creation?.attributesRolled;
     context.unmetRequirements = this.actor.getUnmetClassRequirements();
     context.saveBonusChosen = !!this.actor.system.creation?.saveBonusChosen;

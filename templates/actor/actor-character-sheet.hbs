@@ -151,8 +151,11 @@
         <h3>Abilities</h3>
         <div class="stat-list">
           {{#each system.abilities as |ability key|}}
-          <div class="stat-line" data-action="rollAbility" data-ability="{{key}}" title="Roll {{ability.label}} (d20)">
-            <label>{{ability.label}}</label>
+          <div class="stat-line ability-line" data-action="rollAbility" data-ability="{{key}}" title="Roll {{ability.label}} (d20)">
+            <div class="ability-label-group">
+              <label>{{ability.label}}</label>
+              <span class="ability-formula">{{lookup ../abilityFormulas key}}</span>
+            </div>
             <span class="stat-pf">+{{ability.mod}}</span>
             <input type="number" name="system.abilities.{{key}}.bonus" value="{{ability.bonus}}" placeholder="0" title="Bonus" onclick="event.stopPropagation()"/>
             <i class="fas fa-dice-d20 roll-glyph"></i>

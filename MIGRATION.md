@@ -1116,3 +1116,14 @@ These are deliberate changes, flagged for review:
   without triggering a roll. A dice glyph appears on hover.
 - Columns stack on narrow sheets (< 620px). The old roomy per-stat cards with
   explicit Roll buttons are replaced by the tighter row layout.
+
+## v2.55.0 — Character sheet: ability formulas + smaller Attribute Bonuses heading
+
+- Each Ability now shows its derivation formula beneath its name, matching the
+  paper sheet: Perception = 1/2 (INT + WIS), Search = 1/2 (INT + PAT), Climb =
+  1/2 (WIL + STR), Jump = 1/2 (WIL + AGI), Balance = 1/2 (PAT + AGI), Hide =
+  1/2 (WIS + SPD), Appeal = 1/2 (CHA + VIR). The formula labels are derived
+  from the same source-attribute pairs used to compute the mods, so they can't
+  drift out of sync.
+- Shrunk the oversized "Attribute Bonuses" heading to match the other section
+  headings on the tab.

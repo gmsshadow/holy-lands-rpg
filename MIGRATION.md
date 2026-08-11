@@ -1056,3 +1056,15 @@ These are deliberate changes, flagged for review:
   condition chip.
 - Condition chips display the injury detail inline (e.g. "Broken: Forearm/
   Wrist (set within 3d)").
+
+## v2.51.0 — Fix: clearing a condition didn't actually remove it
+
+- Fixed a bug where clicking the X on a condition (e.g. Stunned) posted the
+  "no longer..." chat message but left the condition active. setFlag MERGES
+  its object, so deleting a key from a local copy and re-saving didn't remove
+  the key from the stored flag. clearCondition now uses Foundry's key-
+  deletion update ("-=key") - or unsets the whole flag if it was the last
+  one - so the condition is genuinely removed.
+- Fixed the same latent bug in tickConditions (round-based auto-expiry of
+  Stunned/Dazed), which would have reported recovery while leaving the
+  condition in place.

@@ -324,10 +324,19 @@ export class HolyLandsActor extends Actor {
 
   /** Remove a condition. */
   async clearCondition(key) {
-    const conditions = foundry.utils.deepClone(this.conditions);
+    const conditions = this.conditions;
     if (!conditions[key]) return;
-    delete conditions[key];
-    await this.setFlag("holy-lands-rpg", "conditions", conditions);
+
+    // setFlag MERGES, so passing a reduced object won't remove a key. Use the
+    // Foundry key-deletion syntax (-=) so the condition is actually removed.
+    // If it was the last condition, unset the whole flag.
+    const remaining = Object.keys(conditions).filter(k => k !== key);
+    if (remaining.length === 0) {
+      await this.unsetFlag("holy-lands-rpg", "conditions");
+    } else {
+      await this.update({ [`flags.holy-lands-rpg.conditions.-=${key}`]: null });
+    }
+
     return ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
       flavor: `<em>${this.name} is no longer ${this.constructor.CONDITIONS[key]?.label ?? key}.</em>`
@@ -349,25 +358,33 @@ export class HolyLandsActor extends Actor {
    */
   async tickConditions() {
     const currentRound = game.combat?.round ?? 0;
-    const conditions = foundry.utils.deepClone(this.conditions);
-    let changed = false;
-    const expired = [];
-    for (const [key, data] of Object.entries(conditions)) {
+    const conditions = this.conditions;
+    const keys = Object.keys(conditions);
+    const expiredKeys = [];
+    const expiredLabels = [];
+    for (const key of keys) {
+      const data = conditions[key];
       if (data.expiresRound !== null && currentRound >= data.expiresRound) {
-        delete conditions[key];
-        expired.push(this.constructor.CONDITIONS[key]?.label ?? key);
-        changed = true;
+        expiredKeys.push(key);
+        expiredLabels.push(this.constructor.CONDITIONS[key]?.label ?? key);
       }
     }
-    if (changed) {
-      await this.setFlag("holy-lands-rpg", "conditions", conditions);
-      if (expired.length) {
-        await ChatMessage.create({
-          speaker: ChatMessage.getSpeaker({ actor: this }),
-          flavor: `<em>${this.name} recovers from: ${expired.join(", ")}.</em>`
-        });
-      }
+    if (!expiredKeys.length) return;
+
+    // If everything expired, unset the whole flag; else delete each expired
+    // key with the -= syntax (setFlag merges and won't remove keys).
+    if (expiredKeys.length === keys.length) {
+      await this.unsetFlag("holy-lands-rpg", "conditions");
+    } else {
+      const update = {};
+      for (const key of expiredKeys) update[`flags.holy-lands-rpg.conditions.-=${key}`] = null;
+      await this.update(update);
     }
+
+    await ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<em>${this.name} recovers from: ${expiredLabels.join(", ")}.</em>`
+    });
   }
 
   /**

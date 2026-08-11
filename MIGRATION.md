@@ -1104,3 +1104,15 @@ These are deliberate changes, flagged for review:
 - Added SIN_EFFECTS reference and hasSin/sinFaithSurcharge/sinHalvesAdvantage
   helpers. Phobias remain Rac-adjudicated (situational fear triggers), listed
   for reference.
+
+## v2.54.0 — Character sheet: compact side-by-side core stats (paper layout)
+
+- Reworked the top of the character sheet to mirror the paper sheet:
+  Attributes, Abilities, and Saving Throws now sit in three side-by-side
+  columns instead of stacked full-width grids.
+- Each stat is a compact single row (label, value field, and for Abilities
+  its PF; for Saves its DF). Clicking a row rolls it (d12 for Attributes,
+  d20 for Abilities/Saves); the number field is still directly editable
+  without triggering a roll. A dice glyph appears on hover.
+- Columns stack on narrow sheets (< 620px). The old roomy per-stat cards with
+  explicit Roll buttons are replaced by the tighter row layout.

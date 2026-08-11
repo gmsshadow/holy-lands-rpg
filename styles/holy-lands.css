@@ -685,3 +685,50 @@
 .holy-lands-rpg .sin-effect { margin: 2px 0; font-size: 0.9em; }
 .holy-lands-rpg .sin-auto { color: #2e7d32; font-weight: bold; }
 .holy-lands-rpg .sin-rac { color: #8a6d3b; font-style: italic; }
+
+/* ============================================================
+   Compact core-stats layout (attributes | abilities | saves)
+   modelled on the paper character sheet
+   ============================================================ */
+.holy-lands-rpg .core-stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+.holy-lands-rpg .core-col h3 {
+  margin: 0 0 4px; padding-bottom: 2px;
+  border-bottom: 2px solid #6b3410;
+  font-size: 1.05em;
+}
+.holy-lands-rpg .stat-list { display: flex; flex-direction: column; gap: 1px; }
+.holy-lands-rpg .stat-line {
+  display: flex; align-items: center; gap: 4px;
+  padding: 1px 3px; border-radius: 2px;
+  cursor: pointer;
+}
+.holy-lands-rpg .stat-line:hover { background: rgba(107, 52, 16, 0.08); }
+.holy-lands-rpg .stat-line label {
+  flex: 1; font-size: 0.82em; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; cursor: pointer;
+}
+.holy-lands-rpg .stat-line input[type="number"] {
+  width: 34px; height: 20px; text-align: center;
+  padding: 0 2px; font-size: 0.85em; flex: 0 0 auto;
+}
+.holy-lands-rpg .stat-line .stat-pf {
+  width: 26px; text-align: right; font-size: 0.8em;
+  font-weight: bold; color: #6b3410; flex: 0 0 auto;
+}
+.holy-lands-rpg .stat-line .save-df { font-size: 0.85em; opacity: 0.6; }
+.holy-lands-rpg .stat-line .roll-glyph {
+  font-size: 0.8em; opacity: 0.35; flex: 0 0 auto; width: 14px;
+}
+.holy-lands-rpg .stat-line:hover .roll-glyph { opacity: 0.9; color: #6b3410; }
+.holy-lands-rpg .saves-col h3 button,
+.holy-lands-rpg .saves-col h3 a { font-size: 0.7em; padding: 1px 5px; }
+
+/* Narrow sheets: stack the three columns */
+@media (max-width: 620px) {
+  .holy-lands-rpg .core-stats-row { grid-template-columns: 1fr; }
+}

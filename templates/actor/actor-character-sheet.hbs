@@ -132,17 +132,55 @@
 
 <section class="sheet-body">
   <div class="tab attributes {{tabs.attributes.cssClass}}" data-group="primary" data-tab="attributes">
-    <h3>Attributes</h3>
-    <div class="attributes-grid">
-      {{#each system.attributes as |attr key|}}
-      <div class="attribute">
-        <label>{{attr.label}}</label>
-        <input type="number" name="system.attributes.{{key}}.value" value="{{attr.value}}"/>
-        <button type="button" data-action="rollAttribute" data-attribute="{{key}}">
-          <i class="fas fa-dice-d12"></i> Roll
-        </button>
+    <div class="core-stats-row">
+
+      <div class="core-col attributes-col">
+        <h3>Attributes</h3>
+        <div class="stat-list">
+          {{#each system.attributes as |attr key|}}
+          <div class="stat-line" data-action="rollAttribute" data-attribute="{{key}}" title="Roll {{attr.label}} (d12)">
+            <label>{{attr.label}}</label>
+            <input type="number" name="system.attributes.{{key}}.value" value="{{attr.value}}" onclick="event.stopPropagation()"/>
+            <i class="fas fa-dice-d12 roll-glyph"></i>
+          </div>
+          {{/each}}
+        </div>
       </div>
-      {{/each}}
+
+      <div class="core-col abilities-col">
+        <h3>Abilities</h3>
+        <div class="stat-list">
+          {{#each system.abilities as |ability key|}}
+          <div class="stat-line" data-action="rollAbility" data-ability="{{key}}" title="Roll {{ability.label}} (d20)">
+            <label>{{ability.label}}</label>
+            <span class="stat-pf">+{{ability.mod}}</span>
+            <input type="number" name="system.abilities.{{key}}.bonus" value="{{ability.bonus}}" placeholder="0" title="Bonus" onclick="event.stopPropagation()"/>
+            <i class="fas fa-dice-d20 roll-glyph"></i>
+          </div>
+          {{/each}}
+        </div>
+      </div>
+
+      <div class="core-col saves-col">
+        <h3>Saving Throws
+          {{#unless saveBonusChosen}}
+          <button type="button" data-action="chooseSaveBonus" title="Step 4: choose one Saving Throw to receive the creation +1 (then locks)"><i class="fas fa-plus"></i></button>
+          {{else}}{{#if isGM}}<a class="hint" data-action="unlockSaveBonus" title="Rac override: unlock"><i class="fas fa-lock-open"></i></a>{{/if}}{{/unless}}
+        </h3>
+        {{#each system.savesValidation.warnings}}
+        <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{this}}</p>
+        {{/each}}
+        <div class="stat-list">
+          {{#each system.saves as |save key|}}
+          <div class="stat-line" data-action="rollSave" data-save="{{key}}" title="Roll {{save.label}} (DF {{save.df}})">
+            <label>{{save.label}} <span class="save-df">({{save.df}})</span></label>
+            <input type="number" name="system.saves.{{key}}.value" value="{{save.value}}" placeholder="0" onclick="event.stopPropagation()"/>
+            <i class="fas fa-dice-d20 roll-glyph"></i>
+          </div>
+          {{/each}}
+        </div>
+      </div>
+
     </div>
 
     {{#if attrBonuses.rows.length}}
@@ -162,48 +200,6 @@
       {{/each}}
     </div>
     {{/if}}
-
-    <h3>Abilities</h3>
-    <div class="abilities-grid">
-      {{#each system.abilities as |ability key|}}
-      <div class="ability">
-        <label>{{ability.label}}</label>
-        <div class="ability-values">
-          <span class="pf">PF: {{ability.mod}}</span>
-          <input type="number" name="system.abilities.{{key}}.bonus" value="{{ability.bonus}}" placeholder="0" title="Bonus"/>
-        </div>
-        <button type="button" data-action="rollAbility" data-ability="{{key}}">
-          <i class="fas fa-dice-d20"></i> Roll
-        </button>
-      </div>
-      {{/each}}
-    </div>
-
-    <h3>Saving Throws
-      {{#unless saveBonusChosen}}
-      <button type="button" data-action="chooseSaveBonus" title="Step 4: choose one Saving Throw to receive the creation +1 (then locks)">
-        <i class="fas fa-plus"></i> Step 4: +1 Save
-      </button>
-      {{else}}
-      {{#if isGM}}
-      <a class="hint" data-action="unlockSaveBonus" title="Rac override: unlock the Step 4 choice"><i class="fas fa-lock-open"></i> unlock</a>
-      {{/if}}
-      {{/unless}}
-    </h3>
-    {{#each system.savesValidation.warnings}}
-    <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{this}}</p>
-    {{/each}}
-    <div class="saves-grid">
-      {{#each system.saves as |save key|}}
-      <div class="save">
-        <label>{{save.label}} (DF {{save.df}})</label>
-        <input type="number" name="system.saves.{{key}}.value" value="{{save.value}}" placeholder="0"/>
-        <button type="button" data-action="rollSave" data-save="{{key}}">
-          <i class="fas fa-dice-d20"></i> Roll
-        </button>
-      </div>
-      {{/each}}
-    </div>
   </div>
 
   <div class="tab skills {{tabs.skills.cssClass}}" data-group="primary" data-tab="skills">

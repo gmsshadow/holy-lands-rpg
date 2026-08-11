@@ -45,6 +45,9 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       applyCondition: HolyLandsActorSheet.#onApplyCondition,
       clearCondition: HolyLandsActorSheet.#onClearCondition,
       rollInjury: HolyLandsActorSheet.#onRollInjury,
+      rest: HolyLandsActorSheet.#onRest,
+      saveVsDeath: HolyLandsActorSheet.#onSaveVsDeath,
+      advanceComa: HolyLandsActorSheet.#onAdvanceComa,
       npcSkillAdd: HolyLandsActorSheet.#onNpcSkillAdd,
       npcSkillDelete: HolyLandsActorSheet.#onNpcSkillDelete,
       addCustomSkill: HolyLandsActorSheet.#onAddCustomSkill,
@@ -127,6 +130,9 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       label: CONDITIONS[k]?.label ?? k,
       note: CONDITIONS[k]?.note ?? ""
     }));
+    // Recovery state: at/below 0 Life or already in a coma shows the recovery bar.
+    context.inComa = actor.hasCondition?.("coma") ?? false;
+    context.isDyingOrComatose = context.inComa || ((actor.system.life?.value ?? 1) <= 0);
 
     if (actor.type === "character") this.#prepareCharacterContext(context);
     if (actor.type === "npc") this.#prepareNpcContext(context);
@@ -956,6 +962,39 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
   static async #onRollInjury(event, target) {
     return this.actor.rollInjurySeverity();
+  }
+
+  /** Rest for a chosen number of hours (restores Life/Faith). */
+  static async #onRest(event, target) {
+    const hours = await this.#promptHours("Rest", "How many hours of rest?", 8);
+    if (hours === null) return;
+    return this.actor.rest(hours);
+  }
+
+  static async #onSaveVsDeath(event, target) {
+    return this.actor.saveVsDeath();
+  }
+
+  /** Advance a coma by a chosen number of hours (loses 1 Life/hour). */
+  static async #onAdvanceComa(event, target) {
+    const hours = await this.#promptHours("Coma", "Advance the coma by how many hours?", 1);
+    if (hours === null) return;
+    return this.actor.resolveComaHours(hours);
+  }
+
+  /** Small helper: prompt for a positive number of hours. */
+  async #promptHours(title, label, initial) {
+    const result = await foundry.applications.api.DialogV2.wait({
+      window: { title },
+      content: `<div class="form-group"><label>${label}</label><input type="number" name="hours" value="${initial}" min="1" autofocus/></div>`,
+      buttons: [
+        { action: "ok", label: "OK", default: true, callback: (e, b) => Number(b.form.elements.hours.value) },
+        { action: "cancel", label: "Cancel" }
+      ],
+      rejectClose: false
+    });
+    if (!result || result === "cancel" || !Number.isFinite(result) || result < 1) return null;
+    return Math.floor(result);
   }
 
   static async #onNpcSkillAdd(event, target) {

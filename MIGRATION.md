@@ -1018,3 +1018,23 @@ These are deliberate changes, flagged for review:
   strict beat), reconciling the book's example.
 - Thrown-vs-aware still falls back to the normal Dodge/Defend loop; Half Roll
   conditions and Nat 1/20 handling carried into the new flow.
+
+## v2.49.0 — Rest, recovery & the death/coma workflow (stage 1)
+
+- **Rest** (Genesis Ch3): a Rest control on the sheet restores 1 Life per
+  hour of sleep/bedrest up to max (and Faith likewise), over a chosen number
+  of hours. Terminal characters can't rest to recover (need Medical/Miracle);
+  characters at 0 or less must stabilise first.
+- **Save vs Death & Coma:** when Life reaches 0 or less, a Recovery bar
+  appears with a "Save vs Death" button. It rolls the save (Nat 20 auto-
+  success, Nat 1 auto-death); success drops the character into a **coma**
+  condition (no actions), failure is death beyond normal healing. An "Advance
+  coma" control ticks the coma forward, losing 1 Life/hour down to the
+  negative maximum (equal to positive max), then death - matching the book's
+  worked example (max 24 -> 24 hours to -24).
+- Added **Coma** as a condition alongside Broken/Terminal. The distinction
+  from the book is preserved: Terminal comes from a Broken critical injury;
+  Coma comes from Life reaching 0 via cumulative Damage.
+- Verified the coma countdown and rest math against Genesis Ch3.
+- (Stage 2 to follow: Broken-injury "setting" within 1d4 days, the Critical
+  Injury location table, and Medical-Skill recovery.)

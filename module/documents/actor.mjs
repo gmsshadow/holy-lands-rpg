@@ -176,7 +176,8 @@ export class HolyLandsActor extends Actor {
     dazed:        { label: "Dazed", rounds: 3, halfRolls: true, noBonuses: true, note: "Critical Half Rolls (no Bonuses) 1 Round, then Half Rolls 2 more" },
     unconscious:  { label: "Unconscious", rounds: null, noActions: true, note: "No actions for 1d4 Rounds; vulnerable to follow-up" },
     broken:       { label: "Broken", rounds: null, noActions: true, note: "Unconscious + a body part disabled; treat within 1d4 days or Terminal" },
-    terminal:     { label: "Terminal", rounds: null, note: "Dying: cannot regain Life; death in 1d4 days without a Miracle or advanced healing" }
+    terminal:     { label: "Terminal", rounds: null, note: "Dying: cannot regain Life; death in 1d4 days without a Miracle or advanced healing" },
+    coma:         { label: "Coma", rounds: null, noActions: true, note: "Life reached 0 or less; loses 1 Life/hour to negative max, then death. Needs Medical or supernatural aid" }
   };
 
   /** Currently active conditions: { key: { appliedRound, expiresRound|null } }. */
@@ -296,6 +297,116 @@ export class HolyLandsActor extends Actor {
     });
     if (key) await this.applyCondition(key);
     return { key, label };
+  }
+
+  /* -------------------------------------------- */
+  /*  Rest, Recovery & Death                      */
+  /* -------------------------------------------- */
+
+  /**
+   * Rest for a number of hours (Genesis Ch3, "Restoring Life"): each hour of
+   * sleep/bedrest restores 1 Life, up to max, in quiet conditions. Terminal
+   * characters cannot regain Life this way (needs Medical/Miracle), and a
+   * character in a coma LOSES 1 Life/hour instead - use resolveComaHours for
+   * that. This is for ordinary recovery of a living character.
+   */
+  async rest(hours = 8) {
+    if (this.type !== "character" && this.type !== "npc") return;
+    if (this.hasCondition("terminal")) {
+      ui.notifications.warn(`${this.name} is Terminal and cannot regain Life by resting - Medical treatment or a Miracle is required.`);
+      return;
+    }
+    if (this.hasCondition("coma")) {
+      ui.notifications.warn(`${this.name} is in a coma - resting doesn't restore Life. Use the coma resolution instead.`);
+      return;
+    }
+    const life = this.system.life;
+    const before = life?.value ?? 0;
+    if (before <= 0) {
+      ui.notifications.warn(`${this.name} is at ${before} Life - cannot rest to recover until stabilised (Save vs Death / coma).`);
+      return;
+    }
+    const max = life?.max ?? 0;
+    const restored = Math.min(hours, max - before);
+    const after = before + Math.max(0, restored);
+    await this.update({ "system.life.value": after });
+
+    // Faith also recovers with rest (regained through rest/reflection).
+    const faith = this.system.faith;
+    let faithNote = "";
+    if (faith && (faith.value < faith.max)) {
+      const fRestored = Math.min(hours, faith.max - faith.value);
+      await this.update({ "system.faith.value": faith.value + fRestored });
+      faithNote = `, Faith +${fRestored} (now ${faith.value + fRestored}/${faith.max})`;
+    }
+
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} rests ${hours} hour${hours === 1 ? "" : "s"}.</strong> Life +${Math.max(0, restored)} (now ${after}/${max})${faithNote}.`
+    });
+  }
+
+  /**
+   * Save vs Death (Genesis Ch3, "Death and Comas"). Called when Life reaches
+   * 0 or less. Success -> the character slips into a coma (loses 1 Life/hour
+   * to negative max). Failure -> dead beyond normal healing. A Natural 20 is
+   * an automatic success; a Natural 1 an automatic death.
+   */
+  async saveVsDeath() {
+    if (this.type !== "character") return;
+    const df = this.system.saves?.death?.df ?? 11;
+    const bonus = this.system.saves?.death?.value ?? 0;
+    const roll = new Roll("1d20 + @b", { b: bonus });
+    await roll.evaluate();
+    let nat = null;
+    for (const t of roll.terms) { if (t.results?.length) { nat = t.results[0].result; break; } }
+    const success = (nat === 20) || ((nat !== 1) && (roll.total >= df));
+
+    if (success) {
+      await this.applyCondition("coma");
+      await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        flavor: `<strong>${this.name} - Save vs Death (DF ${df}): ${roll.total} - Success${nat === 20 ? " (Natural 20!)" : ""}.</strong><br>${this.name} cheats death and slips into a <strong>coma</strong> - losing 1 Life/hour to -${this.system.life?.max ?? 0}, needing Medical or supernatural aid.`,
+        rolls: [roll]
+      });
+    } else {
+      await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        flavor: `<strong>${this.name} - Save vs Death (DF ${df}): ${roll.total} - Failure${nat === 1 ? " (Natural 1!)" : ""}.</strong><br>${this.name} is <strong>dead</strong> beyond means of normal healing.`,
+        rolls: [roll]
+      });
+    }
+    return { success, roll };
+  }
+
+  /**
+   * Advance a coma by a number of hours (Genesis Ch3): the character loses 1
+   * Life/hour down to negative max (equal to positive max), at which point
+   * they die. Recovery from a coma needs Medical/supernatural aid, not this.
+   */
+  async resolveComaHours(hours = 1) {
+    if (!this.hasCondition("coma")) {
+      ui.notifications.warn(`${this.name} is not in a coma.`);
+      return;
+    }
+    const max = this.system.life?.max ?? 0;
+    const before = this.system.life?.value ?? 0;
+    const after = before - hours;
+    const floor = -max;
+
+    if (after <= floor) {
+      await this.update({ "system.life.value": floor });
+      await this.clearCondition("coma");
+      return ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        flavor: `<strong>${this.name}</strong> reaches negative maximum Life (-${max}) after ${hours} hour${hours === 1 ? "" : "s"} in a coma - <strong>death</strong> beyond normal healing.`
+      });
+    }
+    await this.update({ "system.life.value": after });
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name}</strong> in a coma: ${hours} hour${hours === 1 ? "" : "s"} pass, Life ${after}/${max} (dies at -${max}).`
+    });
   }
 
   /** Forfeit Advantage: double the next Dodge/Defend Bonus this Round. */
@@ -2142,7 +2253,7 @@ export class HolyLandsActor extends Actor {
     if ((newLife <= 0) && (currentLife > 0)) {
       await ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: defender }),
-        flavor: `<strong>${defender.name} has fallen to ${newLife} Life!</strong> Roll a Save vs. Death (DF ${defender.system.saves?.death?.df ?? 11}) - success means a coma (lose 1 Life/hour to -${maxLife}), failure means death.`
+        flavor: `<strong>${defender.name} has fallen to ${newLife} Life!</strong> A Save vs Death is needed (DF ${defender.system.saves?.death?.df ?? 11}) - success means a coma (lose 1 Life/hour to -${maxLife}), failure means death. Use the Recovery controls on the sheet.`
       });
     }
 

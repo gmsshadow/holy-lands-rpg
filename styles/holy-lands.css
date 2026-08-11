@@ -667,3 +667,12 @@
 .holy-lands-rpg .condition-chip a { margin-left: 4px; opacity: 0.7; }
 .holy-lands-rpg .condition-chip a:hover { opacity: 1; }
 .holy-lands-rpg .condition-controls { margin-left: auto; display: flex; gap: 10px; }
+
+/* Recovery bar (Save vs Death, coma) */
+.holy-lands-rpg .recovery-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 5px 8px; margin: 4px 0;
+  background: rgba(60, 20, 20, 0.15);
+  border-left: 3px solid #711; border-radius: 3px;
+}
+.holy-lands-rpg .recovery-bar .recovery-label { font-weight: bold; }

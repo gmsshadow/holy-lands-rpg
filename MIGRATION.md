@@ -1038,3 +1038,21 @@ These are deliberate changes, flagged for review:
 - Verified the coma countdown and rest math against Genesis Ch3.
 - (Stage 2 to follow: Broken-injury "setting" within 1d4 days, the Critical
   Injury location table, and Medical-Skill recovery.)
+
+## v2.50.0 — Rest & recovery stage 2: Broken injuries, location table, setting
+
+- **Critical Injury location table** (Book of Life p.11): a full d% body-part
+  table (Skull/Head 00-03 ... Ankle/Foot 97-99, all 100 values covered) with
+  a "Location" roll button. Applying Broken now rolls where it landed.
+- **Broken injury lifecycle:** applying Broken rolls its location and a 1d4-
+  day window to have it "set" (Medical treatment) before it turns Terminal.
+  A Broken-injury bar shows the body part, deadline, and set status with:
+  - "Set injury" - marks it set (rolls 1d4 weeks the limb is unusable); it no
+    longer risks turning Terminal, but doesn't restore Life (Medical can't
+    heal significant Damage, per the book).
+  - "Deadline passed (to Terminal)" - Rac tool: an unset Broken past its
+    window becomes Terminal.
+- **Terminal** now rolls its 1d4-days-to-live on application, shown in the
+  condition chip.
+- Condition chips display the injury detail inline (e.g. "Broken: Forearm/
+  Wrist (set within 3d)").

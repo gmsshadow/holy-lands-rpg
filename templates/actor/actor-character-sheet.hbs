@@ -342,7 +342,7 @@
       <span class="conditions-label">Conditions:</span>
       {{#each activeConditions}}
       <span class="condition-chip" title="{{this.note}}">
-        {{this.label}}
+        {{this.label}}{{#if this.bodyPart}}: {{this.bodyPart}}{{#unless this.isSet}} (set within {{this.setByDays}}d){{else}} (set, {{this.unusableWeeks}}wk){{/unless}}{{/if}}{{#if this.diesInDays}} ({{this.diesInDays}}d to live){{/if}}
         <a data-action="clearCondition" data-condition="{{this.key}}" title="Clear"><i class="fas fa-xmark"></i></a>
       </span>
       {{else}}
@@ -352,8 +352,20 @@
         <a data-action="rest" title="Rest (restore Life/Faith over hours)"><i class="fas fa-bed"></i> Rest</a>
         <a data-action="applyCondition" title="Apply a condition (Rac)"><i class="fas fa-plus"></i></a>
         <a data-action="rollInjury" title="Roll on the Severity of Injury table"><i class="fas fa-dice-d20"></i> Injury</a>
+        <a data-action="rollInjuryLocation" title="Roll Critical Injury location"><i class="fas fa-crosshairs"></i> Location</a>
       </span>
     </div>
+    {{#if hasBroken}}
+    <div class="recovery-bar">
+      <span class="recovery-label">Broken injury:</span>
+      {{#unless brokenIsSet}}
+      <a data-action="setInjury" title="Set the injury (Medical) - stops it turning Terminal"><i class="fas fa-kit-medical"></i> Set injury</a>
+      <a data-action="brokenToTerminal" title="Deadline passed unset - becomes Terminal"><i class="fas fa-skull"></i> Deadline passed (to Terminal)</a>
+      {{else}}
+      <span class="hint">Set - healing; harming it risks permanent disability.</span>
+      {{/unless}}
+    </div>
+    {{/if}}
     {{#if isDyingOrComatose}}
     <div class="recovery-bar">
       <span class="recovery-label">Recovery:</span>

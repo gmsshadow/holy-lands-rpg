@@ -48,6 +48,9 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       rest: HolyLandsActorSheet.#onRest,
       saveVsDeath: HolyLandsActorSheet.#onSaveVsDeath,
       advanceComa: HolyLandsActorSheet.#onAdvanceComa,
+      setInjury: HolyLandsActorSheet.#onSetInjury,
+      brokenToTerminal: HolyLandsActorSheet.#onBrokenToTerminal,
+      rollInjuryLocation: HolyLandsActorSheet.#onRollInjuryLocation,
       npcSkillAdd: HolyLandsActorSheet.#onNpcSkillAdd,
       npcSkillDelete: HolyLandsActorSheet.#onNpcSkillDelete,
       addCustomSkill: HolyLandsActorSheet.#onAddCustomSkill,
@@ -125,11 +128,19 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
     // Active conditions (Critical Injuries) - for both actor types.
     const CONDITIONS = actor.constructor.CONDITIONS;
-    context.activeConditions = Object.keys(actor.conditions ?? {}).map(k => ({
+    const conds = actor.conditions ?? {};
+    context.activeConditions = Object.keys(conds).map(k => ({
       key: k,
       label: CONDITIONS[k]?.label ?? k,
-      note: CONDITIONS[k]?.note ?? ""
+      note: CONDITIONS[k]?.note ?? "",
+      bodyPart: conds[k]?.bodyPart,
+      setByDays: conds[k]?.setByDays,
+      isSet: conds[k]?.isSet,
+      unusableWeeks: conds[k]?.unusableWeeks,
+      diesInDays: conds[k]?.diesInDays
     }));
+    context.hasBroken = !!conds.broken;
+    context.brokenIsSet = !!conds.broken?.isSet;
     // Recovery state: at/below 0 Life or already in a coma shows the recovery bar.
     context.inComa = actor.hasCondition?.("coma") ?? false;
     context.isDyingOrComatose = context.inComa || ((actor.system.life?.value ?? 1) <= 0);
@@ -980,6 +991,18 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     const hours = await this.#promptHours("Coma", "Advance the coma by how many hours?", 1);
     if (hours === null) return;
     return this.actor.resolveComaHours(hours);
+  }
+
+  static async #onSetInjury(event, target) {
+    return this.actor.setBrokenInjury();
+  }
+
+  static async #onBrokenToTerminal(event, target) {
+    return this.actor.brokenToTerminal();
+  }
+
+  static async #onRollInjuryLocation(event, target) {
+    return this.actor.rollInjuryLocation();
   }
 
   /** Small helper: prompt for a positive number of hours. */

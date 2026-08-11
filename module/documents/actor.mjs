@@ -185,6 +185,50 @@ export class HolyLandsActor extends Actor {
     return this.getFlag("holy-lands-rpg", "conditions") ?? {};
   }
 
+  /**
+   * Critical Injury location table (Book of Life p.11). d% -> body part, used
+   * to find where a Broken injury landed.
+   */
+  static CRITICAL_INJURY_TABLE = [
+    { max: 3, part: "Skull/Head (brain)" },
+    { max: 7, part: "Eyeball (sight)" },
+    { max: 14, part: "Nose/Face" },
+    { max: 26, part: "1d4 Teeth/Tongue" },
+    { max: 33, part: "Jaw" },
+    { max: 35, part: "Throat" },
+    { max: 38, part: "Neck" },
+    { max: 40, part: "Chest/Breastbone" },
+    { max: 45, part: "Ribs (lungs)" },
+    { max: 48, part: "Back/Spine" },
+    { max: 53, part: "Shoulder/Arm" },
+    { max: 60, part: "Upper arm/Elbow" },
+    { max: 67, part: "Forearm/Wrist" },
+    { max: 72, part: "Hand" },
+    { max: 77, part: "1d4 Fingers" },
+    { max: 80, part: "Vital organs" },
+    { max: 83, part: "Spinal Column/Back" },
+    { max: 86, part: "Hip" },
+    { max: 90, part: "Thigh/Leg" },
+    { max: 93, part: "Knee/Leg" },
+    { max: 96, part: "Shin/Calf muscle" },
+    { max: 99, part: "Ankle/Foot" }
+  ];
+
+  static injuryLocation(d) {
+    return this.CRITICAL_INJURY_TABLE.find(r => d <= r.max)?.part ?? "Torso";
+  }
+
+  /** Roll on the Critical Injury location table and post the result. */
+  async rollInjuryLocation() {
+    const roll = new Roll("1d100"); await roll.evaluate();
+    const part = this.constructor.injuryLocation(roll.total - 1);
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} - Critical Injury location (d%=${roll.total - 1})</strong>: <strong>${part}</strong>`,
+      rolls: [roll]
+    });
+  }
+
   /** Whether a given condition is currently active. */
   hasCondition(key) {
     return !!this.conditions[key];
@@ -215,15 +259,67 @@ export class HolyLandsActor extends Actor {
     if (!def) return;
     const currentRound = game.combat?.round ?? 0;
     const conditions = foundry.utils.deepClone(this.conditions);
-    conditions[key] = {
+    const entry = {
       appliedRound: currentRound,
       expiresRound: def.rounds ? currentRound + def.rounds : null
     };
+
+    let extra = "";
+    // Broken: roll where it landed (Book of Life p.11) and the 1d4-day window
+    // to have it set by Medical treatment before it turns Terminal.
+    if (key === "broken") {
+      const locRoll = new Roll("1d100"); await locRoll.evaluate();
+      const dayRoll = new Roll("1d4"); await dayRoll.evaluate();
+      entry.bodyPart = this.constructor.injuryLocation(locRoll.total - 1);
+      entry.setByDays = dayRoll.total; // must be set within this many days
+      entry.isSet = false;
+      extra = `<br>Injury location: <strong>${entry.bodyPart}</strong>. Must be <em>set</em> (Medical) within <strong>${entry.setByDays} day${entry.setByDays === 1 ? "" : "s"}</strong> or it becomes Terminal.`;
+    }
+    // Terminal: 1d4 days to live without a Miracle or advanced healing.
+    else if (key === "terminal") {
+      const dayRoll = new Roll("1d4"); await dayRoll.evaluate();
+      entry.diesInDays = dayRoll.total;
+      extra = `<br><strong>${dayRoll.total} day${dayRoll.total === 1 ? "" : "s"}</strong> to live without a Miracle or advanced healing.`;
+    }
+
+    conditions[key] = entry;
     await this.setFlag("holy-lands-rpg", "conditions", conditions);
     return ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: `<strong>${this.name} is ${def.label}!</strong>${def.note ? `<br><em>${def.note}</em>` : ""}`
+      flavor: `<strong>${this.name} is ${def.label}!</strong>${def.note ? `<br><em>${def.note}</em>` : ""}${extra}`
     });
+  }
+
+  /**
+   * Set a Broken injury (Medical treatment, Book of Life p.11). Setting within
+   * the deadline stops it becoming Terminal; the limb is then unusable for 1d4
+   * weeks. Does not restore Life (Medical can't heal significant Damage).
+   */
+  async setBrokenInjury() {
+    const conditions = foundry.utils.deepClone(this.conditions);
+    const broken = conditions.broken;
+    if (!broken) { ui.notifications.warn(`${this.name} has no Broken injury to set.`); return; }
+    if (broken.isSet) { ui.notifications.info(`${this.name}'s injury is already set.`); return; }
+    const weekRoll = new Roll("1d4"); await weekRoll.evaluate();
+    broken.isSet = true;
+    broken.unusableWeeks = weekRoll.total;
+    conditions.broken = broken;
+    await this.setFlag("holy-lands-rpg", "conditions", conditions);
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name}'s ${broken.bodyPart || "injury"} is set.</strong> It's no longer at risk of turning Terminal. The limb is unusable for <strong>${weekRoll.total} week${weekRoll.total === 1 ? "" : "s"}</strong>; harming it in that time risks permanent disability (50%).`
+    });
+  }
+
+  /**
+   * A Broken injury left unset past its deadline becomes Terminal (Book of
+   * Life p.11). Rac tool: call when the setting window has elapsed.
+   */
+  async brokenToTerminal() {
+    if (!this.hasCondition("broken")) { ui.notifications.warn(`${this.name} is not Broken.`); return; }
+    if (this.conditions.broken?.isSet) { ui.notifications.info(`${this.name}'s injury was set - it won't turn Terminal.`); return; }
+    await this.clearCondition("broken");
+    await this.applyCondition("terminal");
   }
 
   /** Remove a condition. */

@@ -1139,3 +1139,16 @@ These are deliberate changes, flagged for review:
   headers with tighter number boxes, and the AtR current/max pair sits on one
   line instead of wrapping to a second row.
 - Shared .stat-strip styling; cells wrap gracefully on very narrow sheets.
+
+## v2.57.0 — Miracles split into High and Clerical subsections
+
+- The character sheet's Miracles section is now split into two labelled
+  subsections - **High Miracles** and **Clerical Miracles** - each with its
+  own list (sorted by name) and its own "+" create button that makes a
+  miracle of the right type. Miracles already carried a miracleType field
+  (high/clerical), so this groups by it; the compendium's 12 High and 3
+  Clerical miracles bucket automatically.
+- itemCreate now sets miracleType from a data-miracle-type attribute, so new
+  miracles land in the correct subsection.
+- On the NPC sheet (smaller lists), each miracle instead shows a compact
+  High/Clerical tag next to its name rather than a full split.

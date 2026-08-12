@@ -210,7 +210,7 @@
   <ol class="skill-item-list">
     {{#each miracles as |item|}}
     <li class="item skill-row" data-item-id="{{item.id}}">
-      <span class="skill-name">{{item.name}}</span>
+      <span class="skill-name">{{item.name}} <span class="miracle-tag">{{#if (eq item.system.miracleType "clerical")}}Clerical{{else}}High{{/if}}</span></span>
       <span class="skill-pf">Fc {{item.system.faithCost}}</span>
       <a class="item-control" data-action="castMiracle" data-item-id="{{item.id}}" title="Cast Miracle"><i class="fas fa-hands-praying"></i></a>
       <a class="item-control" data-action="itemEdit" title="Edit"><i class="fas fa-edit"></i></a>

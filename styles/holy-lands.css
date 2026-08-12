@@ -789,3 +789,15 @@
   .holy-lands-rpg .stat-strip { flex-wrap: wrap; }
   .holy-lands-rpg .stat-strip .strip-cell { flex-basis: 46%; }
 }
+
+/* Miracle subsections (High / Clerical) */
+.holy-lands-rpg .miracle-subhead {
+  margin: 8px 0 2px; padding-bottom: 1px;
+  border-bottom: 1px solid rgba(107, 52, 16, 0.35);
+  font-size: 0.95em; display: flex; align-items: center; gap: 6px;
+}
+.holy-lands-rpg .miracle-subhead .item-control { font-size: 0.85em; }
+.holy-lands-rpg .miracle-tag {
+  font-size: 0.7em; font-weight: normal; opacity: 0.6;
+  border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; margin-left: 4px;
+}

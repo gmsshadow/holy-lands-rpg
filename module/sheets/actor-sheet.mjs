@@ -295,6 +295,10 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     context.armor = buckets.armor;
     context.equipment = buckets.equipment;
     context.miracles = buckets.miracle;
+    // Split miracles into High and Clerical subsections (each sorted by name).
+    const byMiracleName = (a, b) => a.name.localeCompare(b.name);
+    context.highMiracles = buckets.miracle.filter(m => m.system.miracleType !== "clerical").sort(byMiracleName);
+    context.clericalMiracles = buckets.miracle.filter(m => m.system.miracleType === "clerical").sort(byMiracleName);
     context.blessings = buckets.blessing;
 
     // Skill items grouped into the three paper-sheet sections.
@@ -871,6 +875,11 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       itemData.system = { skillType: target.dataset.skillType };
       const labels = { gift: "Gift", talent: "Talent", craft: "Craft" };
       itemData.name = `New ${labels[target.dataset.skillType] ?? "Skill"}`;
+    }
+    if ((type === "miracle") && target.dataset.miracleType) {
+      itemData.system = { miracleType: target.dataset.miracleType };
+      const labels = { high: "High Miracle", clerical: "Clerical Miracle" };
+      itemData.name = `New ${labels[target.dataset.miracleType] ?? "Miracle"}`;
     }
     return Item.create(itemData, { parent: this.actor });
   }

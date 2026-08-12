@@ -1152,3 +1152,16 @@ These are deliberate changes, flagged for review:
   miracles land in the correct subsection.
 - On the NPC sheet (smaller lists), each miracle instead shows a compact
   High/Clerical tag next to its name rather than a full split.
+
+## v2.58.0 — Standardised heading sizes across all tabs
+
+- Added a single base rule for section headings (h3) and sub-headings (h4)
+  across the whole sheet, so they're a consistent, modest size rather than
+  inheriting Foundry's large defaults. This fixes the disparity that appeared
+  once the content rows were compacted - big "Gifts"/"Defense"/"Ready
+  Weapons" headings over small entries.
+- All section headings (Attributes, Abilities, Saves, Defense, Combat
+  Bonuses, Weapon Skills, Gifts/Talents/Crafts, Miracles, Blessings, Sins,
+  Phobias, Attribute Bonuses) now render at the same 1.15em with the shared
+  brown underline. Inline budgets/hints/buttons within headings stay small;
+  the High/Clerical miracle sub-heads stay one step down as intended.

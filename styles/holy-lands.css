@@ -699,7 +699,7 @@
 .holy-lands-rpg .core-col h3 {
   margin: 0 0 4px; padding-bottom: 2px;
   border-bottom: 2px solid #6b3410;
-  font-size: 1.05em;
+  font-size: 1.15em;
 }
 .holy-lands-rpg .stat-list { display: flex; flex-direction: column; gap: 1px; }
 .holy-lands-rpg .stat-line {
@@ -744,7 +744,7 @@
 
 /* Shrink the Attribute Bonuses heading to match the rest of the sheet */
 .holy-lands-rpg .attr-bonus-panel h3 {
-  font-size: 1.05em;
+  font-size: 1.15em;
   margin: 8px 0 4px;
   padding-bottom: 2px;
   border-bottom: 2px solid #6b3410;
@@ -801,3 +801,31 @@
   font-size: 0.7em; font-weight: normal; opacity: 0.6;
   border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; margin-left: 4px;
 }
+
+/* ============================================================
+   Standardised section headings across all tabs
+   (single source of truth - keeps heading/content sizes in
+   proportion now that content rows are compact)
+   ============================================================ */
+.holy-lands-rpg .window-content h3,
+.holy-lands-rpg .sheet-body h3 {
+  font-size: 1.15em;
+  font-weight: bold;
+  margin: 10px 0 4px;
+  padding-bottom: 2px;
+  border-bottom: 2px solid #6b3410;
+  line-height: 1.2;
+}
+.holy-lands-rpg .window-content h4,
+.holy-lands-rpg .sheet-body h4 {
+  font-size: 1em;
+  font-weight: bold;
+  margin: 4px 0;
+  line-height: 1.2;
+}
+/* Inline meta (budgets, hints, buttons) inside headings stays smaller */
+.holy-lands-rpg h3 .hint,
+.holy-lands-rpg h3 .budget,
+.holy-lands-rpg h4 .budget { font-size: 0.7em; font-weight: normal; }
+/* The big skill-column headers (Gifts/Talents/Crafts) come down to match */
+.holy-lands-rpg .skill-col-header h3 { font-size: 1.15em; }

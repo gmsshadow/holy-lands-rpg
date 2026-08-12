@@ -1165,3 +1165,20 @@ These are deliberate changes, flagged for review:
   Phobias, Attribute Bonuses) now render at the same 1.15em with the shared
   brown underline. Inline budgets/hints/buttons within headings stay small;
   the High/Clerical miracle sub-heads stay one step down as intended.
+
+## v2.59.0 — NPC sheet compacted to match the PC sheet
+
+- Reworked the NPC Combat section with the same compact strips as the PC
+  sheet:
+  - **Attacks (weapons) moved to the top** of the Combat section, each with
+    roll-attack / roll-damage / edit / delete, so they're the first thing to
+    hand - mirroring the PC's Ready Weapons block.
+  - **Defense** and **Combat Bonuses** are now compact strips (abbreviated
+    header on top, value below) instead of a mixed row; the tDEF override and
+    its source sit neatly under Defense.
+  - **Weapon Skills** use the shared ATT/CRI/SPC/AtR strip with tight number
+    boxes (AtR current/max on one line).
+  - **Saves** are now two compact columns of rows (label + DF, override, bonus,
+    roll) instead of large stacked cards.
+- Section headings inherit the standardised sizing from v2.58.0, so the NPC
+  sheet now reads consistently with the PC sheet.

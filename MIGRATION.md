@@ -1127,3 +1127,15 @@ These are deliberate changes, flagged for review:
   drift out of sync.
 - Shrunk the oversized "Attribute Bonuses" heading to match the other section
   headings on the tab.
+
+## v2.56.0 — Combat tab compacted (Defense, Combat Bonuses, Weapon Skills)
+
+- **Defense** is now a compact strip: abbreviated headers (nDEF, aDEF, tDEF,
+  Pen) on top with their values directly below, instead of four large stacked
+  boxes.
+- **Combat Bonuses** collapse to a single tight row - labels shortened to
+  Advantage / Dodge / Defend / Damage (dropped "Bonus"), no longer wrapping.
+- **Weapon Skills** use the same strip: ATT / CRI / SPC / AtR abbreviated
+  headers with tighter number boxes, and the AtR current/max pair sits on one
+  line instead of wrapping to a second row.
+- Shared .stat-strip styling; cells wrap gracefully on very narrow sheets.

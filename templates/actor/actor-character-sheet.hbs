@@ -375,22 +375,22 @@
     {{/if}}
 
     <h3>Defense</h3>
-    <div class="defense-stats">
-      <div class="stat">
-        <label>Natural Defense (nDEF)</label>
+    <div class="stat-strip defense-strip">
+      <div class="strip-cell">
+        <span class="strip-label" title="Natural Defense">nDEF</span>
         <input type="number" name="system.defense.nDEF" value="{{system.defense.nDEF}}"/>
       </div>
-      <div class="stat">
-        <label>Armor Defense Total (aDEFTotal)</label>
-        <span class="derived-value">{{system.defense.aDEFTotal}}</span>
+      <div class="strip-cell">
+        <span class="strip-label" title="Armor Defense Total">aDEF</span>
+        <span class="strip-value">{{system.defense.aDEFTotal}}</span>
       </div>
-      <div class="stat">
-        <label>Total Defense (tDEF)</label>
-        <span class="derived-value">{{system.defense.tDEF}}</span>
+      <div class="strip-cell">
+        <span class="strip-label" title="Total Defense">tDEF</span>
+        <span class="strip-value">{{system.defense.tDEF}}</span>
       </div>
-      <div class="stat">
-        <label>Armor Penalty Total</label>
-        <span class="derived-value">{{system.defense.armorPenaltyTotal}}</span>
+      <div class="strip-cell">
+        <span class="strip-label" title="Armor Penalty Total">Pen</span>
+        <span class="strip-value">{{system.defense.armorPenaltyTotal}}</span>
       </div>
     </div>
 
@@ -414,21 +414,21 @@
     {{#unless system.combatValidation.ca.hasSkill}}
     <p class="hint">Add the "Combat Abilities" skill to your Gifts, Talents, or Crafts to gain +1 points to distribute here (Step 7, p.59).</p>
     {{/unless}}
-    <div class="combat-stats">
-      <div class="stat">
-        <label>Advantage Bonus</label>
+    <div class="stat-strip combat-bonus-strip">
+      <div class="strip-cell">
+        <span class="strip-label">Advantage</span>
         <input type="number" name="system.combat.advantageBonus" value="{{system.combat.advantageBonus}}"/>
       </div>
-      <div class="stat">
-        <label>Dodge Bonus</label>
+      <div class="strip-cell">
+        <span class="strip-label">Dodge</span>
         <input type="number" name="system.combat.dodgeBonus" value="{{system.combat.dodgeBonus}}"/>
       </div>
-      <div class="stat">
-        <label>Defend Bonus</label>
+      <div class="strip-cell">
+        <span class="strip-label">Defend</span>
         <input type="number" name="system.combat.defendBonus" value="{{system.combat.defendBonus}}"/>
       </div>
-      <div class="stat">
-        <label>Damage Bonus</label>
+      <div class="strip-cell">
+        <span class="strip-label">Damage</span>
         <input type="number" name="system.combat.damageBonus" value="{{system.combat.damageBonus}}"/>
       </div>
     </div>
@@ -445,24 +445,26 @@
       {{#each v.warnings}}
       <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{this}}</p>
       {{/each}}
-      <div class="ws-stats">
-        <div class="ws-stat">
-          <label>Attack Bonus</label>
+      <div class="stat-strip ws-strip">
+        <div class="strip-cell">
+          <span class="strip-label" title="Attack Bonus">ATT</span>
           <input type="number" name="system.weaponSkills.{{key}}.attackBonus" value="{{ws.attackBonus}}"/>
         </div>
-        <div class="ws-stat">
-          <label>Critical Bonus</label>
+        <div class="strip-cell">
+          <span class="strip-label" title="Critical Bonus">CRI</span>
           <input type="number" name="system.weaponSkills.{{key}}.criticalBonus" value="{{ws.criticalBonus}}"/>
         </div>
-        <div class="ws-stat">
-          <label>Special Bonus</label>
+        <div class="strip-cell">
+          <span class="strip-label" title="Special Bonus">SPC</span>
           <input type="number" name="system.weaponSkills.{{key}}.specialBonus" value="{{ws.specialBonus}}"/>
         </div>
-        <div class="ws-stat">
-          <label>AtR</label>
-          <input type="number" name="system.weaponSkills.{{key}}.atRCurrent" value="{{ws.atRCurrent}}" style="width: 50px;"/>
-          <span>/</span>
-          <input type="number" name="system.weaponSkills.{{key}}.atRMax" value="{{ws.atRMax}}" style="width: 50px;"/>
+        <div class="strip-cell ws-atr-cell">
+          <span class="strip-label" title="Actions this Round (current / max)">AtR</span>
+          <div class="ws-atr-inputs">
+            <input type="number" name="system.weaponSkills.{{key}}.atRCurrent" value="{{ws.atRCurrent}}"/>
+            <span>/</span>
+            <input type="number" name="system.weaponSkills.{{key}}.atRMax" value="{{ws.atRMax}}"/>
+          </div>
         </div>
       </div>
     </div>

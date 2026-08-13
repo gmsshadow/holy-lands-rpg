@@ -2,7 +2,49 @@
 
 .holy-lands-rpg {
   font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+
+  /* ===== Parchment palette (single source of truth) ===== */
+  --hl-parchment: #ede0c2;          /* base parchment */
+  --hl-parchment-2: #e4d4b0;        /* slightly deeper parchment (panels) */
+  --hl-parchment-shade: #d9c6a0;    /* insets / hover */
+  --hl-ink: #2e2416;                /* dark brown body text */
+  --hl-ink-soft: #5b4a33;           /* secondary text */
+  --hl-accent: #6b3410;             /* headings / labels (deep brown) */
+  --hl-accent-2: #8b4513;           /* saddle-brown accent */
+  --hl-border: #b08d57;             /* warm border */
+  --hl-border-strong: #6b3410;      /* strong border */
+  --hl-field-bg: #f6efdc;           /* input background (lighter parchment) */
+  --hl-good: #2e7d32;
+  --hl-bad: #a11;
+
+  color: var(--hl-ink);
 }
+
+/* Parchment background + dark text across the whole sheet body */
+.holy-lands-rpg .window-content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--hl-ink);
+  background-color: var(--hl-parchment);
+  background-image:
+    radial-gradient(circle at 20% 15%, rgba(255, 250, 235, 0.5) 0%, rgba(255, 250, 235, 0) 40%),
+    radial-gradient(circle at 85% 80%, rgba(160, 120, 70, 0.10) 0%, rgba(160, 120, 70, 0) 45%),
+    radial-gradient(circle at 50% 50%, rgba(120, 80, 40, 0.05) 0%, rgba(120, 80, 40, 0) 70%);
+}
+.holy-lands-rpg .sheet-body { flex: 1; overflow-y: auto; }
+/* Safety net: only the active tab is visible */
+.holy-lands-rpg .tab:not(.active) { display: none !important; }
+
+/* Default text colours on parchment */
+.holy-lands-rpg label,
+.holy-lands-rpg .stat-line,
+.holy-lands-rpg .skill-name,
+.holy-lands-rpg p,
+.holy-lands-rpg span,
+.holy-lands-rpg li,
+.holy-lands-rpg h1,
+.holy-lands-rpg h2 { color: var(--hl-ink); }
 
 /* ===== SHEET HEADER ===== */
 .holy-lands-rpg .sheet-header {
@@ -522,22 +564,6 @@
 }
 
 /* ===== ApplicationV2 layout (system v2.0+) ===== */
-.holy-lands-rpg .window-content {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.holy-lands-rpg .sheet-body {
-  flex: 1;
-  overflow-y: auto;
-}
-
-/* Safety net: only the active tab is visible */
-.holy-lands-rpg .tab:not(.active) {
-  display: none !important;
-}
-
 .holy-lands-rpg prose-mirror {
   min-height: 150px;
   flex: 1;
@@ -870,3 +896,91 @@
 }
 .holy-lands-rpg .xp-hint { font-size: 0.72em; opacity: 0.6; margin-left: 4px; white-space: nowrap; }
 .holy-lands-rpg .xp-hint.xp-ready { color: #2e7d32; opacity: 1; font-weight: bold; }
+
+/* ============================================================
+   Parchment theme - field, header, panel and accent overrides
+   (appended last so they win; uses the palette variables)
+   ============================================================ */
+.holy-lands-rpg input,
+.holy-lands-rpg select,
+.holy-lands-rpg textarea,
+.holy-lands-rpg prose-mirror {
+  background: var(--hl-field-bg);
+  color: var(--hl-ink);
+  border: 1px solid var(--hl-border);
+  border-radius: 3px;
+}
+.holy-lands-rpg input:focus,
+.holy-lands-rpg select:focus,
+.holy-lands-rpg textarea:focus {
+  border-color: var(--hl-accent);
+  box-shadow: 0 0 3px rgba(107, 52, 16, 0.4);
+  outline: none;
+}
+.holy-lands-rpg input::placeholder { color: rgba(91, 74, 51, 0.5); }
+
+/* Headings and labels use the deep-brown accent on parchment */
+.holy-lands-rpg .window-content h3,
+.holy-lands-rpg .sheet-body h3,
+.holy-lands-rpg .core-col h3,
+.holy-lands-rpg .attr-bonus-panel h3,
+.holy-lands-rpg .skill-col-header h3 { color: var(--hl-accent); border-bottom-color: var(--hl-border-strong); }
+.holy-lands-rpg .window-content h4,
+.holy-lands-rpg .sheet-body h4,
+.holy-lands-rpg .strip-label,
+.holy-lands-rpg .stat-line .stat-pf,
+.holy-lands-rpg .conditions-label,
+.holy-lands-rpg .recovery-label { color: var(--hl-accent); }
+
+/* Header and profile image */
+.holy-lands-rpg .sheet-header {
+  background: var(--hl-parchment-2);
+  border-color: var(--hl-border-strong);
+}
+.holy-lands-rpg .sheet-header .profile-img { border-color: var(--hl-border-strong); }
+.holy-lands-rpg .sheet-header h1 input { color: var(--hl-ink); font-weight: bold; }
+
+/* Tab navigation */
+.holy-lands-rpg nav.sheet-tabs,
+.holy-lands-rpg .sheet-tabs {
+  border-top: 1px solid var(--hl-border);
+  border-bottom: 2px solid var(--hl-border-strong);
+}
+.holy-lands-rpg .sheet-tabs .item { color: var(--hl-ink-soft); }
+.holy-lands-rpg .sheet-tabs .item.active { color: var(--hl-accent); text-shadow: none; font-weight: bold; }
+
+/* Panels / insets / rows on parchment */
+.holy-lands-rpg .strip-cell,
+.holy-lands-rpg .weapon-skill,
+.holy-lands-rpg .attr-bonus-panel,
+.holy-lands-rpg .item,
+.holy-lands-rpg .conditions-bar,
+.holy-lands-rpg fieldset {
+  background: var(--hl-parchment-2);
+  border-color: var(--hl-border);
+}
+.holy-lands-rpg .stat-line:hover,
+.holy-lands-rpg .item:hover { background: var(--hl-parchment-shade); }
+
+/* Buttons: solid brown on parchment */
+.holy-lands-rpg button {
+  background: var(--hl-accent);
+  color: var(--hl-parchment);
+  border: 1px solid var(--hl-border-strong);
+  border-radius: 3px;
+}
+.holy-lands-rpg button:hover { background: var(--hl-accent-2); }
+.holy-lands-rpg .item-control,
+.holy-lands-rpg .roll-glyph { color: var(--hl-accent); }
+.holy-lands-rpg .item-control:hover { color: var(--hl-accent-2); }
+
+/* Keep the level-up ready button green (overrides the brown button rule) */
+.holy-lands-rpg button.level-up-ready {
+  background: linear-gradient(180deg, #2e7d32, #1b5e20);
+  color: #fff; border-color: #1b5e20;
+}
+
+/* Hints and warnings */
+.holy-lands-rpg .hint { color: var(--hl-ink-soft); }
+.holy-lands-rpg .rules-warning { color: var(--hl-bad); }
+.holy-lands-rpg .budget { color: var(--hl-good); }

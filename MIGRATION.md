@@ -1235,3 +1235,17 @@ These are deliberate changes, flagged for review:
   newly-crossed multiple of 5): a character created at Faith 10 (4 Blessings)
   who levels to Faith 15 gains +2 to reach 6 = the entitlement at Faith 15.
   No double-counting.
+
+## v2.63.0 — Parchment theme for character & NPC sheets
+
+- Reworked the sheet colour scheme to dark ink on parchment instead of the
+  dark background it inherited from Foundry's app chrome.
+- Introduced a palette of CSS variables (--hl-parchment, --hl-ink, --hl-accent,
+  --hl-border, etc.) as a single source of truth, so the whole theme can be
+  retuned from one place.
+- The sheet body now has a warm parchment background with a subtle mottled
+  texture; body text is dark brown; headings and labels use a deep-brown
+  accent; inputs sit on a lighter parchment with warm borders; buttons are
+  solid brown with parchment text. The level-up-ready button stays green.
+- Applies to both the PC and NPC sheets (shared root class). Purely cosmetic -
+  no layout or mechanics changed.

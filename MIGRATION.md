@@ -1249,3 +1249,43 @@ These are deliberate changes, flagged for review:
   solid brown with parchment text. The level-up-ready button stays green.
 - Applies to both the PC and NPC sheets (shared root class). Purely cosmetic -
   no layout or mechanics changed.
+
+# ============================================================
+# v3.0.0 — MAJOR MILESTONE
+# ============================================================
+
+The 2.x line grew the Holy Lands RPG system from a working character-creation
+sheet into a mechanically complete implementation of the core rules. Over that
+line we added: the full ranged-combat two-step resolution; Critical Injuries &
+Conditions; the complete rest / recovery / death / coma workflow (Save vs
+Death, coma countdown, Broken->Terminal with the injury-location table and
+Medical setting); apply-damage-to-actor from any source; Sins & Phobias
+mechanical effects; XP-driven leveling with a guided level-up flow that applies
+the p.62 choices; corrected Blessings scaling (2 per 5 Faith at every point);
+and a full sheet redesign - compact paper-style layouts on both the PC and NPC
+sheets, standardised headings, and a parchment theme. v3.0.0 marks that step up.
+
+## v3.0.0 — Named Special maneuvers
+
+- Added the six named Special maneuvers (Combat Handbook p.20-21) as attack
+  options, each rolling the active Weapon Skill's SPC Bonus for its set AtR
+  cost, with its effect applied on a confirmed hit:
+  - **Stunning Strike** (2+ AtR) - applies the Stunned condition; extra AtR
+    extends the duration (+1 Round each).
+  - **Knock-out** (2 AtR, +5 DF) - a Called Shot to head/neck vs an unaware /
+    held target; on a hit applies Unconscious.
+  - **Subvert Armor** (2 AtR) - the attack resolves against the target's
+    halved tDEF (ceil), no Damage multiplier.
+  - **Disarm** (2 AtR) - roll + AtR, posts a Rac-adjudicated weapon-drop.
+  - **Sweeping Leglock** (2 AtR) - roll + AtR, posts a Rac-adjudicated
+    knockdown / weapon-drop.
+  - **Simultaneous Attack** (1 AtR) - posts the Rac-adjudicated mutual-strike
+    exchange.
+- Surfaced in the attack-options picker as a "Named Maneuvers" group, showing
+  only those the character can afford in AtR; Stunning Strike exposes an
+  extra-AtR field.
+- The pre-existing p.51 rule (a later attack with a DIFFERENT Weapon Skill is
+  auto-resolved as a Special at 1 AtR) was reviewed and left as-is; the
+  "all previous attacks succeeded" gate stays Rac-adjudicated by design.
+- SPECIAL_MANEUVERS table added; effects reuse the Conditions system (Stunned/
+  Unconscious) and the tDEF pipeline (Subvert Armor).

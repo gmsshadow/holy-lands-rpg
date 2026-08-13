@@ -218,6 +218,27 @@ export class HolyLandsActor extends Actor {
     return this.CRITICAL_INJURY_TABLE.find(r => d <= r.max)?.part ?? "Torso";
   }
 
+  /**
+   * Named Special maneuvers (Combat Handbook p.20-21, Genesis p.50-51). Each
+   * rolls the active Weapon Skill's SPC Bonus (handled by mode "special"),
+   * costs a set number of AtR, and on a successful hit applies its effect.
+   *
+   * effect types:
+   *  - "condition": applies a condition to the target on hit (key given).
+   *  - "subvertArmor": the attack resolves against ceil(tDEF/2).
+   *  - "note": no auto-mechanic; posts a Rac-adjudicated result line.
+   * dfMod: added to the to-hit difficulty (Called-Shot style) where relevant.
+   * scalable: extra AtR beyond the base extends the effect (Stunning Strike).
+   */
+  static SPECIAL_MANEUVERS = {
+    disarm:         { label: "Disarm", atr: 2, effect: "note", note: "Target's weapon is knocked from their grip (Rac adjudicates recovery)." },
+    stunningStrike: { label: "Stunning Strike", atr: 2, effect: "condition", condition: "stunned", scalable: true, note: "Target is Stunned (Half Rolls) for 1 Round, +1 Round per extra AtR spent." },
+    subvertArmor:   { label: "Subvert Armor", atr: 2, effect: "subvertArmor", note: "Halves the target's tDEF for this attack (no Damage multiplier)." },
+    sweep:          { label: "Sweeping Leglock", atr: 2, effect: "note", note: "Target is knocked down; may drop their weapon (Rac adjudicates)." },
+    knockout:       { label: "Knock-out (Called Shot: Head/Neck)", atr: 2, dfMod: 5, effect: "condition", condition: "unconscious", note: "Called Shot to head/neck vs an unaware/held target: on a hit the target is knocked Unconscious." },
+    simultaneous:   { label: "Simultaneous Attack", atr: 1, effect: "note", forfeitsDefense: true, note: "Both combatants strike at once; forfeits Advantage & defense. Beating the foe's roll by 2x means you strike unhit; missing means only you take Damage (Rac resolves the exchange)." }
+  };
+
   /** Roll on the Critical Injury location table and post the result. */
   async rollInjuryLocation() {
     const roll = new Roll("1d100"); await roll.evaluate();
@@ -1871,13 +1892,23 @@ export class HolyLandsActor extends Actor {
    *                                         from all Natural 20/1 riders (Ch5).
    */
   async rollAttack(weapon, targetActor = null, options = {}) {
-    let { mode = "attack", multiplier = 1, modifier = 0, free = false, isCounter = false } = options;
+    let { mode = "attack", multiplier = 1, modifier = 0, free = false, isCounter = false,
+          maneuver = null, extraAtR = 0 } = options;
 
     const weaponSkill = weapon?.system?.weaponSkill || "lightArms";
     const ws = this.system.weaponSkills?.[weaponSkill];
     if (!ws) {
       ui.notifications.error(`Weapon skill ${weaponSkill} not found`);
       return;
+    }
+
+    // A named Special maneuver forces Special mode and carries its own AtR cost
+    // and (for Called Shots) a difficulty modifier applied to the to-hit.
+    const maneuverDef = maneuver ? this.constructor.SPECIAL_MANEUVERS[maneuver] : null;
+    if (maneuverDef) {
+      mode = "special";
+      multiplier = 1;
+      if (maneuverDef.dfMod) modifier = (modifier || 0) - maneuverDef.dfMod; // Called Shot: harder to hit
     }
 
     if (this.getCombatFlag("retreating")) {
@@ -1902,8 +1933,10 @@ export class HolyLandsActor extends Actor {
     // Page 51 ("Using two or more Weapon Skills"): the first Weapon Skill a
     // character attacks with in a Round is their opener. Switching to a
     // DIFFERENT Weapon Skill later that Round must be rolled as a Special.
-    // (The "all previous attacks succeeded" and realism conditions are left
-    // to the Rac.) Free counters are exempt and don't set the opener.
+    // This kind of Special costs the normal 1 AtR (confirmed against the rules;
+    // it's a plain attack that happens to roll SPC, not an effect maneuver).
+    // The "all previous attacks succeeded" and realism conditions are left to
+    // the Rac. Free counters are exempt and don't set the opener.
     if (!free) {
       const opener = this.roundWeaponSkill;
       if (opener === null) {
@@ -1916,8 +1949,16 @@ export class HolyLandsActor extends Actor {
       }
     }
 
-    // AtR cost: Critical strikes spend AtR equal to their multiplier (Ch5).
-    const atrCost = free ? 0 : (mode === "critical" ? Math.max(2, multiplier) : 1);
+    // AtR cost. A named maneuver sets its own cost (plus any extra AtR spent to
+    // extend a scalable effect). Otherwise Criticals spend AtR = multiplier,
+    // and everything else (including a WS-switch Special) costs 1.
+    let atrCost;
+    if (maneuverDef) {
+      const extra = maneuverDef.scalable ? Math.max(0, extraAtR) : 0;
+      atrCost = free ? 0 : (maneuverDef.atr + extra);
+    } else {
+      atrCost = free ? 0 : (mode === "critical" ? Math.max(2, multiplier) : 1);
+    }
     const atr = this.getAtR(weaponSkill);
     if (!free && (atr.current < atrCost)) {
       ui.notifications.warn(`Not enough AtR for ${ws.label} (${atrCost} needed, ${atr.current} remaining)`);
@@ -1938,7 +1979,7 @@ export class HolyLandsActor extends Actor {
     }
     else if (mode === "special") {
       actionBonus = ws.specialBonus || 0;
-      modeLabel = " (Special)";
+      modeLabel = maneuverDef ? ` (${maneuverDef.label})` : " (Special)";
     }
 
     // Natural 20 Advantage: +3 to Attack, Critical, and Special this Round.
@@ -2006,8 +2047,14 @@ export class HolyLandsActor extends Actor {
       });
     }
 
-    // GATE A: the attack must exceed the defender's tDEF.
-    const defenderTDEF = targetActor.system?.defense?.tDEF || 4;
+    // GATE A: the attack must exceed the defender's tDEF. Subvert Armor
+    // (Combat Handbook p.20) halves the target's tDEF for this attack.
+    let defenderTDEF = targetActor.system?.defense?.tDEF || 4;
+    if (maneuverDef?.effect === "subvertArmor") {
+      const halved = Math.ceil(defenderTDEF / 2);
+      modeLabel += ` [tDEF ${defenderTDEF}\u2192${halved}]`;
+      defenderTDEF = halved;
+    }
     if (!isNat20 && (attackTotal <= defenderTDEF)) {
       await this.spendActionAtR(atrCost);
       return ChatMessage.create({
@@ -2019,7 +2066,7 @@ export class HolyLandsActor extends Actor {
 
     const attackContext = {
       attackTotal, isNat20, mode, multiplier, free, isCounter,
-      atrCost, weaponSkill
+      atrCost, weaponSkill, maneuver, maneuverDef, extraAtR
     };
 
     await ChatMessage.create({
@@ -2475,10 +2522,45 @@ export class HolyLandsActor extends Actor {
     }
     if (defender.getCombatFlag("advNat20")) await defender.setCombatFlag("advNat20", false);
 
-    return ChatMessage.create({
+    await ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
       flavor: `${weapon?.name || "Unarmed"} Damage: <strong>${finalDamage}</strong> (${parts.join(" ")})`,
       rolls: [damageRoll]
+    });
+
+    // Named Special maneuver effect fires on a confirmed hit.
+    const md = attackContext.maneuverDef;
+    if (md) await this.#applyManeuverEffect(md, defender, attackContext);
+    return;
+  }
+
+  /**
+   * Apply a named Special maneuver's on-hit effect (Combat Handbook p.20-21).
+   * Condition maneuvers apply a status (Stunning Strike scales its duration
+   * with extra AtR); Subvert Armor's tDEF halving is handled at resolution;
+   * "note" maneuvers post a Rac-adjudicated result line.
+   */
+  async #applyManeuverEffect(md, defender, attackContext) {
+    if (md.effect === "condition" && md.condition) {
+      let extraRounds = md.scalable ? Math.max(0, attackContext.extraAtR || 0) : 0;
+      await defender.applyCondition(md.condition);
+      if (extraRounds > 0) {
+        const conds = foundry.utils.deepClone(defender.conditions);
+        const entry = conds[md.condition];
+        if (entry && entry.expiresRound !== null) {
+          entry.expiresRound += extraRounds;
+          await defender.setFlag("holy-lands-rpg", "conditions", conds);
+        }
+      }
+      const roundsNote = md.scalable ? ` (${1 + extraRounds} Round${1 + extraRounds === 1 ? "" : "s"})` : "";
+      return ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        flavor: `<strong>${md.label}</strong> lands on ${defender.name}${roundsNote}. ${md.note}`
+      });
+    }
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${md.label}</strong> succeeds against ${defender.name}. ${md.note}`
     });
   }
 

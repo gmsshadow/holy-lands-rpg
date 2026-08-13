@@ -1315,17 +1315,39 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     }
     modes += `<option value="special">Special (+${ws.specialBonus || 0}, 1 AtR)</option>`;
 
+    // Named Special maneuvers (Combat Handbook p.20-21). Only show those the
+    // character can currently afford in AtR.
+    const MANEUVERS = this.actor.constructor.SPECIAL_MANEUVERS || {};
+    let maneuverOpts = "";
+    for (const [key, m] of Object.entries(MANEUVERS)) {
+      if (m.atr <= atrCurrent) {
+        maneuverOpts += `<option value="maneuver:${key}">${m.label} (+${ws.specialBonus || 0} SPC, ${m.atr} AtR${m.dfMod ? `, +${m.dfMod} DF` : ""})</option>`;
+      }
+    }
+    const maneuverGroup = maneuverOpts ? `<optgroup label="Named Maneuvers">${maneuverOpts}</optgroup>` : "";
+
     const result = await DialogV2.wait({
       window: { title: `${weapon?.name || "Unarmed"} - Attack Options (${ws.label}, AtR ${atrCurrent})` },
       content: `
         <div class="form-group">
           <label>Attack type:</label>
-          <select name="mode" autofocus>${modes}</select>
+          <select name="mode" autofocus>${modes}${maneuverGroup}</select>
+        </div>
+        <div class="form-group extra-atr-group" style="display:none;">
+          <label>Extra AtR (Stunning Strike: +1 Round each):</label>
+          <input type="number" name="extraAtR" value="0" min="0"/>
         </div>
         <div class="form-group">
           <label>Situational modifier (Flanking +1/ally, etc):</label>
           <input type="number" name="modifier" value="0"/>
-        </div>`,
+        </div>
+        <script>(function(){
+          const r = document.currentScript.parentElement;
+          const sel = r.querySelector('select[name=mode]');
+          const eg = r.querySelector('.extra-atr-group');
+          function upd(){ eg.style.display = (sel.value === 'maneuver:stunningStrike') ? '' : 'none'; }
+          sel.addEventListener('change', upd); upd();
+        })();</script>`,
       buttons: [
         {
           action: "roll",
@@ -1333,7 +1355,8 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
           default: true,
           callback: (event, button) => ({
             mode: button.form.elements.mode.value,
-            modifier: Number(button.form.elements.modifier.value) || 0
+            modifier: Number(button.form.elements.modifier.value) || 0,
+            extraAtR: Number(button.form.elements.extraAtR?.value) || 0
           })
         },
         { action: "cancel", label: "Cancel" }
@@ -1342,8 +1365,12 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     });
 
     if (!result || (result === "cancel")) return null;
-    const [mode, mult] = String(result.mode).split(":");
-    return { mode, multiplier: Number(mult) || 1, modifier: result.modifier };
+    // Mode can be "attack", "critical:N", "special", or "maneuver:<key>".
+    const [kind, arg] = String(result.mode).split(":");
+    if (kind === "maneuver") {
+      return { mode: "special", maneuver: arg, extraAtR: result.extraAtR || 0, modifier: result.modifier };
+    }
+    return { mode: kind, multiplier: Number(arg) || 1, modifier: result.modifier };
   }
 
   /**

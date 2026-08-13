@@ -1340,3 +1340,14 @@ sheets, standardised headings, and a parchment theme. v3.0.0 marks that step up.
   reroll, Start (Life/Faith), the XP-gated Level Up button and XP hint, the GM
   unlock/force links, Roll Details, and all validation warnings.
 - Completes the paper-style visual pass across the character sheet.
+
+## v3.2.1 — Header polish: title bar, tighter layout, en-dash fix
+
+- **Window title bar** is now parchment-brown with light text, so the sheet
+  title (and header control buttons) are legible instead of dark-on-dark.
+- **Character Information panel** is now a two-column grid: short fields
+  (Player/Gender, Native Land/Languages, Level/XP) pair two-per-line, while
+  rows that carry buttons or long values (Class, Stature, Age/Height/Weight)
+  span the full width. Much tighter vertically.
+- Fixed the Age label showing a literal "\u2013" instead of an en-dash (a
+  double-escaping bug from the previous header rebuild) - now reads "(18–42)".

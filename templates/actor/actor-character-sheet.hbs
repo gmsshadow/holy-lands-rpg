@@ -13,7 +13,7 @@
         </select>
       </div>
 
-      <div class="ci-row ci-class-row"><label>Class</label>
+      <div class="ci-row ci-span ci-class-row"><label>Class</label>
         <div class="ci-value">
           {{#if classItem}}
           <span class="class-item-display" data-item-id="{{classItem.id}}">
@@ -33,7 +33,7 @@
       {{else}}<p class="hint">Roll Attributes (Step 2) first, then Step 2A rerolls become available.</p>{{/if}}
       {{/if}}
 
-      <div class="ci-row ci-stature-row"><label>Stature</label>
+      <div class="ci-row ci-span ci-stature-row"><label>Stature</label>
         <div class="ci-value">
           <select name="system.stature" {{#if attributesLocked}}disabled{{/if}}>{{selectOptions statures selected=system.stature}}</select>
           {{#unless attributesLocked}}<button type="button" data-action="rollCreationAttributes" title="Roll all twelve Attributes from the p.53 Stature table, then lock"><i class="fas fa-dice"></i> Roll Attributes</button>
@@ -66,7 +66,7 @@
       <div class="ci-row"><label>Native Land</label><input type="text" name="system.nativeLand" value="{{system.nativeLand}}" placeholder="—"/></div>
       <div class="ci-row"><label>Languages</label><input type="text" name="system.languageGroup" value="{{system.languageGroup}}" placeholder="—"/></div>
 
-      <div class="ci-row ci-physical"><label>Age <span class="hint">({{system.detailsValidation.ageMin}}\u2013{{system.detailsValidation.ageMax}})</span></label>
+      <div class="ci-row ci-span ci-physical"><label>Age <span class="hint">({{system.detailsValidation.ageMin}}–{{system.detailsValidation.ageMax}})</span></label>
         <div class="ci-value ci-physical-values">
           <input type="number" name="system.age" value="{{system.age}}" title="Age"/>
           <span class="ci-sep">H</span><input type="text" name="system.height" value="{{system.height}}" title="Height" placeholder="Height"/>

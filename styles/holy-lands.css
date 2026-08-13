@@ -994,26 +994,38 @@
   border-radius: 4px;
   padding: 6px 10px;
   margin: 6px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px 16px;
+  align-items: center;
 }
 .holy-lands-rpg .ci-row {
   display: flex; align-items: center; gap: 8px;
   padding: 2px 0;
   border-bottom: 1px dotted rgba(107, 52, 16, 0.25);
+  min-width: 0;
 }
+.holy-lands-rpg .ci-span { grid-column: 1 / -1; }
+/* Warnings/buttons emitted between rows should span full width */
+.holy-lands-rpg .char-info-panel > .rules-warning,
+.holy-lands-rpg .char-info-panel > .hint,
+.holy-lands-rpg .char-info-panel > button { grid-column: 1 / -1; }
 .holy-lands-rpg .ci-row:last-child { border-bottom: none; }
 .holy-lands-rpg .ci-row > label {
-  flex: 0 0 92px; font-weight: bold; color: var(--hl-accent);
-  font-size: 0.85em;
+  flex: 0 0 74px; font-weight: bold; color: var(--hl-accent);
+  font-size: 0.82em;
 }
+.holy-lands-rpg .ci-span > label { flex-basis: 92px; }
 .holy-lands-rpg .ci-row > input,
-.holy-lands-rpg .ci-row > select { flex: 1; height: 22px; font-size: 0.9em; }
+.holy-lands-rpg .ci-row > select { flex: 1; height: 22px; font-size: 0.9em; min-width: 0; }
 .holy-lands-rpg .ci-value {
-  flex: 1; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  flex: 1; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0;
 }
 .holy-lands-rpg .ci-value select { flex: 1; height: 22px; min-width: 90px; }
 .holy-lands-rpg .ci-level-input,
-.holy-lands-rpg .ci-xp-input { flex: 0 0 60px; }
-.holy-lands-rpg .ci-value button { font-size: 0.75em; padding: 2px 6px; white-space: nowrap; }
+.holy-lands-rpg .ci-xp-input { flex: 0 0 52px; }
+.holy-lands-rpg .ci-value button { font-size: 0.72em; padding: 2px 6px; white-space: nowrap; }
+.holy-lands-rpg .ci-value .hint { font-size: 0.72em; }
 .holy-lands-rpg .class-item-display { display: inline-flex; align-items: center; gap: 6px; }
 
 /* Age / Height / Weight compact on one line */
@@ -1022,3 +1034,30 @@
 .holy-lands-rpg .ci-physical-values input[type="text"] { flex: 1 1 60px; min-width: 50px; }
 .holy-lands-rpg .ci-physical-values .ci-sep { font-size: 0.75em; font-weight: bold; color: var(--hl-accent); opacity: 0.7; }
 .holy-lands-rpg .ci-physical-values button { flex: 0 0 auto; }
+
+/* ============================================================
+   Window title bar - parchment instead of dark chrome so the
+   title text is legible
+   ============================================================ */
+.holy-lands-rpg.application .window-header,
+.holy-lands-rpg .window-header {
+  background: var(--hl-accent);
+  color: var(--hl-parchment);
+  border-bottom: 1px solid var(--hl-border-strong);
+}
+.holy-lands-rpg.application .window-header .window-title,
+.holy-lands-rpg .window-header .window-title {
+  color: var(--hl-parchment);
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  font-weight: bold;
+}
+/* Header control buttons legible on the brown bar */
+.holy-lands-rpg.application .window-header button,
+.holy-lands-rpg .window-header button,
+.holy-lands-rpg .window-header .header-control {
+  color: var(--hl-parchment);
+}
+.holy-lands-rpg .window-header button:hover,
+.holy-lands-rpg .window-header .header-control:hover {
+  color: #fff;
+}

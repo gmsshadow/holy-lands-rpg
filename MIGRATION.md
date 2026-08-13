@@ -1200,3 +1200,23 @@ These are deliberate changes, flagged for review:
 - Model helpers: earnedLevel, canLevelUp, nextLevelXp, MAX_LEVEL. The existing
   automatic grants (class Life/Faith dice, Blessings on Faith-increment
   crossings) and the manual-choice reminders are unchanged.
+
+## v2.61.0 — Guided level-up flow (applies p.62 choices)
+
+- Clicking Level Up now runs a guided flow instead of just reminding:
+  1. Rolls the automatic grants (class Life/Faith dice, Blessings on Faith-
+     increment crossings) and advances the level, as before.
+  2. Opens a choices dialog to apply this level's manual increases from p.62:
+     - **+1 to one Attribute** (dropdown shows the resulting value; Rule of
+       Halves checked softly on the sheet; even-over-11 still uses the
+       Attribute Bonus panel afterward).
+     - **+1 to one Saving Throw**.
+     - **A new skill** where the level grants one: a **Talent at Levels 2-3**
+       and a **Craft at Levels 3-7** (at Level 3 you pick which), chosen from
+       the class's Talent/Craft list, added at +1 PF.
+  3. Posts a summary of the applied increases to chat.
+- The choices can be skipped and applied from the sheet later. Adventurer/
+  Fighter (which don't use the standard Talent/Craft list) get a note to add
+  the skill manually.
+- New actor methods: applyLevelUpChoices() and grantLevelUpSkill() (the latter
+  isn't gated by the creation flag, so it works every level).

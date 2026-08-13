@@ -1608,6 +1608,59 @@ export class HolyLandsActor extends Actor {
   }
 
   /**
+   * Apply the player's chosen level-up increases (Genesis p.62): +1 to one
+   * Attribute and +1 to one Saving Throw (both follow the Rule of Halves, which
+   * is validated softly on the sheet). Optionally grant one new skill (Talent
+   * at Levels 2-3 / Craft at Levels 3-7). Returns a summary string.
+   */
+  async applyLevelUpChoices({ attrKey, saveKey, skillName, skillSection } = {}) {
+    if (this.type !== "character") return "";
+    const parts = [];
+    const update = {};
+
+    if (attrKey && this.system.attributes?.[attrKey]) {
+      const cur = this.system.attributes[attrKey].value || 0;
+      update[`system.attributes.${attrKey}.value`] = cur + 1;
+      parts.push(`${this.system.attributes[attrKey].label} +1 (now ${cur + 1})`);
+    }
+    if (saveKey && this.system.saves?.[saveKey]) {
+      const cur = this.system.saves[saveKey].value || 0;
+      update[`system.saves.${saveKey}.value`] = cur + 1;
+      parts.push(`${this.system.saves[saveKey].label} save +1`);
+    }
+    if (Object.keys(update).length) await this.update(update);
+
+    if (skillName) {
+      const added = await this.grantLevelUpSkill(skillName, skillSection || "talent");
+      if (added) parts.push(`new ${skillSection === "craft" ? "Craft" : "Talent"}: ${skillName} (+1 PF)`);
+    }
+    return parts.join("; ");
+  }
+
+  /**
+   * Grant a single new skill gained on level-up (p.62). Unlike the creation
+   * granter this isn't gated by the creation flag. New skills start at +1 PF.
+   */
+  async grantLevelUpSkill(name, section = "talent") {
+    if (this.type !== "character" || !name) return false;
+    const existing = new Set(this.items.filter(i => i.type === "skill").map(i => i.name.toLowerCase()));
+    if (existing.has(name.toLowerCase())) {
+      ui.notifications.info(`${this.name} already has the skill "${name}".`);
+      return false;
+    }
+    const pack = game.packs.get("holy-lands-rpg.skills");
+    const packDocs = pack ? await pack.getDocuments() : [];
+    const match = packDocs.find(d => d.name.toLowerCase() === name.toLowerCase());
+    const data = match
+      ? foundry.utils.mergeObject(match.toObject(), { system: { skillType: section, pf: 1 } })
+      : { name, type: "skill", img: "icons/svg/book.svg",
+          system: { skillType: section, pf: 1, combatAbilities: /combat\s*abilit/i.test(name), isCombatSkill: /^cs\s/i.test(name) } };
+    delete data._id;
+    await this.createEmbeddedDocuments("Item", [data]);
+    return true;
+  }
+
+  /**
    * Level up (Progressing a Character, p.62): +1 Level; roll the class
    * per-level Life and Faith dice (GE) and add each to BOTH max and current;
    * remind about the manual gains (+1 Attribute, +1 Save, Skills, Blessings).

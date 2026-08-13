@@ -1171,17 +1171,84 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   }
 
   static async #onLevelUp(event, target) {
+    const nextLevel = (this.actor.system.level || 1) + 1;
     const proceed = await DialogV2.confirm({
       window: { title: "Level Up" },
-      content: `<p>Advance <strong>${this.actor.name}</strong> to Level ${(this.actor.system.level || 1) + 1}? This rolls the class Life and Faith dice and applies them.</p>`,
+      content: `<p>Advance <strong>${this.actor.name}</strong> to Level ${nextLevel}? This rolls the class Life and Faith dice, then lets you choose this level's increases.</p>`,
       rejectClose: false
     });
     if (!proceed) return;
+
+    // 1) Roll the automatic grants (Life/Faith dice, Blessings) and advance level.
     await this.actor.levelUp();
 
-    // p.62: each level grants +1 to one Saving Throw - offer the picker now.
-    const saveKey = await this.#promptSaveChoice(`Level ${this.actor.system.level}: Saving Throw Bonus`);
-    if (saveKey) await this.actor.applySaveBonus(saveKey);
+    // 2) Guided choices for this level (Genesis p.62): +1 Attribute, +1 Save,
+    //    and a new skill (Talent at L2-3, Craft at L3-7).
+    const level = this.actor.system.level;
+    const attrs = this.actor.system.attributes;
+    const saves = this.actor.system.saves;
+
+    const attrOpts = Object.entries(attrs)
+      .map(([k, a]) => `<option value="${k}">${a.label} (${a.value} \u2192 ${a.value + 1})</option>`).join("");
+    const saveOpts = Object.entries(saves)
+      .map(([k, s]) => `<option value="${k}">${s.label} (${s.value} \u2192 ${s.value + 1})</option>`).join("");
+
+    // Skill: Talent at levels 2-3, Craft at levels 3-7 (both possible at L3).
+    const list = this.actor.talentCraftList || [];
+    const wantsTalent = (level >= 2 && level <= 3);
+    const wantsCraft = (level >= 3 && level <= 7);
+    let skillBlock = "";
+    if ((wantsTalent || wantsCraft) && list.length) {
+      const skillOpts = `<option value="">- none -</option>` +
+        list.map(n => `<option value="${foundry.utils.escapeHTML(n)}">${foundry.utils.escapeHTML(n)}</option>`).join("");
+      const sectionField = (wantsTalent && wantsCraft)
+        ? `<div class="form-group"><label>Add as:</label><select name="skillSection"><option value="talent">Talent (+1 PF)</option><option value="craft">Craft (+1 PF)</option></select></div>`
+        : `<input type="hidden" name="skillSection" value="${wantsTalent ? "talent" : "craft"}"/>`;
+      const which = (wantsTalent && wantsCraft) ? "Talent or Craft" : (wantsTalent ? "Talent" : "Craft");
+      skillBlock = `<fieldset><legend>New ${which} (p.62)</legend>
+        <div class="form-group"><label>Skill:</label><select name="skillName">${skillOpts}</select></div>
+        ${sectionField}</fieldset>`;
+    } else if (wantsTalent || wantsCraft) {
+      skillBlock = `<p class="hint">This level grants a new ${wantsTalent ? "Talent" : "Craft"}, but this class doesn't use the standard Talent/Craft list (Adventurer/Fighter differ) - add it manually.</p>`;
+    }
+
+    const result = await DialogV2.wait({
+      window: { title: `Level ${level}: Increases (p.62)` },
+      content: `<p>Choose this level's increases. Both +1 choices follow the <strong>Rule of Halves</strong> (checked softly on the sheet).</p>
+        <fieldset><legend>Attribute +1</legend>
+          <div class="form-group"><select name="attrKey">${attrOpts}</select></div>
+          <p class="hint">If this takes an Attribute to an even number above 11, use the Attribute Bonus panel afterward.</p>
+        </fieldset>
+        <fieldset><legend>Saving Throw +1</legend>
+          <div class="form-group"><select name="saveKey">${saveOpts}</select></div>
+        </fieldset>
+        ${skillBlock}`,
+      buttons: [
+        { action: "apply", label: "Apply increases", default: true, callback: (e, b) => {
+          const f = b.form.elements;
+          return {
+            attrKey: f.attrKey?.value || null,
+            saveKey: f.saveKey?.value || null,
+            skillName: f.skillName?.value || null,
+            skillSection: f.skillSection?.value || null
+          };
+        } },
+        { action: "skip", label: "Skip (choose later)" }
+      ],
+      rejectClose: false
+    });
+    if (!result || result === "skip") {
+      ui.notifications.info("Level-up increases skipped - apply them from the sheet when ready.");
+      return;
+    }
+
+    const summary = await this.actor.applyLevelUpChoices(result);
+    if (summary) {
+      await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+        flavor: `<strong>${this.actor.name} - Level ${level} increases:</strong> ${summary}.`
+      });
+    }
   }
 
   static async #onRollStartingLifeFaith(event, target) {

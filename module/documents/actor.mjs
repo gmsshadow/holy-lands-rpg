@@ -235,8 +235,9 @@ export class HolyLandsActor extends Actor {
     stunningStrike: { label: "Stunning Strike", atr: 2, effect: "condition", condition: "stunned", scalable: true, note: "Target is Stunned (Half Rolls) for 1 Round, +1 Round per extra AtR spent." },
     subvertArmor:   { label: "Subvert Armor", atr: 2, effect: "subvertArmor", note: "Halves the target's tDEF for this attack (no Damage multiplier)." },
     sweep:          { label: "Sweeping Leglock", atr: 2, effect: "note", note: "Target is knocked down; may drop their weapon (Rac adjudicates)." },
-    knockout:       { label: "Knock-out (Called Shot: Head/Neck)", atr: 2, dfMod: 5, effect: "condition", condition: "unconscious", note: "Called Shot to head/neck vs an unaware/held target: on a hit the target is knocked Unconscious." },
-    simultaneous:   { label: "Simultaneous Attack", atr: 1, effect: "note", forfeitsDefense: true, note: "Both combatants strike at once; forfeits Advantage & defense. Beating the foe's roll by 2x means you strike unhit; missing means only you take Damage (Rac resolves the exchange)." }
+    knockout:       { label: "Knock-out (Called Shot: Head/Neck)", atr: 2, dfMod: 5, effect: "condition", condition: "unconscious", note: "Called Shot to head/neck vs an unaware/held target: on a hit the target is knocked Unconscious." }
+    // Simultaneous Attack is offered as a DEFENSE option (Genesis p.50 frames it
+    // as striking back at the instant the opponent attacks), not here.
   };
 
   /** Roll on the Critical Injury location table and post the result. */
@@ -1893,7 +1894,8 @@ export class HolyLandsActor extends Actor {
    */
   async rollAttack(weapon, targetActor = null, options = {}) {
     let { mode = "attack", multiplier = 1, modifier = 0, free = false, isCounter = false,
-          maneuver = null, extraAtR = 0 } = options;
+          maneuver = null, extraAtR = 0,
+          customSpecial = false, customLabel = "Custom Special", customAtR = 2 } = options;
 
     const weaponSkill = weapon?.system?.weaponSkill || "lightArms";
     const ws = this.system.weaponSkills?.[weaponSkill];
@@ -1910,6 +1912,9 @@ export class HolyLandsActor extends Actor {
       multiplier = 1;
       if (maneuverDef.dfMod) modifier = (modifier || 0) - maneuverDef.dfMod; // Called Shot: harder to hit
     }
+    // A Custom Special (Rac-defined novel move) is a Special with a player-set
+    // AtR cost and label, no automatic effect.
+    if (customSpecial) { mode = "special"; multiplier = 1; }
 
     if (this.getCombatFlag("retreating")) {
       ui.notifications.warn(`${this.name} has declared a Retreat and forfeits all attacks this Round.`);
@@ -1956,6 +1961,8 @@ export class HolyLandsActor extends Actor {
     if (maneuverDef) {
       const extra = maneuverDef.scalable ? Math.max(0, extraAtR) : 0;
       atrCost = free ? 0 : (maneuverDef.atr + extra);
+    } else if (customSpecial) {
+      atrCost = free ? 0 : Math.max(1, customAtR);
     } else {
       atrCost = free ? 0 : (mode === "critical" ? Math.max(2, multiplier) : 1);
     }
@@ -1979,7 +1986,7 @@ export class HolyLandsActor extends Actor {
     }
     else if (mode === "special") {
       actionBonus = ws.specialBonus || 0;
-      modeLabel = maneuverDef ? ` (${maneuverDef.label})` : " (Special)";
+      modeLabel = maneuverDef ? ` (${maneuverDef.label})` : (customSpecial ? ` (${customLabel})` : " (Special)");
     }
 
     // Natural 20 Advantage: +3 to Attack, Critical, and Special this Round.
@@ -2109,8 +2116,17 @@ export class HolyLandsActor extends Actor {
         <select name="defenseType" autofocus>
           <option value="dodge">Dodge (+${defender.system.combat?.dodgeBonus || 0})</option>
           <option value="defend">Defend (+${defender.system.combat?.defendBonus || 0})</option>
+          <option value="simultaneous">Simultaneous Attack (forfeit defense, strike back)</option>
         </select>
-      </div>`;
+      </div>
+      <p class="hint simul-note" style="display:none;">Forfeits Advantage and any defensive action to strike back at the same instant (Genesis p.50). Rolls a Special vs the attacker's roll: beat it and you both hit; beat it by more than double and you hit unharmed; fail and only you take Damage. Costs 1 AtR.</p>
+      <script>(function(){
+        const r = document.currentScript.parentElement;
+        const sel = r.querySelector('select[name=defenseType]');
+        const n = r.querySelector('.simul-note');
+        function upd(){ n.style.display = (sel.value === 'simultaneous') ? '' : 'none'; }
+        sel.addEventListener('change', upd); upd();
+      })();</script>`;
 
     const choice = await foundry.applications.api.DialogV2.wait({
       window: { title: `${defender.name} - Choose Defense` },
@@ -2313,6 +2329,12 @@ export class HolyLandsActor extends Actor {
   async _resolveDefense(weapon, defender, attackContext, defenseType) {
     const { attackTotal, isNat20: isNat20Attack, free, isCounter = false, atrCost, weaponSkill } = attackContext;
 
+    // Simultaneous Attack (Genesis p.50): instead of Dodge/Defend, the defender
+    // forfeits defense and strikes back at the same instant.
+    if (defenseType === "simultaneous") {
+      return this._resolveSimultaneous(weapon, defender, attackContext);
+    }
+
     // Assemble the defender's Bonus:
     // base -> x2 if Advantage was forfeited -> -3 if Natural 1 Advantage.
     let defenderBonus = defenseType === "dodge"
@@ -2473,6 +2495,64 @@ export class HolyLandsActor extends Actor {
     }
 
     return defender.rollAttack(counterWeapon, attacker, { free, isCounter: true });
+  }
+
+  /**
+   * Resolve a Simultaneous Attack defense (Genesis p.50). The defender forfeits
+   * Advantage and any defensive action to strike the attacker at the same
+   * instant, rolling a Special (their active WS's SPC Bonus) against the
+   * attacker's Attack total:
+   *   - beat it by MORE THAN DOUBLE  -> defender hits, attacker does not;
+   *   - beat it (tie goes to attacker) -> BOTH hit each other;
+   *   - fail to beat it              -> only the defender is hit.
+   * Costs the defender 1 AtR (and being hit costs another, as normal).
+   */
+  async _resolveSimultaneous(weapon, defender, attackContext) {
+    const { attackTotal, weaponSkill, atrCost } = attackContext;
+    // The attacker (this) has already committed; the defender strikes back.
+    const defWsKey = defender.system.activeWeaponSkill || "lightArms";
+    const defWs = defender.system.weaponSkills?.[defWsKey];
+    const spc = defWs?.specialBonus || 0;
+
+    // Defender forfeits Advantage (it's part of the trade) and spends 1 AtR.
+    if (defender.getCombatFlag("advNat20")) await defender.setCombatFlag("advNat20", false);
+    await defender.spendActionAtR(1);
+
+    const defRoll = new Roll("1d20 + @b", { b: spc });
+    await defRoll.evaluate();
+    const defTotal = defRoll.total;
+
+    const beats = defTotal > attackTotal;          // ties go to the attacker
+    const doubleBeats = defTotal > (attackTotal * 2);
+
+    // The attacker's AtR for their own strike is spent regardless.
+    await this.spendActionAtR(atrCost);
+
+    let outcome, attackerHits, defenderHits;
+    if (doubleBeats) { outcome = `${defender.name} strikes cleanly - hitting ${this.name} while avoiding the blow!`; attackerHits = false; defenderHits = true; }
+    else if (beats) { outcome = `Both strike home - ${defender.name} and ${this.name} hit each other!`; attackerHits = true; defenderHits = true; }
+    else { outcome = `${defender.name}'s gamble fails - only ${defender.name} is struck.`; attackerHits = true; defenderHits = false; }
+
+    await ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: defender }),
+      flavor: `<strong>${defender.name} - Simultaneous Attack</strong> (${defWs?.label || "WS"} SPC): ${defTotal} vs ${this.name}'s ${attackTotal}.<br>${outcome}`,
+      rolls: [defRoll]
+    });
+
+    // Resolve damage in both directions as indicated. The attacker's blow on
+    // the defender uses the original attack context; the defender's blow on the
+    // attacker is a straight damage roll with their weapon.
+    if (attackerHits) {
+      await this._resolveDamage(weapon, defender, { ...attackContext, isCounter: true });
+    }
+    if (defenderHits) {
+      const defWeapon = defender.items.find(i => i.type === "weapon" && i.system.equipped
+        && (i.system.weaponSkill === defWsKey)) || null;
+      await defender._resolveDamage(defWeapon, this, {
+        attackTotal: defTotal, isNat20: false, mode: "special", multiplier: 1,
+        free: false, isCounter: true, atrCost: 0, weaponSkill: defWsKey
+      });
+    }
   }
 
   /** Resolve damage and apply armor degradation. */

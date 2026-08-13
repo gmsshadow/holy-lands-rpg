@@ -1325,17 +1325,24 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       }
     }
     const maneuverGroup = maneuverOpts ? `<optgroup label="Named Maneuvers">${maneuverOpts}</optgroup>` : "";
+    const customOpt = `<option value="custom">Custom Special (Rac-defined)...</option>`;
 
     const result = await DialogV2.wait({
       window: { title: `${weapon?.name || "Unarmed"} - Attack Options (${ws.label}, AtR ${atrCurrent})` },
       content: `
         <div class="form-group">
           <label>Attack type:</label>
-          <select name="mode" autofocus>${modes}${maneuverGroup}</select>
+          <select name="mode" autofocus>${modes}${maneuverGroup}${customOpt}</select>
         </div>
         <div class="form-group extra-atr-group" style="display:none;">
           <label>Extra AtR (Stunning Strike: +1 Round each):</label>
           <input type="number" name="extraAtR" value="0" min="0"/>
+        </div>
+        <div class="form-group custom-group" style="display:none;">
+          <label>Custom move name:</label>
+          <input type="text" name="customLabel" placeholder="e.g. Shield Bash"/>
+          <label>AtR cost:</label>
+          <input type="number" name="customAtR" value="2" min="1" max="${atrCurrent}"/>
         </div>
         <div class="form-group">
           <label>Situational modifier (Flanking +1/ally, etc):</label>
@@ -1345,7 +1352,11 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
           const r = document.currentScript.parentElement;
           const sel = r.querySelector('select[name=mode]');
           const eg = r.querySelector('.extra-atr-group');
-          function upd(){ eg.style.display = (sel.value === 'maneuver:stunningStrike') ? '' : 'none'; }
+          const cg = r.querySelector('.custom-group');
+          function upd(){
+            eg.style.display = (sel.value === 'maneuver:stunningStrike') ? '' : 'none';
+            cg.style.display = (sel.value === 'custom') ? '' : 'none';
+          }
           sel.addEventListener('change', upd); upd();
         })();</script>`,
       buttons: [
@@ -1356,7 +1367,9 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
           callback: (event, button) => ({
             mode: button.form.elements.mode.value,
             modifier: Number(button.form.elements.modifier.value) || 0,
-            extraAtR: Number(button.form.elements.extraAtR?.value) || 0
+            extraAtR: Number(button.form.elements.extraAtR?.value) || 0,
+            customLabel: button.form.elements.customLabel?.value || "",
+            customAtR: Number(button.form.elements.customAtR?.value) || 2
           })
         },
         { action: "cancel", label: "Cancel" }
@@ -1365,10 +1378,15 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     });
 
     if (!result || (result === "cancel")) return null;
-    // Mode can be "attack", "critical:N", "special", or "maneuver:<key>".
+    // Mode can be "attack", "critical:N", "special", "maneuver:<key>", or "custom".
     const [kind, arg] = String(result.mode).split(":");
     if (kind === "maneuver") {
       return { mode: "special", maneuver: arg, extraAtR: result.extraAtR || 0, modifier: result.modifier };
+    }
+    if (kind === "custom") {
+      return { mode: "special", customSpecial: true,
+        customLabel: result.customLabel?.trim() || "Custom Special",
+        customAtR: Math.max(1, result.customAtR || 2), modifier: result.modifier };
     }
     return { mode: kind, multiplier: Number(arg) || 1, modifier: result.modifier };
   }

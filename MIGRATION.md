@@ -1289,3 +1289,21 @@ sheets, standardised headings, and a parchment theme. v3.0.0 marks that step up.
   "all previous attacks succeeded" gate stays Rac-adjudicated by design.
 - SPECIAL_MANEUVERS table added; effects reuse the Conditions system (Stunned/
   Unconscious) and the tDEF pipeline (Subvert Armor).
+
+## v3.1.0 — Custom Special + Simultaneous Attack as a defense
+
+- **Custom Special** added to the attack-options picker: a Rac-defined novel
+  move that rolls the active WS's SPC Bonus for a player-set AtR cost and a
+  free-text label (which names the chat card). Covers moves not in the named
+  list, per the book's note that the SPC families are expandable.
+- **Simultaneous Attack** is now offered as a DEFENSE option (alongside Dodge
+  and Defend) when an attack beats armor - which is where Genesis p.50 places
+  it ("strike an opponent at the same time the opponent strikes"). The
+  defender forfeits Advantage and defense, rolls a Special (their WS's SPC
+  Bonus) vs the attacker's Attack total:
+  - beat it by MORE THAN DOUBLE -> defender hits, attacker is unharmed;
+  - beat it (tie goes to the attacker) -> both combatants hit each other;
+  - fail -> only the defender is struck.
+  Costs the defender 1 AtR. Damage resolves in both directions as indicated.
+- Removed the attack-side "Simultaneous" maneuver added in 3.0.0 - it belongs
+  in the defense flow, not as a self-initiated attack.

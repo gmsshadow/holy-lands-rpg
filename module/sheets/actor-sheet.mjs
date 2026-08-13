@@ -10,7 +10,12 @@ const TextEditorImpl = foundry.applications.ux.TextEditor.implementation;
  */
 export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
-  /** @override */
+  /** Show just the actor's name in the window title bar (avoids the raw
+   *  "TYPES.Actor.character" localization key appearing as a prefix). */
+  get title() {
+    return this.actor?.name ?? super.title;
+  }
+
   /** Named Difficulty Factor tiers (Genesis). Used by the DF picker. */
   static DF_TIERS = [
     { label: "Simple", df: 7 },

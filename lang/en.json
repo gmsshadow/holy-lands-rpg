@@ -1,7 +1,6 @@
 {
   "HOLY-LANDS": {
     "SystemName": "Holy Lands RPG",
-    
     "Attributes": {
       "INT": "Intellect",
       "WIS": "Wisdom",
@@ -16,7 +15,6 @@
       "CHA": "Charisma",
       "VIR": "Virtue"
     },
-    
     "Abilities": {
       "Perception": "Perception",
       "Search": "Search",
@@ -26,7 +24,6 @@
       "Hide": "Hide",
       "Appeal": "Appeal"
     },
-    
     "Classes": {
       "Adventurer": "Adventurer",
       "Bard": "Bard",
@@ -42,21 +39,18 @@
       "Voyager": "Voyager",
       "Warrior": "Warrior"
     },
-    
     "Statures": {
       "WeeFolk": "WeeFolk",
       "Dwarfolk": "Dwarfolk",
       "CommonFolk": "CommonFolk",
       "GiantFolk": "GiantFolk"
     },
-    
     "WeaponSkills": {
       "LightArms": "Light Arms",
       "HeavyArms": "Heavy Arms",
       "Missile": "Missile",
       "Thrown": "Thrown"
     },
-    
     "SavingThrows": {
       "Death": "Death",
       "Poison": "Poison",
@@ -65,10 +59,24 @@
       "Fear": "Fear",
       "Sin": "Sin"
     },
-    
     "Currency": {
       "Gold": "Gold",
       "Silver": "Silver"
+    }
+  },
+  "TYPES": {
+    "Actor": {
+      "character": "Character",
+      "npc": "NPC"
+    },
+    "Item": {
+      "weapon": "Weapon",
+      "armor": "Armor",
+      "equipment": "Equipment",
+      "miracle": "Miracle",
+      "blessing": "Blessing",
+      "skill": "Skill",
+      "class": "Class"
     }
   }
 }

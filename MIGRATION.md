@@ -1351,3 +1351,15 @@ sheets, standardised headings, and a parchment theme. v3.0.0 marks that step up.
   span the full width. Much tighter vertically.
 - Fixed the Age label showing a literal "\u2013" instead of an en-dash (a
   double-escaping bug from the previous header rebuild) - now reads "(18–42)".
+
+## v3.2.2 — Fix window title + remove duplicated bio fields
+
+- **Window title** now shows just the character's name (e.g. "Briant")
+  instead of the raw "TYPES.Actor.character: Briant" localization key. Fixed by
+  overriding the sheet's title getter and registering the Actor/Item type
+  labels in lang/en.json. Applies to both PC and NPC sheets (shared class).
+- **Removed Native Land and Language Group from the Biography tab** - they now
+  live in the header's Character Information panel, so the duplicate is gone.
+  (Note: a character showing a doubled value like "Slavic Europe,Slavic
+  Europe" is pre-existing saved data, not a current bug - editing or re-rolling
+  Details clears it.)

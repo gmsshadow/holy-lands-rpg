@@ -204,6 +204,11 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     context.classItem = this.actor.classItem;
     context.isGM = game.user.isGM;
 
+    // Level-up (Genesis p.62): surface the button only when earned XP allows.
+    context.canLevelUp = this.actor.system.canLevelUp;
+    context.nextLevelXp = this.actor.system.nextLevelXp;
+    context.nextLevel = (this.actor.system.level || 1) + 1;
+
     // Ability derivation formulas (paper sheet), keyed to the same source
     // attribute pairs used to compute the mods, so they can't drift apart.
     const ATTR_ABBR = {

@@ -68,9 +68,11 @@
         <label>Level</label>
         <input type="number" name="system.level" value="{{system.level}}"/>
         {{#if classItem}}
-        <button type="button" data-action="levelUp" title="Roll class Life/Faith dice and advance a level">
-          <i class="fas fa-arrow-up"></i> Level Up
+        {{#if canLevelUp}}
+        <button type="button" class="level-up-ready" data-action="levelUp" title="XP threshold reached - roll class Life/Faith dice and advance a level">
+          <i class="fas fa-arrow-up"></i> Level Up!
         </button>
+        {{/if}}
         {{#unless startingRolled}}
         {{#if attributesLocked}}
         <button type="button" data-action="rollStartingLifeFaith" title="Roll starting Life and Faith from the class formulas (locks after rolling)">
@@ -84,11 +86,19 @@
         <a class="hint" data-action="unlockStartingRoll" title="Rac override: allow a fresh starting Life &amp; Faith roll"><i class="fas fa-lock-open"></i> unlock start</a>
         {{/if}}
         {{/unless}}
+        {{#if isGM}}
+        <a class="hint" data-action="levelUp" title="Rac override: force a manual level-up regardless of XP"><i class="fas fa-arrow-up"></i> force</a>
+        {{/if}}
         {{/if}}
       </div>
       <div class="info-group">
         <label>XP</label>
         <input type="number" name="system.experience" value="{{system.experience}}"/>
+        {{#if nextLevelXp}}
+        <span class="xp-hint {{#if canLevelUp}}xp-ready{{/if}}" title="EXP needed to reach the next level (Genesis p.62)">/ {{nextLevelXp}} for L{{nextLevel}}</span>
+        {{else}}
+        <span class="xp-hint hint">max level</span>
+        {{/if}}
       </div>
     </div>
     <div class="character-details">

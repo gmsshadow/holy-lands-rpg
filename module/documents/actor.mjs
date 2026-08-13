@@ -1618,6 +1618,15 @@ export class HolyLandsActor extends Actor {
       ui.notifications.warn("No Class item on this character - drop one from the Character Classes compendium first.");
       return;
     }
+    if ((this.system.level || 1) >= this.system.constructor.MAX_LEVEL) {
+      ui.notifications.info(`${this.name} is already at the maximum level (${this.system.constructor.MAX_LEVEL}).`);
+      return;
+    }
+    // Normally the character must have earned the XP; a GM may force it anyway.
+    if (!this.system.canLevelUp && !game.user.isGM) {
+      ui.notifications.warn(`${this.name} hasn't earned enough EXP to level up yet (needs ${this.system.nextLevelXp}).`);
+      return;
+    }
     const newLevel = (this.system.level || 1) + 1;
 
     const lifeRoll = new Roll(this.constructor.graceFormula(cls.system.lifePerLevelDie || "1d4"));

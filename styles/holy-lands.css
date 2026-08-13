@@ -857,3 +857,16 @@
 @media (max-width: 560px) {
   .holy-lands-rpg .npc-saves-grid { grid-template-columns: 1fr; }
 }
+
+/* Level-up ready button + XP hint */
+.holy-lands-rpg button.level-up-ready {
+  background: linear-gradient(180deg, #2e7d32, #1b5e20);
+  color: #fff; border-color: #1b5e20; font-weight: bold;
+  animation: hlrpg-levelpulse 1.6s ease-in-out infinite;
+}
+@keyframes hlrpg-levelpulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(46, 125, 50, 0.0); }
+  50% { box-shadow: 0 0 6px rgba(46, 125, 50, 0.8); }
+}
+.holy-lands-rpg .xp-hint { font-size: 0.72em; opacity: 0.6; margin-left: 4px; white-space: nowrap; }
+.holy-lands-rpg .xp-hint.xp-ready { color: #2e7d32; opacity: 1; font-weight: bold; }

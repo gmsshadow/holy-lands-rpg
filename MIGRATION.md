@@ -1182,3 +1182,21 @@ These are deliberate changes, flagged for review:
     roll) instead of large stacked cards.
 - Section headings inherit the standardised sizing from v2.58.0, so the NPC
   sheet now reads consistently with the PC sheet.
+
+## v2.60.0 — XP-driven level-up prompting (Genesis p.62)
+
+- Added the Experience Levels table (p.62): cumulative EXP to reach each level
+  from 1 (0) through 30 (73,215).
+- The **Level Up button now appears only when the character's XP has reached
+  the next level's threshold** - it's hidden otherwise, pulses green when
+  ready, and disappears again once the level is taken. The XP field shows a
+  "/ NNNN for L#" hint of the next threshold, highlighted when reached.
+- If a character has banked enough XP for several levels, the button stays up
+  after each level-up so they advance one level at a time (each level has
+  manual choices - Attribute/Save +1, Talent/Craft - that shouldn't be
+  batched).
+- levelUp() now guards against leveling before the XP is earned and past the
+  max level; a GM "force" link overrides the XP requirement when needed.
+- Model helpers: earnedLevel, canLevelUp, nextLevelXp, MAX_LEVEL. The existing
+  automatic grants (class Life/Faith dice, Blessings on Faith-increment
+  crossings) and the manual-choice reminders are unchanged.

@@ -218,6 +218,69 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
   static SINS = ["Attachment", "Bitterness", "Cheating", "Control", "Cruelty", "Doubt", "Drunkenness", "Envy", "Gluttony", "Gossip", "Greed", "Laziness", "Lying", "Malice", "Paganism", "Prejudice", "Pride", "Strife", "Theft", "Vanity"];
 
   /**
+   * Experience Levels table (Genesis p.62). Cumulative EXP required to REACH
+   * each level. Index = level; value = total EXP needed. Level 1 = 0.
+   */
+  static EXP_TABLE = [
+    0,       // (unused index 0)
+    0,       // 1
+    1230,    // 2
+    2555,    // 3
+    3980,    // 4
+    5495,    // 5
+    7095,    // 6
+    8780,    // 7
+    10560,   // 8
+    12415,   // 9
+    14345,   // 10
+    16345,   // 11
+    18415,   // 12
+    20555,   // 13
+    22805,   // 14
+    25165,   // 15
+    27630,   // 16
+    30200,   // 17
+    32875,   // 18
+    35655,   // 19
+    38540,   // 20
+    41530,   // 21
+    44625,   // 22
+    47825,   // 23
+    51130,   // 24
+    54540,   // 25
+    58060,   // 26
+    61685,   // 27
+    65415,   // 28
+    69260,   // 29
+    73215    // 30
+  ];
+
+  /** Maximum defined level. */
+  static get MAX_LEVEL() { return this.EXP_TABLE.length - 1; }
+
+  /** The highest level this character's current EXP entitles them to. */
+  get earnedLevel() {
+    const table = this.constructor.EXP_TABLE;
+    const xp = this.experience || 0;
+    let lvl = 1;
+    for (let i = 2; i < table.length; i++) {
+      if (xp >= table[i]) lvl = i; else break;
+    }
+    return lvl;
+  }
+
+  /** Whether current EXP entitles the character to a higher level than they are. */
+  get canLevelUp() {
+    return this.earnedLevel > (this.level || 1);
+  }
+
+  /** EXP required to reach the next level (or null at max level). */
+  get nextLevelXp() {
+    const next = (this.level || 1) + 1;
+    return (next <= this.constructor.MAX_LEVEL) ? this.constructor.EXP_TABLE[next] : null;
+  }
+
+  /**
    * Short mechanical effect per Sin (Genesis p.55). "auto: true" means the
    * system enforces it; otherwise it's a Rac/roleplay reminder.
    */

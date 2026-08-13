@@ -84,7 +84,28 @@ export class HolyLandsActor extends Actor {
       if (skill.atRCurrent === undefined) continue;
       update[`system.weaponSkills.${key}.atRCurrent`] = Math.max(0, (skill.atRCurrent || 0) - cost);
     }
-    if (Object.keys(update).length) await this.update(update);
+    if (Object.keys(update).length) await this.safeUpdate(update);
+  }
+
+  /**
+   * Update this actor, relaying to the GM via socket when the current user
+   * lacks permission (e.g. a player modifying an NPC's AtR/Life after a hit).
+   * Foundry silently drops update() calls on documents the user doesn't own,
+   * which previously left NPC AtR/Life unchanged after a PC's attack.
+   */
+  async safeUpdate(update) {
+    if (this.isOwner) return this.update(update);
+    if (game.user.isGM) return this.update(update);
+    // Not owned by this client - ask the GM to apply it. Pass the token UUID so
+    // the GM can target an unlinked token's actor rather than the prototype.
+    const tokenDoc = this.token ?? this.getActiveTokens?.(true)[0]?.document ?? null;
+    game.socket.emit("system.holy-lands-rpg", {
+      type: "actorUpdate",
+      actorId: this.id,
+      tokenUuid: tokenDoc?.uuid ?? null,
+      update
+    });
+    return null;
   }
 
   /** When taking damage, one action-beat is lost: every AtR pool drops by 1. */
@@ -130,9 +151,9 @@ export class HolyLandsActor extends Actor {
   }
 
   async setCombatFlag(key, value) {
-    if (value) return this.setFlag("holy-lands-rpg", key, true);
+    if (value) return this.safeUpdate({ [`flags.holy-lands-rpg.${key}`]: true });
     if (this.getFlag("holy-lands-rpg", key) !== undefined) {
-      return this.unsetFlag("holy-lands-rpg", key);
+      return this.safeUpdate({ [`flags.holy-lands-rpg.-=${key}`]: null });
     }
   }
 
@@ -323,7 +344,7 @@ export class HolyLandsActor extends Actor {
     }
 
     conditions[key] = entry;
-    await this.setFlag("holy-lands-rpg", "conditions", conditions);
+    await this.safeUpdate({ "flags.holy-lands-rpg.conditions": conditions });
     return ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
       flavor: `<strong>${this.name} is ${def.label}!</strong>${def.note ? `<br><em>${def.note}</em>` : ""}${extra}`
@@ -2291,7 +2312,7 @@ export class HolyLandsActor extends Actor {
 
     if (isNat1) {
       await this.spendActionAtR(atrCost);
-      await defender.update({ "system.combat.halfDefenseFlag": true }).catch(() => {});
+      await defender.safeUpdate({ "system.combat.halfDefenseFlag": true });
       return ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: this }),
         flavor: `${weaponName}${modeLabel} Attack: <strong>Natural 1 - Automatic Failure!</strong>`,
@@ -2369,7 +2390,7 @@ export class HolyLandsActor extends Actor {
       finalDefenseTotal = Math.ceil((natRollDefense ?? 0) / 2) + defenderBonus;
       notes.push("Half Roll");
       if (defender.system.combat?.halfDefenseFlag) {
-        await defender.update({ "system.combat.halfDefenseFlag": false });
+        await defender.safeUpdate({ "system.combat.halfDefenseFlag": false });
       }
     }
     const noteText = notes.length ? ` (${notes.join(", ")})` : "";
@@ -2629,7 +2650,7 @@ export class HolyLandsActor extends Actor {
         const entry = conds[md.condition];
         if (entry && entry.expiresRound !== null) {
           entry.expiresRound += extraRounds;
-          await defender.setFlag("holy-lands-rpg", "conditions", conds);
+          await defender.safeUpdate({ "flags.holy-lands-rpg.conditions": conds });
         }
       }
       const roundsNote = md.scalable ? ` (${1 + extraRounds} Round${1 + extraRounds === 1 ? "" : "s"})` : "";
@@ -2728,7 +2749,7 @@ export class HolyLandsActor extends Actor {
       }
       const healed = Math.min(-amount, max - current);
       const after = current + Math.max(0, healed);
-      await this.update({ "system.life.value": after });
+      await this.safeUpdate({ "system.life.value": after });
       if (silent) return;
       return ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: this }),
@@ -2737,7 +2758,7 @@ export class HolyLandsActor extends Actor {
     }
 
     const newLife = Math.max(-max, current - amount);
-    await this.update({ "system.life.value": newLife });
+    await this.safeUpdate({ "system.life.value": newLife });
 
     if (costAtR && typeof this._consumeAtRFromDamage === "function") {
       await this._consumeAtRFromDamage();

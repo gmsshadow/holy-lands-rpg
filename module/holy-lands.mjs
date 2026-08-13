@@ -23,6 +23,26 @@ const { Actors, Items } = foundry.documents.collections;
 Hooks.once("init", function() {
   console.log("Holy Lands RPG | Initializing Holy Lands RPG System");
 
+  // Socket relay: players can't update actors they don't own (e.g. an NPC's
+  // AtR or Life when a PC hits it). Requests to modify a non-owned actor are
+  // emitted on this socket and executed by the GM's client.
+  game.socket.on("system.holy-lands-rpg", async (payload) => {
+    if (!game.user.isGM) return;                 // only the GM applies relayed updates
+    if (!payload || payload.type !== "actorUpdate") return;
+    // Prefer the token's actor: unlinked NPC/monster tokens carry their own
+    // actor data, and updating the base prototype actor would not affect the
+    // token on the scene. Fall back to the world actor for linked/PC actors.
+    let actor = null;
+    if (payload.tokenUuid) {
+      const tokenDoc = await fromUuid(payload.tokenUuid).catch(() => null);
+      actor = tokenDoc?.actor ?? null;
+    }
+    if (!actor && payload.actorId) actor = game.actors.get(payload.actorId) ?? null;
+    if (!actor) return;
+    try { await actor.update(payload.update); }
+    catch (e) { console.error("Holy Lands RPG | relayed update failed", e); }
+  });
+
   // Define custom Document classes
   CONFIG.Actor.documentClass = HolyLandsActor;
   CONFIG.Item.documentClass = HolyLandsItem;

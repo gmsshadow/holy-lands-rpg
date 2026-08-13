@@ -1307,3 +1307,22 @@ sheets, standardised headings, and a parchment theme. v3.0.0 marks that step up.
   Costs the defender 1 AtR. Damage resolves in both directions as indicated.
 - Removed the attack-side "Simultaneous" maneuver added in 3.0.0 - it belongs
   in the defense flow, not as a self-initiated attack.
+
+## v3.1.1 — Fix: AtR/Life/conditions not updating on non-owned actors
+
+- Root cause: Foundry silently drops update() calls on documents the current
+  user doesn't own. When a player attacked an NPC (or vice versa), the NPC's
+  AtR-on-damage, Life, and applied conditions never changed, because the
+  update ran on a client that didn't own the target. This is why the
+  Gargoyle's AtR didn't tick down on being hit, on a return attack, or on a
+  simultaneous exchange.
+- Added a GM socket relay: writes to an actor the current client can't update
+  are emitted on a system socket and applied by the GM's client. Crucially it
+  targets the TOKEN's actor, so unlinked NPC/monster tokens (which carry their
+  own data) update correctly rather than the base prototype.
+- Routed all cross-actor writes through a new safeUpdate(): AtR spend
+  (spendActionAtR / _consumeAtRFromDamage), applyDamage (Life), applyCondition,
+  the Stunning-Strike duration extension, combat flags, and the off-balance
+  half-defense flag.
+- This fixes NPC AtR not iterating on damage/return/simultaneous, and the
+  same for PCs in a simultaneous exchange run from another client.

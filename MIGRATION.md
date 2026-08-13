@@ -1326,3 +1326,17 @@ sheets, standardised headings, and a parchment theme. v3.0.0 marks that step up.
   half-defense flag.
 - This fixes NPC AtR not iterating on damage/return/simultaneous, and the
   same for PCs in a simultaneous exchange run from another client.
+
+## v3.2.0 — Character-info header styled to match the paper sheet
+
+- Reworked the character sheet header into a "Character Information" panel that
+  mirrors the paper sheet's labelled-column layout: Player, Gender, Class,
+  Stature, Level, XP, Native Land, Languages, and a compact Age/Height/Weight
+  row, each as an aligned label + value row on parchment.
+- Added a Player Name field (system.playerName) - previously absent - and
+  surfaced Native Land and Languages as editable fields in the header (they're
+  still populated by Roll Details).
+- All existing functionality preserved: Choose Class, Roll Attributes, Step 2A
+  reroll, Start (Life/Faith), the XP-gated Level Up button and XP hint, the GM
+  unlock/force links, Roll Details, and all validation warnings.
+- Completes the paper-style visual pass across the character sheet.

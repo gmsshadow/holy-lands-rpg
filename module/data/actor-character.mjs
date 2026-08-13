@@ -30,6 +30,7 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
       weight: new fields.StringField({ required: true, initial: "" }),
       nativeLand: new fields.StringField({ required: true, initial: "" }),
       languageGroup: new fields.StringField({ required: true, initial: "" }),
+      playerName: new fields.StringField({ required: true, initial: "" }),
 
       classData: new fields.SchemaField({
         baseLife: new fields.NumberField({ required: true, integer: true, initial: 10 }),

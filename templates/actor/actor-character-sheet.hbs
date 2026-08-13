@@ -3,6 +3,83 @@
   <img class="profile-img" src="{{actor.img}}" data-action="editImage" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
   <div class="header-fields">
     <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Character Name"/></h1>
+
+    <div class="char-info-panel">
+      <div class="ci-row"><label>Player</label><input type="text" name="system.playerName" value="{{system.playerName}}" placeholder="Player name"/></div>
+      <div class="ci-row"><label>Gender</label>
+        <select name="system.gender">
+          <option value="male" {{#if (eq system.gender "male")}}selected{{/if}}>Male</option>
+          <option value="female" {{#if (eq system.gender "female")}}selected{{/if}}>Female</option>
+        </select>
+      </div>
+
+      <div class="ci-row ci-class-row"><label>Class</label>
+        <div class="ci-value">
+          {{#if classItem}}
+          <span class="class-item-display" data-item-id="{{classItem.id}}">
+            <a data-action="itemEdit" title="Open class"><strong>{{classItem.name}}</strong></a>
+            <a data-action="itemDelete" title="Remove class"><i class="fas fa-times"></i></a>
+          </span>
+          {{else}}
+          {{#if legacyClassLabel}}<span class="legacy-class" title="Assigned before class items existed - choose a class item to enable full automation">{{legacyClassLabel}} <span class="hint">(legacy)</span></span>{{/if}}
+          <button type="button" data-action="chooseClass" title="Pick a class legal for this Stature from the Character Classes compendium (p.53)"><i class="fas fa-scroll"></i> Choose Class</button>
+          {{/if}}
+        </div>
+      </div>
+      {{#if classStatureInvalid}}<p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{classItem.name}} cannot be this Stature (Ch7)</p>{{/if}}
+      {{#if unmetRequirements.length}}
+      {{#each unmetRequirements}}<p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{this.label}} AV {{this.current}} below the required {{this.min}} (Ch7)</p>{{/each}}
+      {{#if attributesLocked}}<button type="button" data-action="rollStep2A" title="Reroll unmet class Attributes with the Stature dice until requirements are met (p.53)"><i class="fas fa-rotate"></i> Step 2A Reroll</button>
+      {{else}}<p class="hint">Roll Attributes (Step 2) first, then Step 2A rerolls become available.</p>{{/if}}
+      {{/if}}
+
+      <div class="ci-row ci-stature-row"><label>Stature</label>
+        <div class="ci-value">
+          <select name="system.stature" {{#if attributesLocked}}disabled{{/if}}>{{selectOptions statures selected=system.stature}}</select>
+          {{#unless attributesLocked}}<button type="button" data-action="rollCreationAttributes" title="Roll all twelve Attributes from the p.53 Stature table, then lock"><i class="fas fa-dice"></i> Roll Attributes</button>
+          {{else}}{{#if isGM}}<a class="hint" data-action="unlockCreationAttributes" title="Rac override: allow a fresh Step 2 roll"><i class="fas fa-lock-open"></i> unlock</a>{{/if}}{{/unless}}
+        </div>
+      </div>
+
+      <div class="ci-row ci-level-row"><label>Level</label>
+        <div class="ci-value">
+          <input type="number" name="system.level" value="{{system.level}}" class="ci-level-input"/>
+          {{#if classItem}}
+          {{#if canLevelUp}}<button type="button" class="level-up-ready" data-action="levelUp" title="XP threshold reached - roll class Life/Faith dice and advance a level"><i class="fas fa-arrow-up"></i> Level Up!</button>{{/if}}
+          {{#unless startingRolled}}
+          {{#if attributesLocked}}<button type="button" data-action="rollStartingLifeFaith" title="Roll starting Life and Faith from the class formulas (locks after rolling)"><i class="fas fa-dice"></i> Start</button>
+          {{else}}<span class="hint" title="Roll Attributes (Step 2) first">roll Attributes first</span>{{/if}}
+          {{else}}{{#if isGM}}<a class="hint" data-action="unlockStartingRoll" title="Rac override: allow a fresh starting Life &amp; Faith roll"><i class="fas fa-lock-open"></i> unlock start</a>{{/if}}{{/unless}}
+          {{#if isGM}}<a class="hint" data-action="levelUp" title="Rac override: force a manual level-up regardless of XP"><i class="fas fa-arrow-up"></i> force</a>{{/if}}
+          {{/if}}
+        </div>
+      </div>
+
+      <div class="ci-row ci-xp-row"><label>XP</label>
+        <div class="ci-value">
+          <input type="number" name="system.experience" value="{{system.experience}}" class="ci-xp-input"/>
+          {{#if nextLevelXp}}<span class="xp-hint {{#if canLevelUp}}xp-ready{{/if}}" title="EXP needed to reach the next level (Genesis p.62)">/ {{nextLevelXp}} for L{{nextLevel}}</span>
+          {{else}}<span class="xp-hint hint">max level</span>{{/if}}
+        </div>
+      </div>
+
+      <div class="ci-row"><label>Native Land</label><input type="text" name="system.nativeLand" value="{{system.nativeLand}}" placeholder="—"/></div>
+      <div class="ci-row"><label>Languages</label><input type="text" name="system.languageGroup" value="{{system.languageGroup}}" placeholder="—"/></div>
+
+      <div class="ci-row ci-physical"><label>Age <span class="hint">({{system.detailsValidation.ageMin}}\u2013{{system.detailsValidation.ageMax}})</span></label>
+        <div class="ci-value ci-physical-values">
+          <input type="number" name="system.age" value="{{system.age}}" title="Age"/>
+          <span class="ci-sep">H</span><input type="text" name="system.height" value="{{system.height}}" title="Height" placeholder="Height"/>
+          <span class="ci-sep">W</span><input type="text" name="system.weight" value="{{system.weight}}" title="Weight" placeholder="Weight"/>
+          <button type="button" data-action="rollDetails" title="Step 5: roll Height, Weight, Native Land, and Language Group (editable afterwards)"><i class="fas fa-dice"></i></button>
+        </div>
+      </div>
+    </div>
+
+    {{#if system.detailsValidation.ageOutOfRange}}
+    <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> Age {{system.age}} is outside the p.56 range {{system.detailsValidation.ageMin}}–{{system.detailsValidation.ageMax}} (Rac may adjust Attributes for very young/old characters)</p>
+    {{/if}}
+
     <div class="resource">
       <div class="resource-group">
         <label>Life</label>
@@ -17,117 +94,6 @@
         <input type="number" name="system.faith.max" value="{{system.faith.max}}" placeholder="5"/>
       </div>
     </div>
-    <div class="character-info">
-      <div class="info-group">
-        <label>Class</label>
-        {{#if classItem}}
-        <div class="class-item-display" data-item-id="{{classItem.id}}">
-          <a data-action="itemEdit" title="Open class"><strong>{{classItem.name}}</strong></a>
-          <a data-action="itemDelete" title="Remove class"><i class="fas fa-times"></i></a>
-        </div>
-        {{#if classStatureInvalid}}
-        <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{classItem.name}} cannot be this Stature (Ch7)</p>
-        {{/if}}
-        {{else}}
-        {{#if legacyClassLabel}}
-        <span class="legacy-class" title="Assigned before class items existed - choose a class item to enable full automation">{{legacyClassLabel}} <span class="hint">(legacy)</span></span>
-        {{/if}}
-        <button type="button" data-action="chooseClass" title="Pick a class legal for this Stature from the Character Classes compendium (p.53)">
-          <i class="fas fa-scroll"></i> Choose Class
-        </button>
-        {{/if}}
-        {{#if unmetRequirements.length}}
-        {{#each unmetRequirements}}
-        <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{this.label}} AV {{this.current}} below the required {{this.min}} (Ch7)</p>
-        {{/each}}
-        {{#if attributesLocked}}
-        <button type="button" data-action="rollStep2A" title="Reroll unmet class Attributes with the Stature dice until requirements are met (p.53)">
-          <i class="fas fa-rotate"></i> Step 2A Reroll
-        </button>
-        {{else}}
-        <p class="hint">Roll Attributes (Step 2) first, then Step 2A rerolls become available.</p>
-        {{/if}}
-        {{/if}}
-      </div>
-      <div class="info-group">
-        <label>Stature</label>
-        <select name="system.stature" {{#if attributesLocked}}disabled{{/if}}>
-          {{selectOptions statures selected=system.stature}}
-        </select>
-        {{#unless attributesLocked}}
-        <button type="button" data-action="rollCreationAttributes" title="Roll all twelve Attributes from the p.53 Stature table, then lock">
-          <i class="fas fa-dice"></i> Roll Attributes
-        </button>
-        {{else}}
-        {{#if isGM}}
-        <a class="hint" data-action="unlockCreationAttributes" title="Rac override: allow a fresh Step 2 roll"><i class="fas fa-lock-open"></i> unlock</a>
-        {{/if}}
-        {{/unless}}
-      </div>
-      <div class="info-group">
-        <label>Level</label>
-        <input type="number" name="system.level" value="{{system.level}}"/>
-        {{#if classItem}}
-        {{#if canLevelUp}}
-        <button type="button" class="level-up-ready" data-action="levelUp" title="XP threshold reached - roll class Life/Faith dice and advance a level">
-          <i class="fas fa-arrow-up"></i> Level Up!
-        </button>
-        {{/if}}
-        {{#unless startingRolled}}
-        {{#if attributesLocked}}
-        <button type="button" data-action="rollStartingLifeFaith" title="Roll starting Life and Faith from the class formulas (locks after rolling)">
-          <i class="fas fa-dice"></i> Start
-        </button>
-        {{else}}
-        <span class="hint" title="Roll Attributes (Step 2) first">Start: roll Attributes first</span>
-        {{/if}}
-        {{else}}
-        {{#if isGM}}
-        <a class="hint" data-action="unlockStartingRoll" title="Rac override: allow a fresh starting Life &amp; Faith roll"><i class="fas fa-lock-open"></i> unlock start</a>
-        {{/if}}
-        {{/unless}}
-        {{#if isGM}}
-        <a class="hint" data-action="levelUp" title="Rac override: force a manual level-up regardless of XP"><i class="fas fa-arrow-up"></i> force</a>
-        {{/if}}
-        {{/if}}
-      </div>
-      <div class="info-group">
-        <label>XP</label>
-        <input type="number" name="system.experience" value="{{system.experience}}"/>
-        {{#if nextLevelXp}}
-        <span class="xp-hint {{#if canLevelUp}}xp-ready{{/if}}" title="EXP needed to reach the next level (Genesis p.62)">/ {{nextLevelXp}} for L{{nextLevel}}</span>
-        {{else}}
-        <span class="xp-hint hint">max level</span>
-        {{/if}}
-      </div>
-    </div>
-    <div class="character-details">
-      <div class="detail-group">
-        <label>Age <span class="hint">({{system.detailsValidation.ageMin}}–{{system.detailsValidation.ageMax}})</span></label>
-        <input type="number" name="system.age" value="{{system.age}}"/>
-      </div>
-      <div class="detail-group">
-        <label>Gender</label>
-        <select name="system.gender">
-          <option value="male" {{#if (eq system.gender "male")}}selected{{/if}}>Male</option>
-          <option value="female" {{#if (eq system.gender "female")}}selected{{/if}}>Female</option>
-        </select>
-      </div>
-      <div class="detail-group">
-        <label>Height</label>
-        <input type="text" name="system.height" value="{{system.height}}"/>
-      </div>
-      <div class="detail-group">
-        <label>Weight</label>
-        <input type="text" name="system.weight" value="{{system.weight}}"/>
-      </div>
-      <button type="button" data-action="rollDetails" title="Step 5: roll Height, Weight, Native Land, and Language Group (editable afterwards)">
-        <i class="fas fa-dice"></i> Roll Details
-      </button>
-    </div>
-    {{#if system.detailsValidation.ageOutOfRange}}
-    <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> Age {{system.age}} is outside the p.56 range {{system.detailsValidation.ageMin}}–{{system.detailsValidation.ageMax}} (Rac may adjust Attributes for very young/old characters)</p>
-    {{/if}}
   </div>
 </header>
 

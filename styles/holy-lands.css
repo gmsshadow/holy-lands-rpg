@@ -984,3 +984,41 @@
 .holy-lands-rpg .hint { color: var(--hl-ink-soft); }
 .holy-lands-rpg .rules-warning { color: var(--hl-bad); }
 .holy-lands-rpg .budget { color: var(--hl-good); }
+
+/* ============================================================
+   Character Information panel (paper-sheet header)
+   ============================================================ */
+.holy-lands-rpg .char-info-panel {
+  background: var(--hl-parchment-2);
+  border: 1px solid var(--hl-border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin: 6px 0;
+}
+.holy-lands-rpg .ci-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 2px 0;
+  border-bottom: 1px dotted rgba(107, 52, 16, 0.25);
+}
+.holy-lands-rpg .ci-row:last-child { border-bottom: none; }
+.holy-lands-rpg .ci-row > label {
+  flex: 0 0 92px; font-weight: bold; color: var(--hl-accent);
+  font-size: 0.85em;
+}
+.holy-lands-rpg .ci-row > input,
+.holy-lands-rpg .ci-row > select { flex: 1; height: 22px; font-size: 0.9em; }
+.holy-lands-rpg .ci-value {
+  flex: 1; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.holy-lands-rpg .ci-value select { flex: 1; height: 22px; min-width: 90px; }
+.holy-lands-rpg .ci-level-input,
+.holy-lands-rpg .ci-xp-input { flex: 0 0 60px; }
+.holy-lands-rpg .ci-value button { font-size: 0.75em; padding: 2px 6px; white-space: nowrap; }
+.holy-lands-rpg .class-item-display { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Age / Height / Weight compact on one line */
+.holy-lands-rpg .ci-physical-values { gap: 4px; }
+.holy-lands-rpg .ci-physical-values input[type="number"] { flex: 0 0 44px; }
+.holy-lands-rpg .ci-physical-values input[type="text"] { flex: 1 1 60px; min-width: 50px; }
+.holy-lands-rpg .ci-physical-values .ci-sep { font-size: 0.75em; font-weight: bold; color: var(--hl-accent); opacity: 0.7; }
+.holy-lands-rpg .ci-physical-values button { flex: 0 0 auto; }

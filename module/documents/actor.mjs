@@ -1327,17 +1327,18 @@ export class HolyLandsActor extends Actor {
     const tableKey = this.blessingTableKey;
     if (!tableKey) { ui.notifications.warn("This character's class has no Blessing table."); return; }
 
-    // Starting entitlement (p.60) is a FLAT 2 if Faith >= 5, else 0 - not
-    // scaled by Faith. Additional Blessings come from level-up increments
-    // (p.62), which pass an explicit count. If no count is given, use the
-    // outstanding STARTING entitlement.
+    // Entitlement (p.62): a character should always have two (2) Blessings per
+    // five (5) maximum Faith. This holds at creation, so it scales with Faith
+    // (Faith 10 -> 4, Faith 15 -> 6). Level-up increments pass an explicit
+    // count; otherwise grant however many are still outstanding to reach the
+    // scaled entitlement.
     const faithMax = this.system.faith?.max || 0;
-    const startingEntitled = (faithMax >= 5) ? 2 : 0;
+    const entitled = (faithMax >= 5) ? Math.floor(faithMax / 5) * 2 : 0;
     const have = this.items.filter(i => i.type === "blessing");
     const haveNames = new Set(have.map(i => i.name.toLowerCase()));
-    const outstanding = (count !== null) ? count : Math.max(0, startingEntitled - have.length);
+    const outstanding = (count !== null) ? count : Math.max(0, entitled - have.length);
     if (outstanding <= 0) {
-      ui.notifications.info(`${this.name} is not currently entitled to more Blessings (starting entitlement is ${startingEntitled}).`);
+      ui.notifications.info(`${this.name} is not currently entitled to more Blessings (should have ${entitled} at Faith ${faithMax}).`);
       return;
     }
 

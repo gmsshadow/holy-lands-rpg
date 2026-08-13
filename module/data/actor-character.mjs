@@ -365,32 +365,24 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
   /**
    * Blessings entitlement (Genesis p.60 & p.62).
    *
-   * At character creation a character gains a FLAT two (2) Blessings if their
-   * maximum Faith is five (5) or higher, and none at four (4) or lower - it
-   * is NOT scaled by how high Faith is (a starting Faith of 12 still grants
-   * only 2). Additional Blessings are earned in play: two more each time max
-   * Faith crosses a new increment of five during a level-up (p.62), handled
-   * by the level-up flow, not granted up-front.
-   *
-   * So the starting entitlement shown here is the flat rule; the lifetime
-   * figure (2 per 5 Faith) is exposed separately for reference.
+   * A character should ALWAYS have two (2) Blessings per five (5) maximum Faith
+   * (p.62: "your character should always have two (2) Blessings per five (5)
+   * Faith"). This invariant holds at creation too, so a starting character
+   * with Faith 10 gets 4 Blessings, Faith 15 gets 6, and so on - not a flat 2.
+   * The p.60 creation text ("roll twice for two Blessings") describes the
+   * common single-increment case; the p.62 note generalises it to the rule
+   * used here. In play, two more are gained each time max Faith crosses a new
+   * multiple of five during a level-up.
    */
   #prepareBlessingsCount() {
     const faithMax = this.faith?.max || 0;
-    const startingEntitled = (faithMax >= 5) ? 2 : 0;
-    const lifetimeEntitled = (faithMax >= 5) ? Math.floor(faithMax / 5) * 2 : 0;
+    const entitled = (faithMax >= 5) ? Math.floor(faithMax / 5) * 2 : 0;
     const held = this.parent.items.filter(i => i.type === "blessing").length;
-
-    // The count the sheet acts on is the STARTING entitlement unless the
-    // character has already been granted their starting Blessings (then the
-    // lifetime figure is the meaningful target as they level).
-    const started = !!this.creation?.blessingsGranted;
-    const entitled = started ? lifetimeEntitled : startingEntitled;
 
     this.blessingsValidation = {
       entitled,
-      startingEntitled,
-      lifetimeEntitled,
+      startingEntitled: entitled,
+      lifetimeEntitled: entitled,
       held,
       remaining: Math.max(0, entitled - held),
       over: held > entitled,

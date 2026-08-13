@@ -1220,3 +1220,18 @@ These are deliberate changes, flagged for review:
   the skill manually.
 - New actor methods: applyLevelUpChoices() and grantLevelUpSkill() (the latter
   isn't gated by the creation flag, so it works every level).
+
+## v2.62.0 — Fix: starting Blessings scale at 2 per 5 Faith (not a flat 2)
+
+- Corrected the creation Blessings entitlement. Per Genesis p.62 ("your
+  character should always have two (2) Blessings per five (5) Faith"), the
+  2-per-5 rule is an invariant that holds at creation too - so a character
+  created with Faith 10 gets 4 Blessings, Faith 15 gets 6, etc., rather than
+  the flat 2 I previously capped it at. (The p.60 "roll twice" text describes
+  the common single-increment case; p.62 generalises it.)
+- #prepareBlessingsCount and rollBlessings now both use floor(maxFaith/5)*2 as
+  the entitlement at creation.
+- Verified this composes correctly with the level-up grant (which adds 2 per
+  newly-crossed multiple of 5): a character created at Faith 10 (4 Blessings)
+  who levels to Faith 15 gains +2 to reach 6 = the entitlement at Faith 15.
+  No double-counting.

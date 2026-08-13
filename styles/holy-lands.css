@@ -1000,7 +1000,10 @@
   align-items: center;
 }
 .holy-lands-rpg .ci-row {
-  display: flex; align-items: center; gap: 8px;
+  display: grid;
+  grid-template-columns: 74px 1fr;
+  align-items: center;
+  gap: 8px;
   padding: 2px 0;
   border-bottom: 1px dotted rgba(107, 52, 16, 0.25);
   min-width: 0;
@@ -1012,14 +1015,13 @@
 .holy-lands-rpg .char-info-panel > button { grid-column: 1 / -1; }
 .holy-lands-rpg .ci-row:last-child { border-bottom: none; }
 .holy-lands-rpg .ci-row > label {
-  flex: 0 0 74px; font-weight: bold; color: var(--hl-accent);
+  font-weight: bold; color: var(--hl-accent);
   font-size: 0.82em;
 }
-.holy-lands-rpg .ci-span > label { flex-basis: 92px; }
 .holy-lands-rpg .ci-row > input,
-.holy-lands-rpg .ci-row > select { flex: 1; height: 22px; font-size: 0.9em; min-width: 0; }
+.holy-lands-rpg .ci-row > select { height: 22px; font-size: 0.9em; min-width: 0; width: 100%; }
 .holy-lands-rpg .ci-value {
-  flex: 1; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0;
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0;
 }
 .holy-lands-rpg .ci-value select { flex: 1; height: 22px; min-width: 90px; }
 .holy-lands-rpg .ci-level-input,

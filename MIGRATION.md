@@ -1363,3 +1363,13 @@ sheets, standardised headings, and a parchment theme. v3.0.0 marks that step up.
   (Note: a character showing a doubled value like "Slavic Europe,Slavic
   Europe" is pre-existing saved data, not a current bug - editing or re-rolling
   Details clears it.)
+
+## v3.2.3 — Header: Class+Stature paired, value boxes aligned
+
+- **Class and Stature now share a line** (Class left, Stature right), with the
+  class/stature and unmet-requirement warnings flowing full-width beneath the
+  pair.
+- **Fixed value-box alignment**: every Character Information row now uses a
+  fixed-width label column (grid), so all the input boxes line up vertically
+  down each column instead of Class/Stature/Age sitting further right than the
+  paired rows.

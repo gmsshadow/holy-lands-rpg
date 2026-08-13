@@ -13,7 +13,7 @@
         </select>
       </div>
 
-      <div class="ci-row ci-span ci-class-row"><label>Class</label>
+      <div class="ci-row ci-class-row"><label>Class</label>
         <div class="ci-value">
           {{#if classItem}}
           <span class="class-item-display" data-item-id="{{classItem.id}}">
@@ -26,20 +26,21 @@
           {{/if}}
         </div>
       </div>
+
+      <div class="ci-row ci-stature-row"><label>Stature</label>
+        <div class="ci-value">
+          <select name="system.stature" {{#if attributesLocked}}disabled{{/if}}>{{selectOptions statures selected=system.stature}}</select>
+          {{#unless attributesLocked}}<button type="button" data-action="rollCreationAttributes" title="Roll all twelve Attributes from the p.53 Stature table, then lock"><i class="fas fa-dice"></i> Roll</button>
+          {{else}}{{#if isGM}}<a class="hint" data-action="unlockCreationAttributes" title="Rac override: allow a fresh Step 2 roll"><i class="fas fa-lock-open"></i> unlock</a>{{/if}}{{/unless}}
+        </div>
+      </div>
+
       {{#if classStatureInvalid}}<p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{classItem.name}} cannot be this Stature (Ch7)</p>{{/if}}
       {{#if unmetRequirements.length}}
       {{#each unmetRequirements}}<p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{this.label}} AV {{this.current}} below the required {{this.min}} (Ch7)</p>{{/each}}
       {{#if attributesLocked}}<button type="button" data-action="rollStep2A" title="Reroll unmet class Attributes with the Stature dice until requirements are met (p.53)"><i class="fas fa-rotate"></i> Step 2A Reroll</button>
       {{else}}<p class="hint">Roll Attributes (Step 2) first, then Step 2A rerolls become available.</p>{{/if}}
       {{/if}}
-
-      <div class="ci-row ci-span ci-stature-row"><label>Stature</label>
-        <div class="ci-value">
-          <select name="system.stature" {{#if attributesLocked}}disabled{{/if}}>{{selectOptions statures selected=system.stature}}</select>
-          {{#unless attributesLocked}}<button type="button" data-action="rollCreationAttributes" title="Roll all twelve Attributes from the p.53 Stature table, then lock"><i class="fas fa-dice"></i> Roll Attributes</button>
-          {{else}}{{#if isGM}}<a class="hint" data-action="unlockCreationAttributes" title="Rac override: allow a fresh Step 2 roll"><i class="fas fa-lock-open"></i> unlock</a>{{/if}}{{/unless}}
-        </div>
-      </div>
 
       <div class="ci-row ci-level-row"><label>Level</label>
         <div class="ci-value">

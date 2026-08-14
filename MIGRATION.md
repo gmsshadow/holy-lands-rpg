@@ -1397,3 +1397,17 @@ sheets, standardised headings, and a parchment theme. v3.0.0 marks that step up.
 - New actor methods: applySkillIncreases(), applyAtRGrowth(); CA/WS action
   label maps. These run as steps 3-4 of the level-up flow after the Attribute/
   Save/new-skill choices, and post their own chat summary.
+
+## v3.3.1 — AtR [Max] caps per Weapon Skill
+
+- Added the fixed per-Weapon-Skill AtR [Max] caps printed on the character
+  sheet: Hand to Hand [6], Light Arms [4], Heavy Arms [3], Paired Weapons [5],
+  Missile [3], Thrown [4], Kick Attack [4].
+- **Automatic level-up AtR growth now stops at the cap** - it grows a WS's AtR
+  toward its [Max] and never past it (previously it incremented with no
+  ceiling).
+- **Manual editing above the cap is still allowed**, but the Weapon Skill now
+  shows a warning that the value exceeds its [Max] (and that auto-growth stops
+  at the cap) - same soft-warning approach as the Rule of Halves.
+- The Weapon Skills header now shows "AtR N [Max C]" (e.g. "AtR 3 [Max 4]"),
+  mirroring the paper sheet's [Max] column, and highlights when over cap.

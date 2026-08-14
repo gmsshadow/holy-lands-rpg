@@ -219,6 +219,17 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
   static SINS = ["Attachment", "Bitterness", "Cheating", "Control", "Cruelty", "Doubt", "Drunkenness", "Envy", "Gluttony", "Gossip", "Greed", "Laziness", "Lying", "Malice", "Paganism", "Prejudice", "Pride", "Strife", "Theft", "Vanity"];
 
   /**
+   * Fixed maximum AtR per Weapon Skill (the "[Max]" printed on the character
+   * sheet). A WS's actions-per-round grows toward this ceiling as the character
+   * levels (Book of Life p.2); automatic growth stops here, though a Rac may
+   * set a higher value manually (the sheet warns when AtR exceeds the cap).
+   */
+  static WS_ATR_CAP = {
+    handToHand: 6, lightArms: 4, heavyArms: 3, pairedWeapons: 5,
+    missile: 3, thrown: 4, kickAttack: 4
+  };
+
+  /**
    * Experience Levels table (Genesis p.62). Cumulative EXP required to REACH
    * each level. Index = level; value = total EXP needed. Level 1 = 0.
    */
@@ -463,24 +474,27 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
       const spent = att + cri + spc;
       const baseAtR = ["handToHand", "pairedWeapons"].includes(key) ? 2 : 1;
       const expectedAtR = baseAtR + (hasSkill ? 1 : 0);
+      const atrCap = this.constructor.WS_ATR_CAP[key] ?? null;
 
       // Rule of Halves across ATT/CRI/SPC (Combat Handbook, Section 3 & RoH
       // sidebar): no single action's Bonus may exceed twice the next highest.
       const wsRoH = this.constructor.ruleOfHalvesCheck([att, cri, spc]);
 
       const v = {
-        budget, spent, hasSkill, expectedAtR,
+        budget, spent, hasSkill, expectedAtR, atrCap,
         over: spent > budget,
         criOverAtt: cri > att,
         spcOverAtt: spc > att,
         halvesViolation: wsRoH.violation,
         atrMismatch: (skill.atRMax || 0) !== expectedAtR,
+        atrOverCap: (atrCap !== null) && ((skill.atRMax || 0) > atrCap),
         warnings: []
       };
       if (v.over) v.warnings.push(`${spent} points spent but only ${budget} granted by the ${skill.label} skill`);
       if (v.criOverAtt) v.warnings.push("Critical Bonus cannot exceed the Attack Bonus");
       if (v.spcOverAtt) v.warnings.push("Special Bonus cannot exceed the Attack Bonus");
       if (wsRoH.violation) v.warnings.push(`Rule of Halves: a +${wsRoH.highest} Bonus (ATT/CRI/SPC) needs the next-lowest Bonus to be at least +${wsRoH.maxAllowed} (half, rounded up), but it is +${wsRoH.second} - raise it or lower the +${wsRoH.highest}.`);
+      if (v.atrOverCap) v.warnings.push(`AtR ${skill.atRMax} is above this Weapon Skill's [Max] of ${atrCap} - allowed, but automatic level-up growth stops at ${atrCap}.`);
       if (v.atrMismatch) v.warnings.push(`Expected ${expectedAtR} AtR (${baseAtR} base${hasSkill ? " +1 for having the skill" : ""}; Rac awards such as AGI 12+ may differ)`);
       ws[key] = v;
     }

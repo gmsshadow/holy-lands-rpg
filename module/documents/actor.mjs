@@ -1768,11 +1768,13 @@ export class HolyLandsActor extends Actor {
       const wsKey = item.system.weaponSkillKey;
       const ws = this.system.weaponSkills?.[wsKey];
       if (!ws) continue;
-      // Grow the current Max by 1 (the class "[Max]" cap is a soft ceiling the
-      // sheet already surfaces; we grow toward it one step per cadence hit).
-      const newMax = (ws.atRMax || 0) + 1;
+      // Grow toward the fixed [Max] cap for this Weapon Skill; never past it.
+      const cap = this.system.constructor.WS_ATR_CAP[wsKey] ?? Infinity;
+      const currentMax = ws.atRMax || 0;
+      if (currentMax >= cap) continue; // already at (or above) the cap
+      const newMax = Math.min(cap, currentMax + 1);
       update[`system.weaponSkills.${wsKey}.atRMax`] = newMax;
-      notes.push(`${ws.label} AtR Max +1 (${newMax})`);
+      notes.push(`${ws.label} AtR +1 (${newMax}${newMax === cap ? " - at [Max]" : ""})`);
     }
     if (Object.keys(update).length) await this.update(update);
     return notes.join("; ");

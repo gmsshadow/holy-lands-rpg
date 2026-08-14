@@ -417,7 +417,7 @@
     <div class="weapon-skill">
       <h4>{{ws.label}}
         <span class="budget {{#if v.over}}over{{/if}}">{{v.spent}} / {{v.budget}} pts</span>
-        <span class="budget {{#if v.atrMismatch}}over{{/if}}" title="Expected AtR">AtR {{ws.atRMax}} (exp {{v.expectedAtR}})</span>
+        <span class="budget {{#if v.atrOverCap}}over{{/if}}" title="Actions per Round / printed [Max]">AtR {{ws.atRMax}} [Max {{v.atrCap}}]</span>
       </h4>
       {{#each v.warnings}}
       <p class="rules-warning"><i class="fas fa-triangle-exclamation"></i> {{this}}</p>

@@ -11,7 +11,7 @@ import { HolyLandsItemSheet } from "./sheets/item-sheet.mjs";
 import { CharacterData } from "./data/actor-character.mjs";
 import { NpcData } from "./data/actor-npc.mjs";
 import {
-  WeaponData, ArmorData, EquipmentData, MiracleData, BlessingData, SkillData, ClassData
+  WeaponData, ArmorData, EquipmentData, MiracleData, BlessingData, SkillData, ClassData, ConsumableData
 } from "./data/items.mjs";
 
 const { Actors, Items } = foundry.documents.collections;
@@ -57,6 +57,7 @@ Hooks.once("init", function() {
     weapon: WeaponData,
     armor: ArmorData,
     equipment: EquipmentData,
+    consumable: ConsumableData,
     miracle: MiracleData,
     blessing: BlessingData,
     skill: SkillData,

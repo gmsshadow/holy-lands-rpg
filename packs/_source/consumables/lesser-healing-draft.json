@@ -1,0 +1,29 @@
+{
+  "_id": "wWeRdT7ZFi2a5Be4",
+  "_key": "!items!wWeRdT7ZFi2a5Be4",
+  "name": "Lesser Healing Draft",
+  "type": "consumable",
+  "img": "icons/consumables/potions/bottle-round-corked-red.webp",
+  "system": {
+    "description": "<p>A common herbal draft any human can brew with Herbal Science. Restores a small amount of Life, but taken too often it turns toxic.</p>",
+    "quantity": 1,
+    "weight": 0,
+    "cost": { "gold": 10, "silver": 0 },
+    "consumableType": "draft",
+    "healFormula": "1d4+1",
+    "relievesComa": false,
+    "comaReliefFormula": "",
+    "removesTerminal": false,
+    "setsBroken": false,
+    "effectNote": "",
+    "components": "Wolfberry, Silvermint, Pennythistle",
+    "toxinClass": 1,
+    "overuseWindow": "1/hour",
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": { "default": 0 },
+  "flags": {}
+}

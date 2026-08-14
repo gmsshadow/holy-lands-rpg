@@ -45,6 +45,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       toggleEquip: HolyLandsActorSheet.#onToggleEquip,
       castMiracle: HolyLandsActorSheet.#onCastMiracle,
       useBlessing: HolyLandsActorSheet.#onUseBlessing,
+      useConsumable: HolyLandsActorSheet.#onUseConsumable,
       forfeitAdvantage: HolyLandsActorSheet.#onForfeitAdvantage,
       declareRetreat: HolyLandsActorSheet.#onDeclareRetreat,
       applyCondition: HolyLandsActorSheet.#onApplyCondition,
@@ -281,7 +282,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
   /** Organize embedded items for the sheet. */
   #prepareItems(context) {
-    const buckets = { weapon: [], armor: [], equipment: [], miracle: [], blessing: [], skill: [] };
+    const buckets = { weapon: [], armor: [], equipment: [], miracle: [], blessing: [], skill: [], consumable: [] };
     for (const item of this.actor.items) {
       if (buckets[item.type]) buckets[item.type].push(item);
     }
@@ -304,6 +305,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     }
     context.armor = buckets.armor;
     context.equipment = buckets.equipment;
+    context.consumables = buckets.consumable;
     context.miracles = buckets.miracle;
     // Split miracles into High and Clerical subsections (each sorted by name).
     const byMiracleName = (a, b) => a.name.localeCompare(b.name);
@@ -1396,6 +1398,11 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   static async #onUseBlessing(event, target) {
     const blessing = this.#getItemForTarget(target);
     return blessing?.useBlessing();
+  }
+
+  static async #onUseConsumable(event, target) {
+    const consumable = this.#getItemForTarget(target);
+    return consumable?.useConsumable();
   }
 
   /* -------------------------------------------- */

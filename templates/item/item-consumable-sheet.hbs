@@ -1,0 +1,75 @@
+<div class="sheet-content">
+<header class="sheet-header">
+  <img class="profile-img" src="{{item.img}}" data-action="editImage" data-edit="img" title="{{item.name}}" height="64" width="64"/>
+  <div class="header-fields">
+    <h1 class="charname">
+      <input name="name" type="text" value="{{item.name}}" placeholder="Consumable Name"/>
+    </h1>
+  </div>
+</header>
+
+<section class="sheet-body">
+  <div class="form-group">
+    <label>Type</label>
+    <select name="system.consumableType">
+      <option value="draft" {{#if (eq system.consumableType "draft")}}selected{{/if}}>Herbal Draft</option>
+      <option value="oil" {{#if (eq system.consumableType "oil")}}selected{{/if}}>Holy Oil</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label>Quantity</label>
+    <input type="number" name="system.quantity" value="{{system.quantity}}"/>
+  </div>
+
+  <div class="form-group">
+    <label>Cost (Gold) / (Silver)</label>
+    <input type="number" name="system.cost.gold" value="{{system.cost.gold}}" style="width:80px;"/>
+    <input type="number" name="system.cost.silver" value="{{system.cost.silver}}" style="width:80px;"/>
+  </div>
+
+  <h3>Effect</h3>
+  <div class="form-group">
+    <label>Heal formula <span class="hint">(e.g. 1d4+1; blank for none)</span></label>
+    <input type="text" name="system.healFormula" value="{{system.healFormula}}" placeholder="1d4+1"/>
+  </div>
+  <div class="form-group">
+    <label><input type="checkbox" name="system.relievesComa" {{checked system.relievesComa}}/> Relieves coma</label>
+  </div>
+  <div class="form-group">
+    <label>Coma relief Life <span class="hint">(restored on relief, e.g. 1d4)</span></label>
+    <input type="text" name="system.comaReliefFormula" value="{{system.comaReliefFormula}}" placeholder="1d4"/>
+  </div>
+  <div class="form-group">
+    <label><input type="checkbox" name="system.removesTerminal" {{checked system.removesTerminal}}/> Removes Terminal effect</label>
+  </div>
+  <div class="form-group">
+    <label><input type="checkbox" name="system.setsBroken" {{checked system.setsBroken}}/> Sets Broken injuries</label>
+  </div>
+  <div class="form-group">
+    <label>Effect note <span class="hint">(extra rules text shown on use)</span></label>
+    <input type="text" name="system.effectNote" value="{{system.effectNote}}" placeholder="e.g. prevents Disease spread for 1d4+3 days"/>
+  </div>
+
+  <h3>Crafting &amp; Toxicity</h3>
+  <div class="form-group">
+    <label>Components</label>
+    <input type="text" name="system.components" value="{{system.components}}" placeholder="Wolfberry, Silvermint, Pennythistle"/>
+  </div>
+  <div class="form-group">
+    <label>Toxin Class <span class="hint">(0 = non-toxic)</span></label>
+    <input type="number" name="system.toxinClass" value="{{system.toxinClass}}" min="0" style="width:60px;"/>
+  </div>
+  <div class="form-group">
+    <label>Overuse window <span class="hint">(toxic if exceeded, e.g. 1/hour)</span></label>
+    <input type="text" name="system.overuseWindow" value="{{system.overuseWindow}}" placeholder="1/hour"/>
+  </div>
+
+  <div class="form-group">
+    <label>Description</label>
+    <prose-mirror name="system.description" value="{{system.description}}" toggled>
+      {{{enrichedDescription}}}
+    </prose-mirror>
+  </div>
+</section>
+</div>

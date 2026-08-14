@@ -76,7 +76,8 @@
       "miracle": "Miracle",
       "blessing": "Blessing",
       "skill": "Skill",
-      "class": "Class"
+      "class": "Class",
+      "consumable": "Consumable"
     }
   }
 }

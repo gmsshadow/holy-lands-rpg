@@ -78,6 +78,74 @@ export class HolyLandsItem extends Item {
   /**
    * Cast a miracle
    */
+  /**
+   * Use a consumable (Book of Life, Ch13 healing drafts & holy oils). Applies:
+   *  - the heal formula (via applyDamage, negative = healing);
+   *  - coma relief (+Nd Life and clears the coma) and Terminal removal;
+   *  - setting Broken injuries;
+   * then posts the effect and any toxicity/overuse note, and decrements the
+   * quantity. The toxicity layer is surfaced as a warning (the Rac applies the
+   * toxin if the overuse window is exceeded) rather than auto-tracked.
+   */
+  async useConsumable() {
+    if (this.type !== "consumable") return;
+    const actor = this.actor;
+    if (!actor) { ui.notifications.warn("This consumable is not owned by an actor."); return; }
+
+    const sys = this.system;
+    const lines = [];
+
+    // Terminal removal FIRST - applyDamage (healing) is blocked while Terminal,
+    // and Hospice Oil both removes Terminal and restores Life, so order matters.
+    if (sys.removesTerminal && actor.hasCondition?.("terminal")) {
+      await actor.clearCondition("terminal");
+      lines.push("removes the Terminal effect");
+    }
+
+    // Coma relief (Hospice Oil): clear coma, restore a little Life.
+    if (sys.relievesComa && actor.hasCondition?.("coma")) {
+      let restored = 0;
+      if (sys.comaReliefFormula) {
+        const r = new Roll(sys.comaReliefFormula); await r.evaluate();
+        restored = r.total;
+      }
+      await actor.clearCondition("coma");
+      if (restored > 0) await actor.applyDamage(-restored, { source: this.name, silent: true });
+      lines.push(`relieves the coma (+${restored} Life)`);
+    }
+
+    // Set a Broken injury (stops it turning Terminal).
+    if (sys.setsBroken && actor.hasCondition?.("broken") && !actor.conditions.broken?.isSet) {
+      await actor.setBrokenInjury();
+      lines.push("sets the Broken injury");
+    }
+
+    // General healing (drafts, Oil of Life, etc.).
+    if (sys.healFormula) {
+      const r = new Roll(sys.healFormula); await r.evaluate();
+      await actor.applyDamage(-r.total, { source: this.name, silent: true });
+      lines.push(`heals ${r.total} Life`);
+    }
+
+    if (!lines.length) lines.push("no effect in the current state");
+
+    // Toxicity / overuse note (Rac-adjudicated).
+    let toxNote = "";
+    if (sys.toxinClass > 0) {
+      toxNote = `<br><em>Toxicity: acts as a Class ${sys.toxinClass} toxin if taken more than ${sys.overuseWindow || "the safe rate"}.</em>`;
+    }
+    const extra = sys.effectNote ? `<br>${sys.effectNote}` : "";
+
+    // Decrement quantity.
+    const qty = Math.max(0, (sys.quantity || 1) - 1);
+    await this.update({ "system.quantity": qty });
+
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor }),
+      flavor: `<strong>${actor.name} uses ${this.name}</strong> - ${lines.join("; ")}.${extra}${toxNote}<br><span class="hint">${qty} remaining.</span>`
+    });
+  }
+
   async castMiracle() {
     if (this.type !== 'miracle') return;
 

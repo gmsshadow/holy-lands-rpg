@@ -1411,3 +1411,25 @@ sheets, standardised headings, and a parchment theme. v3.0.0 marks that step up.
   at the cap) - same soft-warning approach as the Rule of Halves.
 - The Weapon Skills header now shows "AtR N [Max C]" (e.g. "AtR 3 [Max 4]"),
   mirroring the paper sheet's [Max] column, and highlights when over cap.
+
+## v3.4.0 — Consumables: healing drafts & holy oils (Book of Life Ch13)
+
+- New **consumable** item type with two layers:
+  - **Effect**: heal formula (wired to applyDamage), coma relief (+Life and
+    clears the coma), Terminal removal, and Broken-injury setting - all applied
+    on use through the existing condition/damage pipeline.
+  - **Crafting/economy**: components, cost, and a toxicity class + overuse
+    window (surfaced as a Rac-adjudicated warning on use, not auto-tracked).
+- A **Use** button (flask icon) on the new Consumables section of the Equipment
+  tab applies the effect, posts a chat summary, and decrements quantity. Each
+  consumable shows inline tags (heal formula, "coma", toxicity class).
+- Full item edit sheet (item-consumable-sheet.hbs) exposing both layers.
+- **Two demo items** shipped in a new `consumables` compendium (kept minimal to
+  respect the books' IP - the mechanism supports the full tables, but only
+  these two are provided):
+  - **Lesser Healing Draft** - heals 1d4+1; Class 1 toxin if taken more than
+    1/hour (tests the heal + toxicity layer).
+  - **Hospice Oil** - relieves coma to +1d4 Life, removes Terminal, sets Broken
+    injuries (tests the coma/Terminal-relief loop - the gap this closes).
+- Use-order handles the Terminal-vs-heal interaction correctly: Terminal is
+  removed before any Life is restored (applyDamage is blocked while Terminal).

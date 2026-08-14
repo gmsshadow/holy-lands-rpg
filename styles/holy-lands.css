@@ -1072,3 +1072,11 @@
 .lvl-skill-row .lvl-skill-name { flex: 1; }
 .lvl-skill-row .lvl-action-wrap { flex: 0 0 auto; }
 .lvl-action { max-width: 110px; }
+
+/* Consumable inline tags on the equipment list */
+.holy-lands-rpg .consumable-tag {
+  display: inline-block; font-size: 0.7em; padding: 1px 5px; margin-left: 4px;
+  border: 1px solid var(--hl-border); border-radius: 8px;
+  background: var(--hl-field-bg); color: var(--hl-accent);
+}
+.holy-lands-rpg .consumable-tag.tox { color: #a11; border-color: #a11; }

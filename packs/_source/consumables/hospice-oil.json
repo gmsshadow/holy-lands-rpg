@@ -1,0 +1,29 @@
+{
+  "_id": "1O8rbTWPZF7YeVQA",
+  "_key": "!items!1O8rbTWPZF7YeVQA",
+  "name": "Hospice Oil",
+  "type": "consumable",
+  "img": "icons/consumables/potions/bottle-conical-corked-holy.webp",
+  "system": {
+    "description": "<p>A specialty Holy Oil clergy use to draw a critically injured patient back from the brink. Relieves coma, undoes a Terminal decline, and sets Broken injuries over 1d4 hours.</p>",
+    "quantity": 1,
+    "weight": 0,
+    "cost": { "gold": 370, "silver": 0 },
+    "consumableType": "oil",
+    "healFormula": "",
+    "relievesComa": true,
+    "comaReliefFormula": "1d4",
+    "removesTerminal": true,
+    "setsBroken": true,
+    "effectNote": "Full effect unfolds over 1d4 hours at +1 Life/hour (Rac paces the recovery).",
+    "components": "Rue, Betony, Pennythistle",
+    "toxinClass": 0,
+    "overuseWindow": "",
+    "equipped": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 1,
+  "ownership": { "default": 0 },
+  "flags": {}
+}

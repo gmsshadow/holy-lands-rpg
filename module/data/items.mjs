@@ -204,3 +204,31 @@ export class ClassData extends foundry.abstract.TypeDataModel {
     };
   }
 }
+
+/**
+ * Consumable items - healing drafts and holy oils (Book of Life, Ch13).
+ * Two layers:
+ *  - Effect: heal formula + coma/Terminal/Broken relief, wired to applyDamage
+ *    and the condition system on use.
+ *  - Crafting/economy: components, toxicity class + overuse window.
+ */
+export class ConsumableData extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    return {
+      ...baseItemSchema(),
+      consumableType: new fields.StringField({ required: true, initial: "draft", choices: ["draft", "oil"] }),
+      // --- Effect layer ---
+      healFormula: new fields.StringField({ required: true, initial: "" }),   // e.g. "1d4+1"
+      relievesComa: new fields.BooleanField({ required: true, initial: false }),
+      comaReliefFormula: new fields.StringField({ required: true, initial: "" }), // Life restored on coma relief, e.g. "1d4"
+      removesTerminal: new fields.BooleanField({ required: true, initial: false }),
+      setsBroken: new fields.BooleanField({ required: true, initial: false }),
+      effectNote: new fields.StringField({ required: true, initial: "" }),    // extra flavour/rules text shown on use
+      // --- Crafting / economy layer ---
+      components: new fields.StringField({ required: true, initial: "" }),     // e.g. "Wolfberry, Silvermint, Pennythistle"
+      toxinClass: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }), // 0 = non-toxic
+      overuseWindow: new fields.StringField({ required: true, initial: "" }),  // e.g. "1/hour" - toxic if exceeded
+      equipped: new fields.BooleanField({ required: true, initial: false })
+    };
+  }
+}

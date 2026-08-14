@@ -1063,3 +1063,12 @@
 .holy-lands-rpg .window-header .header-control:hover {
   color: #fff;
 }
+
+/* Level-up skill-increase dialog rows */
+.holy-lands-rpg .lvl-skill-row,
+.dialog .lvl-skill-row {
+  display: flex; align-items: center; gap: 8px; padding: 2px 0;
+}
+.lvl-skill-row .lvl-skill-name { flex: 1; }
+.lvl-skill-row .lvl-action-wrap { flex: 0 0 auto; }
+.lvl-action { max-width: 110px; }

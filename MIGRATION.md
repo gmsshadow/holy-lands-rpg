@@ -1373,3 +1373,27 @@ sheets, standardised headings, and a parchment theme. v3.0.0 marks that step up.
   fixed-width label column (grid), so all the input boxes line up vertically
   down each column instead of Class/Stature/Age sitting further right than the
   paired rows.
+
+## v3.2.4 — Level-up skill picker excludes skills already owned
+
+- The new-Talent/Craft dropdown in the guided level-up flow now filters out
+  skills the character already has (case-insensitive), so it only offers
+  genuine new choices. If every skill on the class list is already owned, it
+  shows a note instead of an empty dropdown.
+
+## v3.3.0 — Per-level skill increases & AtR growth (Book of Life p.2)
+
+- The guided level-up now includes the Book of Life p.2 Skill progression:
+  - **Skill increases step**: pick +1 PF for any 3 Gifts, 2 Talents, and 1
+    Craft (Rule of Halves per category; the dialog caps each category at its
+    quota). Each shows its PF before->after.
+  - **Weapon Skill / Combat Abilities knock-on**: if an increased skill is a
+    WS or the Combat Abilities skill, an action dropdown lets you also raise
+    one action Bonus by +1 (Attack/Critical/Special for a WS; Advantage/Dodge/
+    Defend/Damage for Combat Abilities), applied to the correct section.
+  - **AtR growth** (automatic): each Weapon Skill's Max AtR grows +1 by the
+    category of its linked Skill item - Gift every 3rd level, Talent every
+    4th, Craft every 5th.
+- New actor methods: applySkillIncreases(), applyAtRGrowth(); CA/WS action
+  label maps. These run as steps 3-4 of the level-up flow after the Attribute/
+  Save/new-skill choices, and post their own chat summary.

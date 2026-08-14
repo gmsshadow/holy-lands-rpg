@@ -239,6 +239,13 @@ export class HolyLandsActor extends Actor {
     return this.CRITICAL_INJURY_TABLE.find(r => d <= r.max)?.part ?? "Torso";
   }
 
+  /** Combat Abilities / Weapon Skill action keys and labels (Book of Life p.2
+   *  level-up knock-on: increasing the skill lets you raise one action Bonus). */
+  static CA_ACTIONS = ["advantageBonus", "dodgeBonus", "defendBonus", "damageBonus"];
+  static CA_ACTION_LABELS = { advantageBonus: "Advantage", dodgeBonus: "Dodge", defendBonus: "Defend", damageBonus: "Damage" };
+  static WS_ACTIONS = ["attackBonus", "criticalBonus", "specialBonus"];
+  static WS_ACTION_LABELS = { attackBonus: "Attack", criticalBonus: "Critical", specialBonus: "Special" };
+
   /**
    * Named Special maneuvers (Combat Handbook p.20-21, Genesis p.50-51). Each
    * rolls the active Weapon Skill's SPC Bonus (handled by mode "special"),
@@ -1702,6 +1709,73 @@ export class HolyLandsActor extends Actor {
     delete data._id;
     await this.createEmbeddedDocuments("Item", [data]);
     return true;
+  }
+
+  /**
+   * Apply per-level Skill increases (Book of Life p.2): +1 PF to chosen Gifts,
+   * Talents and Crafts (Rule of Halves per category, checked softly). If an
+   * increased skill is a Weapon Skill or the Combat Abilities skill, also bump
+   * the chosen action Bonus in that section by +1.
+   * @param {object[]} increases  [{ itemId, wsAction }] - wsAction is the
+   *        chosen action key (e.g. "attackBonus" / "advantageBonus") for
+   *        WS/CA skills, else omitted.
+   */
+  async applySkillIncreases(increases = []) {
+    if (!increases.length) return "";
+    const parts = [];
+    const wsUpdate = {};
+    for (const inc of increases) {
+      const item = this.items.get(inc.itemId);
+      if (!item || item.type !== "skill") continue;
+      const newPF = (item.system.pf || 0) + 1;
+      await item.update({ "system.pf": newPF });
+      parts.push(`${item.name} +1 PF (${newPF})`);
+
+      // Weapon Skill / Combat Abilities knock-on (+1 to a chosen action Bonus).
+      if (inc.wsAction) {
+        if (item.system.combatAbilities) {
+          const cur = this.system.combat?.[inc.wsAction] || 0;
+          wsUpdate[`system.combat.${inc.wsAction}`] = cur + 1;
+          parts.push(`Combat Abilities ${this.constructor.CA_ACTION_LABELS?.[inc.wsAction] || inc.wsAction} +1`);
+        } else if (item.system.weaponSkillKey) {
+          const wsKey = item.system.weaponSkillKey;
+          const cur = this.system.weaponSkills?.[wsKey]?.[inc.wsAction] || 0;
+          wsUpdate[`system.weaponSkills.${wsKey}.${inc.wsAction}`] = cur + 1;
+          parts.push(`${this.system.weaponSkills?.[wsKey]?.label || wsKey} ${this.constructor.WS_ACTION_LABELS?.[inc.wsAction] || inc.wsAction} +1`);
+        }
+      }
+    }
+    if (Object.keys(wsUpdate).length) await this.update(wsUpdate);
+    return parts.join("; ");
+  }
+
+  /**
+   * Apply per-level AtR growth (Book of Life p.2). A Weapon Skill gains +1 Max
+   * AtR (up to its cap tracked separately by the class) at a cadence set by the
+   * category of its linked Skill item: Gift every 3rd level, Talent every 4th,
+   * Craft every 5th. Called on level-up with the new level number.
+   */
+  async applyAtRGrowth(newLevel) {
+    const cadence = { gift: 3, talent: 4, craft: 5 };
+    const wsSkillItems = this.items.filter(i =>
+      i.type === "skill" && i.system.weaponSkillKey);
+    if (!wsSkillItems.length) return "";
+    const update = {};
+    const notes = [];
+    for (const item of wsSkillItems) {
+      const every = cadence[item.system.skillType];
+      if (!every || (newLevel % every !== 0)) continue;
+      const wsKey = item.system.weaponSkillKey;
+      const ws = this.system.weaponSkills?.[wsKey];
+      if (!ws) continue;
+      // Grow the current Max by 1 (the class "[Max]" cap is a soft ceiling the
+      // sheet already surfaces; we grow toward it one step per cadence hit).
+      const newMax = (ws.atRMax || 0) + 1;
+      update[`system.weaponSkills.${wsKey}.atRMax`] = newMax;
+      notes.push(`${ws.label} AtR Max +1 (${newMax})`);
+    }
+    if (Object.keys(update).length) await this.update(update);
+    return notes.join("; ");
   }
 
   /**

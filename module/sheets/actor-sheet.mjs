@@ -1199,7 +1199,12 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       .map(([k, s]) => `<option value="${k}">${s.label} (${s.value} \u2192 ${s.value + 1})</option>`).join("");
 
     // Skill: Talent at levels 2-3, Craft at levels 3-7 (both possible at L3).
-    const list = this.actor.talentCraftList || [];
+    // Exclude skills the character already has - offering a duplicate is a
+    // wasted choice (and grantLevelUpSkill would reject it anyway).
+    const owned = new Set(this.actor.items
+      .filter(i => i.type === "skill")
+      .map(i => i.name.toLowerCase()));
+    const list = (this.actor.talentCraftList || []).filter(n => !owned.has(n.toLowerCase()));
     const wantsTalent = (level >= 2 && level <= 3);
     const wantsCraft = (level >= 3 && level <= 7);
     let skillBlock = "";
@@ -1213,6 +1218,8 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       skillBlock = `<fieldset><legend>New ${which} (p.62)</legend>
         <div class="form-group"><label>Skill:</label><select name="skillName">${skillOpts}</select></div>
         ${sectionField}</fieldset>`;
+    } else if ((wantsTalent || wantsCraft) && this.actor.talentCraftList?.length) {
+      skillBlock = `<p class="hint">This level grants a new ${wantsTalent ? "Talent" : "Craft"}, but this character already has every skill on the class list - add one manually if the Rac allows an off-list choice.</p>`;
     } else if (wantsTalent || wantsCraft) {
       skillBlock = `<p class="hint">This level grants a new ${wantsTalent ? "Talent" : "Craft"}, but this class doesn't use the standard Talent/Craft list (Adventurer/Fighter differ) - add it manually.</p>`;
     }
@@ -1254,6 +1261,99 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
         flavor: `<strong>${this.actor.name} - Level ${level} increases:</strong> ${summary}.`
       });
     }
+
+    // 3) Per-level Skill increases (Book of Life p.2): +1 to 3 Gifts, 2 Talents,
+    //    1 Craft, with WS/Combat-Abilities knock-ons.
+    const skillSummary = await this.#promptSkillIncreases(level);
+
+    // 4) AtR growth by category (Book of Life p.2): Gift WS every 3rd level,
+    //    Talent every 4th, Craft every 5th - applied automatically.
+    const atrSummary = await this.actor.applyAtRGrowth(level);
+
+    const extra = [skillSummary, atrSummary].filter(Boolean).join("; ");
+    if (extra) {
+      await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+        flavor: `<strong>${this.actor.name} - Level ${level} skills:</strong> ${extra}.`
+      });
+    }
+  }
+
+  /**
+   * Prompt for the per-level Skill increases (Book of Life p.2): pick 3 Gifts,
+   * 2 Talents, 1 Craft to raise +1 PF (Rule of Halves per category). For any
+   * Weapon Skill or Combat Abilities skill picked, also choose one action Bonus
+   * in its section to raise. Returns a summary string (or "" if skipped).
+   */
+  async #promptSkillIncreases(level) {
+    const skills = this.actor.items.filter(i => i.type === "skill");
+    if (!skills.length) return "";
+
+    const CA = this.actor.constructor;
+    const byCat = { gift: [], talent: [], craft: [] };
+    for (const s of skills) (byCat[s.system.skillType] ?? byCat.gift).push(s);
+    const quota = { gift: 3, talent: 2, craft: 1 };
+
+    const catBlock = (cat, label) => {
+      const items = byCat[cat];
+      if (!items.length) return `<fieldset><legend>${label} (pick ${quota[cat]})</legend><p class="hint">No ${label.toLowerCase()} to increase.</p></fieldset>`;
+      const rows = items.map(s => {
+        // WS/CA skills get an action dropdown for the knock-on Bonus.
+        let actionSel = "";
+        if (s.system.combatAbilities) {
+          actionSel = `<select name="act:${s.id}" class="lvl-action">` +
+            CA.CA_ACTIONS.map(a => `<option value="${a}">${CA.CA_ACTION_LABELS[a]}</option>`).join("") + `</select>`;
+        } else if (s.system.weaponSkillKey) {
+          actionSel = `<select name="act:${s.id}" class="lvl-action">` +
+            CA.WS_ACTIONS.map(a => `<option value="${a}">${CA.WS_ACTION_LABELS[a]}</option>`).join("") + `</select>`;
+        }
+        return `<label class="lvl-skill-row">
+          <input type="checkbox" name="inc:${s.id}" data-cat="${cat}"/>
+          <span class="lvl-skill-name">${foundry.utils.escapeHTML(s.name)} <span class="hint">(${s.system.pf || 0}\u2192${(s.system.pf || 0) + 1})</span></span>
+          ${actionSel ? `<span class="lvl-action-wrap">${actionSel}</span>` : ""}
+        </label>`;
+      }).join("");
+      return `<fieldset data-cat="${cat}"><legend>${label} (pick ${quota[cat]})</legend>${rows}</fieldset>`;
+    };
+
+    const content = `
+      <p>Choose this level's Skill increases (Book of Life p.2), following the Rule of Halves within each category. For a Weapon Skill or Combat Abilities pick, also choose which action Bonus rises.</p>
+      ${catBlock("gift", "Gifts")}
+      ${catBlock("talent", "Talents")}
+      ${catBlock("craft", "Crafts")}
+      <p class="lvl-warn" style="color:#a11;display:none;"></p>
+      <script>(function(){
+        const r = document.currentScript.parentElement;
+        const quota = { gift:3, talent:2, craft:1 };
+        const warn = r.querySelector('.lvl-warn');
+        r.querySelectorAll('input[type=checkbox]').forEach(cb => cb.addEventListener('change', () => {
+          const cat = cb.dataset.cat;
+          const checked = r.querySelectorAll('input[data-cat='+cat+']:checked');
+          if (checked.length > quota[cat]) { cb.checked = false; }
+        }));
+      })();</script>`;
+
+    const result = await DialogV2.wait({
+      window: { title: `Level ${level}: Skill Increases (Book of Life p.2)` },
+      content,
+      buttons: [
+        { action: "apply", label: "Apply increases", default: true, callback: (e, b) => {
+          const picks = [];
+          for (const el of b.form.elements) {
+            if (el.type === "checkbox" && el.checked && el.name.startsWith("inc:")) {
+              const id = el.name.slice(4);
+              const actEl = b.form.elements[`act:${id}`];
+              picks.push({ itemId: id, wsAction: actEl ? actEl.value : undefined });
+            }
+          }
+          return picks;
+        } },
+        { action: "skip", label: "Skip" }
+      ],
+      rejectClose: false
+    });
+    if (!result || result === "skip" || !result.length) return "";
+    return this.actor.applySkillIncreases(result);
   }
 
   static async #onRollStartingLifeFaith(event, target) {

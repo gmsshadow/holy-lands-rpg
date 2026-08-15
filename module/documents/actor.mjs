@@ -247,6 +247,30 @@ export class HolyLandsActor extends Actor {
   static WS_ACTION_LABELS = { attackBonus: "Attack", criticalBonus: "Critical", specialBonus: "Special" };
 
   /**
+   * Called Shot hit-location table (Combat Handbook p.20). Each targets a body
+   * part at an added DF (harder to hit), maps to an armor placement (ap) so the
+   * correct piece degrades, and applies an effect on a hit. Head/Neck reuses
+   * the Knock-out maneuver / optional x2 damage; the rest post a Rac-adjudicated
+   * result (Disarm auto-applies no condition here - the book leaves the limb
+   * effects to the Rac). DF values sit within the book's ranges; the Rac can
+   * fine-tune via the situational modifier.
+   */
+  static CALLED_SHOTS = {
+    headNeck:  { label: "Head / Neck", ap: "head",  df: 5, atr: 2, allowDouble: true,
+                 note: "Vital shot: choose Knock-out (Unconscious) or x2 Damage.", effect: "note" },
+    chest:     { label: "Chest / Abdomen", ap: "chest", df: 1, atr: 2,
+                 note: "Solid hit to the torso (normal Damage).", effect: "note" },
+    arms:      { label: "Arm", ap: "arms", df: 3, atr: 2,
+                 note: "May Disarm or impair the arm (Rac adjudicates).", effect: "note" },
+    legs:      { label: "Leg", ap: "legs", df: 5, atr: 2,
+                 note: "May hobble or knock the target down (Rac adjudicates).", effect: "note" },
+    hand:      { label: "Hand (non-vital)", ap: "arms", df: 7, atr: 2,
+                 note: "Disrupt/Disarm - fine target (Rac adjudicates).", effect: "note" },
+    belt:      { label: "Belt / Pouch (non-vital)", ap: "chest", df: 8, atr: 2,
+                 note: "Disrupt gear or sever a pouch (Rac adjudicates).", effect: "note" }
+  };
+
+  /**
    * Named Special maneuvers (Combat Handbook p.20-21, Genesis p.50-51). Each
    * rolls the active Weapon Skill's SPC Bonus (handled by mode "special"),
    * costs a set number of AtR, and on a successful hit applies its effect.
@@ -1992,7 +2016,8 @@ export class HolyLandsActor extends Actor {
   async rollAttack(weapon, targetActor = null, options = {}) {
     let { mode = "attack", multiplier = 1, modifier = 0, free = false, isCounter = false,
           maneuver = null, extraAtR = 0,
-          customSpecial = false, customLabel = "Custom Special", customAtR = 2 } = options;
+          customSpecial = false, customLabel = "Custom Special", customAtR = 2,
+          calledShot = null, doubleDamage = false } = options;
 
     const weaponSkill = weapon?.system?.weaponSkill || "lightArms";
     const ws = this.system.weaponSkills?.[weaponSkill];
@@ -2012,6 +2037,17 @@ export class HolyLandsActor extends Actor {
     // A Custom Special (Rac-defined novel move) is a Special with a player-set
     // AtR cost and label, no automatic effect.
     if (customSpecial) { mode = "special"; multiplier = 1; }
+
+    // A Called Shot (Combat Handbook p.20) is a Special that targets a body
+    // part: forces Special mode, applies the location's DF penalty, feeds the
+    // location to armor degradation, and (Head/Neck only) may double Damage.
+    const calledShotDef = calledShot ? this.constructor.CALLED_SHOTS[calledShot] : null;
+    if (calledShotDef) {
+      mode = "special";
+      modifier = (modifier || 0) - calledShotDef.df; // harder to hit
+      if (calledShotDef.allowDouble && doubleDamage) multiplier = 2;
+      else multiplier = 1;
+    }
 
     if (this.getCombatFlag("retreating")) {
       ui.notifications.warn(`${this.name} has declared a Retreat and forfeits all attacks this Round.`);
@@ -2058,6 +2094,8 @@ export class HolyLandsActor extends Actor {
     if (maneuverDef) {
       const extra = maneuverDef.scalable ? Math.max(0, extraAtR) : 0;
       atrCost = free ? 0 : (maneuverDef.atr + extra);
+    } else if (calledShotDef) {
+      atrCost = free ? 0 : (calledShotDef.atr || 2);
     } else if (customSpecial) {
       atrCost = free ? 0 : Math.max(1, customAtR);
     } else {
@@ -2083,7 +2121,9 @@ export class HolyLandsActor extends Actor {
     }
     else if (mode === "special") {
       actionBonus = ws.specialBonus || 0;
-      modeLabel = maneuverDef ? ` (${maneuverDef.label})` : (customSpecial ? ` (${customLabel})` : " (Special)");
+      modeLabel = maneuverDef ? ` (${maneuverDef.label})`
+        : calledShotDef ? ` (Called Shot: ${calledShotDef.label}${(calledShotDef.allowDouble && doubleDamage) ? ", x2 DAM" : ""})`
+        : (customSpecial ? ` (${customLabel})` : " (Special)");
     }
 
     // Natural 20 Advantage: +3 to Attack, Critical, and Special this Round.
@@ -2170,7 +2210,8 @@ export class HolyLandsActor extends Actor {
 
     const attackContext = {
       attackTotal, isNat20, mode, multiplier, free, isCounter,
-      atrCost, weaponSkill, maneuver, maneuverDef, extraAtR
+      atrCost, weaponSkill, maneuver, maneuverDef, extraAtR,
+      calledShot, calledShotDef
     };
 
     await ChatMessage.create({
@@ -2686,8 +2727,9 @@ export class HolyLandsActor extends Actor {
     // Landing a hit clears this actor's Natural 1 Advantage penalty (Ch5).
     if (this.getCombatFlag("advNat1")) await this.setCombatFlag("advNat1", false);
 
-    // Determine hit location (default: chest)
-    const hitAP = "chest";
+    // Determine hit location: a Called Shot targets a specific armor placement;
+    // otherwise the torso/chest takes the blow by default.
+    const hitAP = attackContext.calledShotDef?.ap || "chest";
 
     await this._applyArmorDegradation(defender, hitAP, finalDamage);
 
@@ -2708,6 +2750,17 @@ export class HolyLandsActor extends Actor {
     // Named Special maneuver effect fires on a confirmed hit.
     const md = attackContext.maneuverDef;
     if (md) await this.#applyManeuverEffect(md, defender, attackContext);
+
+    // Called Shot result note (Combat Handbook p.20). Head/Neck can also apply
+    // Knock-out; that's chosen via the maneuver, so here we just post the
+    // location's Rac-adjudicated effect.
+    const cs = attackContext.calledShotDef;
+    if (cs) {
+      await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        flavor: `<strong>Called Shot - ${cs.label}</strong> hits ${defender.name}. ${cs.note}`
+      });
+    }
     return;
   }
 

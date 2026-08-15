@@ -1433,3 +1433,21 @@ sheets, standardised headings, and a parchment theme. v3.0.0 marks that step up.
     injuries (tests the coma/Terminal-relief loop - the gap this closes).
 - Use-order handles the Terminal-vs-heal interaction correctly: Terminal is
   removed before any Life is restored (applyDamage is blocked while Terminal).
+
+## v3.5.0 — Full Called Shots / hit-location table (Combat Handbook p.20)
+
+- Added the complete Called Shot table as an attack option ("Called Shots"
+  group in the attack picker): Head/Neck (+5 DF), Chest/Abdomen (+1),
+  Arm (+3), Leg (+5), Hand (+7), Belt/Pouch (+8). Each is a Special that:
+  - applies the location's DF penalty (harder to hit);
+  - **feeds the location to armor degradation** - retiring the hardcoded
+    "chest" placeholder, so a called shot to the leg now degrades leg armor,
+    an arm shot degrades arm armor, etc.;
+  - posts the location's Rac-adjudicated effect on a hit (Disarm/hobble/impair/
+    disrupt as the book describes).
+- **Head/Neck** offers a checkbox to deal **x2 Damage** instead of the
+  Knock-out (the existing Knock-out maneuver remains the route to the
+  Unconscious effect; the two are the same book entry approached two ways).
+- New CALLED_SHOTS static (target -> armor ap, DF, effect). DF values sit
+  within the book's ranges; the Rac can fine-tune via the situational modifier.
+- Default (non-called) hits still degrade chest armor as before.

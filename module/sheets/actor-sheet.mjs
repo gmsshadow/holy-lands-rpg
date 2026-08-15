@@ -1439,16 +1439,29 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     const maneuverGroup = maneuverOpts ? `<optgroup label="Named Maneuvers">${maneuverOpts}</optgroup>` : "";
     const customOpt = `<option value="custom">Custom Special (Rac-defined)...</option>`;
 
+    // Called Shots (Combat Handbook p.20): target a body part at added DF.
+    const CS = this.actor.constructor.CALLED_SHOTS || {};
+    let csOpts = "";
+    for (const [key, c] of Object.entries(CS)) {
+      if ((c.atr || 2) <= atrCurrent) {
+        csOpts += `<option value="called:${key}">${c.label} (+${c.df} DF, ${c.atr || 2} AtR)</option>`;
+      }
+    }
+    const calledGroup = csOpts ? `<optgroup label="Called Shots (target a location)">${csOpts}</optgroup>` : "";
+
     const result = await DialogV2.wait({
       window: { title: `${weapon?.name || "Unarmed"} - Attack Options (${ws.label}, AtR ${atrCurrent})` },
       content: `
         <div class="form-group">
           <label>Attack type:</label>
-          <select name="mode" autofocus>${modes}${maneuverGroup}${customOpt}</select>
+          <select name="mode" autofocus>${modes}${maneuverGroup}${calledGroup}${customOpt}</select>
         </div>
         <div class="form-group extra-atr-group" style="display:none;">
           <label>Extra AtR (Stunning Strike: +1 Round each):</label>
           <input type="number" name="extraAtR" value="0" min="0"/>
+        </div>
+        <div class="form-group double-dam-group" style="display:none;">
+          <label><input type="checkbox" name="doubleDamage"/> Double Damage (x2) instead of Knock-out</label>
         </div>
         <div class="form-group custom-group" style="display:none;">
           <label>Custom move name:</label>
@@ -1465,9 +1478,11 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
           const sel = r.querySelector('select[name=mode]');
           const eg = r.querySelector('.extra-atr-group');
           const cg = r.querySelector('.custom-group');
+          const dd = r.querySelector('.double-dam-group');
           function upd(){
             eg.style.display = (sel.value === 'maneuver:stunningStrike') ? '' : 'none';
             cg.style.display = (sel.value === 'custom') ? '' : 'none';
+            dd.style.display = (sel.value === 'called:headNeck') ? '' : 'none';
           }
           sel.addEventListener('change', upd); upd();
         })();</script>`,
@@ -1481,7 +1496,8 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
             modifier: Number(button.form.elements.modifier.value) || 0,
             extraAtR: Number(button.form.elements.extraAtR?.value) || 0,
             customLabel: button.form.elements.customLabel?.value || "",
-            customAtR: Number(button.form.elements.customAtR?.value) || 2
+            customAtR: Number(button.form.elements.customAtR?.value) || 2,
+            doubleDamage: !!button.form.elements.doubleDamage?.checked
           })
         },
         { action: "cancel", label: "Cancel" }
@@ -1490,10 +1506,14 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     });
 
     if (!result || (result === "cancel")) return null;
-    // Mode can be "attack", "critical:N", "special", "maneuver:<key>", or "custom".
+    // Mode can be "attack", "critical:N", "special", "maneuver:<key>",
+    // "called:<key>", or "custom".
     const [kind, arg] = String(result.mode).split(":");
     if (kind === "maneuver") {
       return { mode: "special", maneuver: arg, extraAtR: result.extraAtR || 0, modifier: result.modifier };
+    }
+    if (kind === "called") {
+      return { mode: "special", calledShot: arg, doubleDamage: result.doubleDamage, modifier: result.modifier };
     }
     if (kind === "custom") {
       return { mode: "special", customSpecial: true,

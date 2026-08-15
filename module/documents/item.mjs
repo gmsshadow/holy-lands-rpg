@@ -184,7 +184,11 @@ export class HolyLandsItem extends Item {
           <hr>
           <p>${this.system.description}</p>
         </div>
-      `
+      `,
+      flags: { "holy-lands-rpg": { expAward: {
+        actorId: actor.id, tokenUuid: actor.token?.uuid ?? null,
+        category: "miracle", df: null, suggested: actor.constructor.EXP_AWARDS.miracle[7]
+      } } }
     };
 
     return ChatMessage.create(chatData);
@@ -224,7 +228,11 @@ export class HolyLandsItem extends Item {
           <hr>
           <p>${this.system.description}</p>
         </div>
-      `
+      `,
+      flags: { "holy-lands-rpg": { expAward: {
+        actorId: actor.id, tokenUuid: actor.token?.uuid ?? null,
+        category: "miracle", df: null, suggested: actor.constructor.EXP_AWARDS.miracle[7]
+      } } }
     };
 
     return ChatMessage.create(chatData);

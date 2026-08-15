@@ -292,9 +292,78 @@ Hooks.on("renderChatMessageHTML", (message, html) => {
   (content ?? html).appendChild(btn);
 });
 
-/* -------------------------------------------- */
-/*  Dice Rolling Utilities                      */
-/* -------------------------------------------- */
+/**
+ * Add an "Award EXP" button to successful Ability/Skill/Attribute/Save/Miracle
+ * roll cards (Genesis p.30). GM only. Opens a prompt pre-filled with the table
+ * amount, which the Rac can confirm or adjust; for Attributes (no fixed DF) the
+ * Rac picks the difficulty tier. Applies the EXP to the rolling character.
+ */
+Hooks.on("renderChatMessageHTML", (message, html) => {
+  const data = message.getFlag?.("holy-lands-rpg", "expAward");
+  if (!data) return;
+  if (!game.user.isGM) return;
+  if (html.querySelector(".hlrpg-award-exp")) return;
+
+  const { DialogV2 } = foundry.applications.api;
+  const CATLABEL = { miracle: "Miracle/Blessing", attribute: "Attribute", ability: "Ability", skill: "Skill", save: "Saving Throw", monster: "Damage to Monster/Demon" };
+  const TIERS = { 7: "Simple", 14: "Easy", 21: "Moderate", 28: "High", 35: "Extreme" };
+
+  const btn = document.createElement("button");
+  btn.className = "hlrpg-award-exp";
+  btn.innerHTML = `<i class="fas fa-star"></i> Award EXP (${data.suggested})`;
+  btn.style.cssText = "margin-top:4px;width:100%;";
+  btn.addEventListener("click", async () => {
+    // Resolve the character (prefer token actor for unlinked NPCs).
+    let actor = null;
+    if (data.tokenUuid) { const t = await fromUuid(data.tokenUuid).catch(() => null); actor = t?.actor ?? null; }
+    if (!actor && data.actorId) actor = game.actors.get(data.actorId) ?? null;
+    if (!actor) { ui.notifications.warn("Could not find the character for this EXP award."); return; }
+
+    // Build the award table (from the actor's static) for the tier selector.
+    const AWARDS = actor.constructor.EXP_AWARDS;
+    // Categories rolled without a fixed DF (Attributes roll-under-AV; Miracles
+    // cost Faith) let the Rac pick the difficulty tier.
+    const picksTier = (data.df === null) && !!AWARDS[data.category];
+    const tierRow = picksTier
+      ? `<div class="form-group"><label>Difficulty tier:</label>
+           <select name="tier">${Object.entries(TIERS).map(([df, lbl]) =>
+             `<option value="${df}">${lbl} (DF ${df}) - ${AWARDS[data.category][df]} EXP</option>`).join("")}</select></div>`
+      : "";
+
+    const result = await DialogV2.wait({
+      window: { title: `Award EXP - ${CATLABEL[data.category] || "Roll"}` },
+      content: `
+        <p>Award Experience to <strong>${actor.name}</strong> for this successful ${CATLABEL[data.category] || "roll"}${(data.df && data.category !== "attribute") ? ` (DF ${data.df}, ${TIERS[actor.constructor.expTierForDF(data.df)]})` : ""}.</p>
+        ${tierRow}
+        <div class="form-group"><label>EXP to award:</label>
+          <input type="number" name="amount" value="${data.suggested}" min="0"/></div>
+        <p class="hint">Genesis p.30. Adjust freely - the Rac has final say.</p>`,
+      buttons: [
+        { action: "award", label: "Award EXP", default: true, callback: (e, b) => ({
+          amount: Number(b.form.elements.amount.value) || 0,
+          tier: b.form.elements.tier ? Number(b.form.elements.tier.value) : null
+        }) },
+        { action: "skip", label: "No award" }
+      ],
+      rejectClose: false
+    });
+    if (!result || result === "skip") return;
+
+    // If the tier changed for a DF-less category, use the row value unless the
+    // Rac also edited the amount away from the suggested default.
+    let amount = result.amount;
+    if (picksTier && result.tier && amount === data.suggested) {
+      amount = AWARDS[data.category][result.tier] || amount;
+    }
+    const reason = CATLABEL[data.category] || "roll";
+    await actor.awardExp(amount, reason);
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fas fa-check"></i> Awarded ${amount} EXP`;
+  });
+
+  const content = html.querySelector(".message-content");
+  (content ?? html).appendChild(btn);
+});
 
 export class HolyLandsDice {
   /**

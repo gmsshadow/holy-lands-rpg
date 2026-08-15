@@ -239,6 +239,53 @@ export class HolyLandsActor extends Actor {
     return this.CRITICAL_INJURY_TABLE.find(r => d <= r.max)?.part ?? "Torso";
   }
 
+  /**
+   * Experience Awards table (Genesis p.30). EXP granted for a SUCCESSFUL roll,
+   * by category and the DF tier of the task. Saves are a flat award; damaging
+   * Monsters/Demons grants +1 EXP per point of Damage. Noble Deeds/Creativity
+   * are left to the Rac (not automated).
+   */
+  static EXP_AWARDS = {
+    // category -> { df tier: EXP }
+    miracle:   { 7: 5,  14: 10, 21: 15, 28: 20, 35: 25 },  // Miracles & Blessings
+    attribute: { 7: 10, 14: 15, 21: 20, 28: 30, 35: 50 },
+    ability:   { 7: 10, 14: 20, 21: 40, 28: 70, 35: 100 },
+    skill:     { 7: 10, 14: 25, 21: 50, 28: 75, 35: 150 }
+  };
+  static EXP_SAVE = 50;                 // flat EXP for a successful Saving Throw
+  static DF_TIERS_LIST = [7, 14, 21, 28, 35];
+  static DF_TIER_LABELS = { 7: "Simple", 14: "Easy", 21: "Moderate", 28: "High", 35: "Extreme" };
+
+  /**
+   * Nearest DF tier at or below the given DF (Genesis awards are per named
+   * tier; a Rac-set DF between tiers rounds down to the tier it meets).
+   */
+  static expTierForDF(df) {
+    const tiers = this.DF_TIERS_LIST;
+    let tier = tiers[0];
+    for (const t of tiers) { if (df >= t) tier = t; else break; }
+    return tier;
+  }
+
+  /** Look up the table EXP for a category + DF (0 if none). */
+  static expAward(category, df) {
+    const row = this.EXP_AWARDS[category];
+    if (!row) return 0;
+    return row[this.expTierForDF(df)] || 0;
+  }
+
+  /** Add EXP to this character (Rac-awarded). Posts a short confirmation. */
+  async awardExp(amount, reason = "") {
+    const amt = Math.max(0, Math.round(amount));
+    if (!amt) return;
+    const current = this.system.experience || 0;
+    await this.safeUpdate({ "system.experience": current + amt });
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} gains ${amt} EXP</strong>${reason ? ` (${reason})` : ""}. Total: ${current + amt}.`
+    });
+  }
+
   /** Combat Abilities / Weapon Skill action keys and labels (Book of Life p.2
    *  level-up knock-on: increasing the skill lets you raise one action Bonus). */
   static CA_ACTIONS = ["advantageBonus", "dodgeBonus", "defendBonus", "damageBonus"];
@@ -1898,11 +1945,13 @@ export class HolyLandsActor extends Actor {
     else if (success) flavor += " - Success";
     else flavor += " - Failed";
 
-    return ChatMessage.create({
+    const msgData = {
       speaker: ChatMessage.getSpeaker({ actor: this }),
       flavor,
       rolls: [roll]
-    });
+    };
+    if (success || critSuccess) this.#attachExpFlag(msgData, "attribute", null);
+    return ChatMessage.create(msgData);
   }
 
   /** Roll an ability check (d20 + PF, higher is better). */
@@ -1924,11 +1973,13 @@ export class HolyLandsActor extends Actor {
     else if (success) flavor += " - Success";
     else flavor += " - Failed";
 
-    return ChatMessage.create({
+    const msgData = {
       speaker: ChatMessage.getSpeaker({ actor: this }),
       flavor,
       rolls: [roll]
-    });
+    };
+    if (success || critSuccess) this.#attachExpFlag(msgData, "ability", df);
+    return ChatMessage.create(msgData);
   }
 
   /**
@@ -1954,11 +2005,13 @@ export class HolyLandsActor extends Actor {
     else if (success) flavor += " - Success";
     else flavor += " - Failed";
 
-    return ChatMessage.create({
+    const msgData = {
       speaker: ChatMessage.getSpeaker({ actor: this }),
       flavor,
       rolls: [roll]
-    });
+    };
+    if (success || critSuccess) this.#attachExpFlag(msgData, "skill", df);
+    return ChatMessage.create(msgData);
   }
 
   /** Roll a saving throw. Uses the save's own DF unless one is supplied. */
@@ -1981,11 +2034,30 @@ export class HolyLandsActor extends Actor {
     else if (success) flavor += " - Success";
     else flavor += " - Failed";
 
-    return ChatMessage.create({
+    const msgData = {
       speaker: ChatMessage.getSpeaker({ actor: this }),
       flavor,
       rolls: [roll]
-    });
+    };
+    if (success || critSuccess) this.#attachExpFlag(msgData, "save", resolvedDf);
+    return ChatMessage.create(msgData);
+  }
+
+  /**
+   * Attach the EXP-award flag + a GM "Award EXP" button to a roll's chat
+   * message. category is one of miracle/attribute/ability/skill/save; df is the
+   * task DF (null for Attributes, where the Rac picks the tier). The button and
+   * its handler live in the renderChatMessage hook (holy-lands.mjs).
+   */
+  #attachExpFlag(msgData, category, df) {
+    const suggested = (category === "save")
+      ? this.constructor.EXP_SAVE
+      : this.constructor.expAward(category, df ?? 7);
+    msgData.flags = msgData.flags || {};
+    msgData.flags["holy-lands-rpg"] = {
+      expAward: { actorId: this.id, tokenUuid: this.token?.uuid ?? null,
+        category, df: df ?? null, suggested }
+    };
   }
 
   /** Roll advantage for combat initiative. */
@@ -2967,11 +3039,20 @@ export class HolyLandsActor extends Actor {
     }
     if (defender.getCombatFlag("advNat20")) await defender.setCombatFlag("advNat20", false);
 
-    await ChatMessage.create({
+    const dmgMsg = {
       speaker: ChatMessage.getSpeaker({ actor: this }),
       flavor: `${weapon?.name || "Unarmed"} Damage: <strong>${finalDamage}</strong> (${parts.join(" ")})`,
       rolls: [damageRoll]
-    });
+    };
+    // Monsters/Demons: +1 EXP per point of Damage (Genesis p.30). When a player
+    // character damages an NPC, offer the attacker that EXP.
+    if (this.type === "character" && defender.type === "npc" && finalDamage > 0) {
+      dmgMsg.flags = { "holy-lands-rpg": { expAward: {
+        actorId: this.id, tokenUuid: this.token?.uuid ?? null,
+        category: "monster", df: null, suggested: finalDamage
+      } } };
+    }
+    await ChatMessage.create(dmgMsg);
 
     // Named Special maneuver effect fires on a confirmed hit.
     const md = attackContext.maneuverDef;

@@ -1488,3 +1488,21 @@ Double/Twin Attack use a new multiHit effect (per-hit Damage scaled, applied
 N times, socket-safe). Run Through joins Simultaneous Attack in the defense
 prompt. All previously-built maneuvers (Called Shot, Disarm, Stunning Strike,
 Subvert Armor, Sweeping Leglock, Sweeping Attack, Knock-out) remain.
+
+## v3.8.0 — EXP awards automation (Genesis p.30)
+
+- Added the Experience Awards table. Successful rolls now show a GM-only
+  **"Award EXP"** button on their chat card, pre-filled with the table amount,
+  which the Rac confirms or adjusts before it's added to the character's XP:
+  - **Abilities / Skills** - by the DF tier of the roll (e.g. Skill at DF 21 =
+    50 EXP). The DF is already known, so the amount is pre-filled.
+  - **Attributes** and **Miracles/Blessings** - rolled without a fixed DF, so
+    the prompt includes a difficulty-tier selector for the Rac to pick.
+  - **Saving Throws** - flat 50 EXP.
+  - **Monsters/Demons** - when a player character damages an NPC, the attacker's
+    damage card offers +1 EXP per point of Damage dealt.
+- DF between named tiers rounds down to the tier it meets (DF 25 -> Moderate).
+- Noble Deeds/Creativity is left to the Rac (manual), as requested.
+- EXP applied via the socket-safe path (awardExp); the button confirms and
+  disables after awarding. Since XP drives leveling, the Level Up button then
+  appears automatically once a threshold is crossed.

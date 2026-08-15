@@ -287,6 +287,7 @@ export class HolyLandsActor extends Actor {
     stunningStrike: { label: "Stunning Strike", atr: 2, effect: "condition", condition: "stunned", scalable: true, note: "Target is Stunned (Half Rolls) for 1 Round, +1 Round per extra AtR spent." },
     subvertArmor:   { label: "Subvert Armor", atr: 2, effect: "subvertArmor", note: "Halves the target's tDEF for this attack (no Damage multiplier)." },
     sweep:          { label: "Sweeping Leglock", atr: 2, effect: "note", note: "Target is knocked down; may drop their weapon (Rac adjudicates)." },
+    sweepingAttack: { label: "Sweeping Attack (multi-target)", atr: 2, effect: "multiSweep", multiTarget: true, note: "One broad strike at 2+ opponents in range: first hit takes full Damage, each subsequent hit halves it. Stops when Damage halves to 1 or an opponent Defends." },
     knockout:       { label: "Knock-out (Called Shot: Head/Neck)", atr: 2, dfMod: 5, effect: "condition", condition: "unconscious", note: "Called Shot to head/neck vs an unaware/held target: on a hit the target is knocked Unconscious." }
     // Simultaneous Attack is offered as a DEFENSE option (Genesis p.50 frames it
     // as striking back at the instant the opponent attacks), not here.
@@ -2691,6 +2692,115 @@ export class HolyLandsActor extends Actor {
         free: false, isCounter: true, atrCost: 0, weaponSkill: defWsKey
       });
     }
+  }
+
+  /**
+   * Sweeping Attack (Genesis p.51): one broad Special strike against several
+   * opponents in range. A single SPC roll and a single base Damage roll are
+   * made; targets are resolved in order. The first opponent who does not
+   * Dodge or Defend takes FULL Damage; each subsequent hit opponent takes half
+   * the previous amount (floored). The sweep ends when the Damage would halve
+   * to 1, or when any opponent successfully DEFENDS (a Defend stops the sweep;
+   * a Dodge only spares that one target and the chain continues).
+   * @param {Item|null} weapon
+   * @param {Actor[]} targets  ordered list of target actors (from the user's
+   *        selected tokens); their tokens are used for socket-safe updates.
+   */
+  async rollSweepingAttack(weapon, targets = []) {
+    if (targets.length < 2) {
+      ui.notifications.warn("A Sweeping Attack needs at least two targets - target 2+ tokens (T) first.");
+      return;
+    }
+    const weaponSkill = weapon?.system?.weaponSkill || "lightArms";
+    const ws = this.system.weaponSkills?.[weaponSkill];
+    if (!ws) { ui.notifications.error(`Weapon skill ${weaponSkill} not found`); return; }
+
+    // Cost: the Sweeping Attack is a 2-AtR Special (Combat Handbook maneuver cost).
+    const atrCost = 2;
+    if (this.getAtR(weaponSkill).current < atrCost) {
+      ui.notifications.warn(`Not enough AtR for a Sweeping Attack (${atrCost} needed).`);
+      return;
+    }
+    await this.spendActionAtR(atrCost);
+
+    // One SPC attack roll and one base Damage roll for the whole sweep.
+    const spc = ws.specialBonus || 0;
+    const atkRoll = new Roll("1d20 + @b", { b: spc });
+    await atkRoll.evaluate();
+    const attackTotal = atkRoll.total;
+
+    const damageRoll = new Roll(this.weaponDamageFormula(weapon));
+    await damageRoll.evaluate();
+    const damageBonus = this.system.combat?.damageBonus || 0;
+    let currentDamage = damageRoll.total + damageBonus;
+
+    await ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} - Sweeping Attack</strong> (${ws.label} SPC): rolls <strong>${attackTotal}</strong>, base Damage <strong>${currentDamage}</strong> against ${targets.length} opponents.`,
+      rolls: [atkRoll, damageRoll]
+    });
+
+    const lines = [];
+    let stopped = false;
+    for (const target of targets) {
+      if (currentDamage < 1) { lines.push(`Damage exhausted - sweep ends.`); break; }
+
+      // Each opponent may Dodge or Defend.
+      const defChoice = target.isOwner
+        ? await this._promptDefenseChoice(target)
+        : "dodge"; // non-owned: assume a basic evasion; the Rac can adjust
+      const dodgeBonus = target.system.combat?.dodgeBonus || 0;
+      const defendBonus = target.system.combat?.defendBonus || 0;
+      const tDEF = target.system?.defense?.tDEF || 4;
+
+      let defended = false;
+      let defenseTotal = 0;
+      if (defChoice === "defend" || defChoice === "dodge") {
+        const bonus = (defChoice === "defend") ? defendBonus : dodgeBonus;
+        const dRoll = new Roll("1d20 + @b", { b: bonus });
+        await dRoll.evaluate();
+        defenseTotal = dRoll.total;
+        // A defense succeeds if it meets or beats the sweep's attack roll.
+        defended = defenseTotal >= attackTotal;
+      }
+
+      // Must also beat tDEF to land at all.
+      const beatsArmor = attackTotal > tDEF;
+
+      if (!beatsArmor) {
+        lines.push(`${target.name}: armor holds (tDEF ${tDEF}) - no Damage.`);
+        continue; // armor stops this one, but the sweep continues
+      }
+      if (defended && defChoice === "dodge") {
+        lines.push(`${target.name}: Dodges the sweep - untouched (sweep continues).`);
+        continue; // dodge spares this target only
+      }
+      if (defended && defChoice === "defend") {
+        lines.push(`${target.name}: <strong>Defends</strong> the sweep - it is stopped here.`);
+        stopped = true;
+        break; // a successful Defend ends the whole sweep
+      }
+
+      // Hit: apply the current Damage tier.
+      const dmg = Math.max(1, Math.floor(currentDamage));
+      await this._applyArmorDegradation(target, "chest", dmg);
+      await target.applyDamage(dmg, { source: "Sweeping Attack", silent: true });
+      if (typeof target._consumeAtRFromDamage === "function") await target._consumeAtRFromDamage();
+      lines.push(`${target.name}: hit for <strong>${dmg}</strong>.`);
+
+      // Next opponent takes half the previous amount.
+      currentDamage = Math.floor(currentDamage / 2);
+      if (currentDamage <= 1) {
+        lines.push(`Damage halved to 1 - sweep ends after this opponent.`);
+        stopped = true;
+        break;
+      }
+    }
+
+    await ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>Sweeping Attack results:</strong><br>${lines.join("<br>")}${stopped ? "" : "<br><em>All targets resolved.</em>"}`
+    });
   }
 
   /** Resolve damage and apply armor degradation. */

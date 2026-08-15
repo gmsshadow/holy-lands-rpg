@@ -980,6 +980,18 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     const weapon = this.#getItemForTarget(target);
     const options = await this.#promptAttackOptions(weapon);
     if (!options) return;
+
+    // Sweeping Attack targets multiple opponents from the user's targeted
+    // tokens (T), not a single-target select.
+    if (options.maneuver === "sweepingAttack") {
+      const targets = Array.from(game.user.targets).map(t => t.actor).filter(Boolean);
+      if (targets.length < 2) {
+        ui.notifications.warn("Target two or more tokens (press T over each) before a Sweeping Attack.");
+        return;
+      }
+      return this.actor.rollSweepingAttack(weapon, targets);
+    }
+
     const targetActor = await this.#selectTarget();
     if (!targetActor) return;
     return this.actor.rollAttack(weapon, targetActor, options);

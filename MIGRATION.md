@@ -1451,3 +1451,21 @@ sheets, standardised headings, and a parchment theme. v3.0.0 marks that step up.
 - New CALLED_SHOTS static (target -> armor ap, DF, effect). DF values sit
   within the book's ranges; the Rac can fine-tune via the situational modifier.
 - Default (non-called) hits still degrade chest armor as before.
+
+## v3.6.0 — Sweeping Attack multi-target automation (Genesis p.51)
+
+- Added **Sweeping Attack** as a distinct multi-target maneuver (separate from
+  the single-target Sweeping Leglock, which is a different Combat Handbook
+  move). One broad SPC strike at 2+ opponents:
+  - a single SPC attack roll and single base Damage roll are made;
+  - targets (the user's targeted tokens, T) are resolved in order;
+  - the first opponent who doesn't Dodge/Defend takes FULL Damage, each
+    subsequent hit opponent takes half the previous (floored);
+  - the sweep ends when Damage would halve to 1, or when any opponent
+    successfully DEFENDS (a Defend stops the sweep; a Dodge only spares that
+    one target and the chain continues);
+  - armor that holds (attack doesn't beat tDEF) spares that target without
+    stopping the sweep.
+- Costs 2 AtR. Selected via the attack picker's Named Maneuvers; requires 2+
+  targeted tokens. Damage applied via the socket-safe path so it works on
+  NPCs the attacker doesn't own. Results posted as a per-target summary.

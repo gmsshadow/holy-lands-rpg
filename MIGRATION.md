@@ -1469,3 +1469,22 @@ sheets, standardised headings, and a parchment theme. v3.0.0 marks that step up.
 - Costs 2 AtR. Selected via the attack picker's Named Maneuvers; requires 2+
   targeted tokens. Damage applied via the socket-safe path so it works on
   NPCs the attacker doesn't own. Results posted as a per-target summary.
+
+## v3.7.0 — Remaining Special Attacks (Combat Handbook p.20-21)
+
+Completes the SPC maneuver table. Added:
+- **Double Attack** (1 AtR) - two half-power hits in one action.
+- **Twin Attack** (2 AtR) - strike with two weapons: two full hits. (Distinct
+  from Simultaneous Attack, which is the reactive p.50 defense option.)
+- **Combat Movement** (2 AtR) - leap/roll/vault into a strike; roll SPC vs a
+  Rac-set movement DF, then attack (Rac-adjudicated).
+- **Follow Strike** (2 AtR) - pursue a fleeing foe; applies a -3 DF (easier to
+  hit) which the Rac can adjust.
+- **Run Through** (2-6 AtR) - a DEFENSE option: Defend the blow, and on a
+  successful Defend, counterstrike as a Critical whose multiplier equals the
+  AtR spent (2-6). A failed Defend lets the attack land normally.
+
+Double/Twin Attack use a new multiHit effect (per-hit Damage scaled, applied
+N times, socket-safe). Run Through joins Simultaneous Attack in the defense
+prompt. All previously-built maneuvers (Called Shot, Disarm, Stunning Strike,
+Subvert Armor, Sweeping Leglock, Sweeping Attack, Knock-out) remain.

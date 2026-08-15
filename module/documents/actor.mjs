@@ -288,7 +288,13 @@ export class HolyLandsActor extends Actor {
     subvertArmor:   { label: "Subvert Armor", atr: 2, effect: "subvertArmor", note: "Halves the target's tDEF for this attack (no Damage multiplier)." },
     sweep:          { label: "Sweeping Leglock", atr: 2, effect: "note", note: "Target is knocked down; may drop their weapon (Rac adjudicates)." },
     sweepingAttack: { label: "Sweeping Attack (multi-target)", atr: 2, effect: "multiSweep", multiTarget: true, note: "One broad strike at 2+ opponents in range: first hit takes full Damage, each subsequent hit halves it. Stops when Damage halves to 1 or an opponent Defends." },
-    knockout:       { label: "Knock-out (Called Shot: Head/Neck)", atr: 2, dfMod: 5, effect: "condition", condition: "unconscious", note: "Called Shot to head/neck vs an unaware/held target: on a hit the target is knocked Unconscious." }
+    knockout:       { label: "Knock-out (Called Shot: Head/Neck)", atr: 2, dfMod: 5, effect: "condition", condition: "unconscious", note: "Called Shot to head/neck vs an unaware/held target: on a hit the target is knocked Unconscious." },
+    doubleAttack:   { label: "Double Attack", atr: 1, effect: "multiHit", hits: 2, damageScale: 0.5, note: "Two half-power hits in one AtR." },
+    twinAttack:     { label: "Twin Attack (two weapons)", atr: 2, effect: "multiHit", hits: 2, damageScale: 1, note: "Strike with two weapons at once - two full hits." },
+    combatMovement: { label: "Combat Movement (leap/roll/vault)", atr: 2, effect: "note", note: "Movement-based strike (flying kick, roll-into-strike). Roll SPC vs a Rac-set DF for the movement; on success the attack lands normally." },
+    followStrike:   { label: "Follow Strike (pursue fleeing foe)", atr: 2, dfMod: -3, effect: "note", note: "Stay with a fleeing foe to press the attack - lowers the DF to hit them as they retreat (Rac sets the exact reduction)." }
+    // Simultaneous Attack and Run Through are DEFENSE options (reactive strikes),
+    // offered in the defense prompt, not here.
     // Simultaneous Attack is offered as a DEFENSE option (Genesis p.50 frames it
     // as striking back at the instant the opponent attacks), not here.
   };
@@ -2256,14 +2262,24 @@ export class HolyLandsActor extends Actor {
           <option value="dodge">Dodge (+${defender.system.combat?.dodgeBonus || 0})</option>
           <option value="defend">Defend (+${defender.system.combat?.defendBonus || 0})</option>
           <option value="simultaneous">Simultaneous Attack (forfeit defense, strike back)</option>
+          <option value="runThrough">Run Through (Defend, then counterstrike for 2-6x Damage)</option>
         </select>
       </div>
       <p class="hint simul-note" style="display:none;">Forfeits Advantage and any defensive action to strike back at the same instant (Genesis p.50). Rolls a Special vs the attacker's roll: beat it and you both hit; beat it by more than double and you hit unharmed; fail and only you take Damage. Costs 1 AtR.</p>
+      <div class="form-group runthrough-group" style="display:none;">
+        <p class="hint">Defend the blow, then counterstrike with a Critical for a multiplier equal to the AtR you spend (2-6). Costs that many AtR.</p>
+        <label>Counterstrike AtR / multiplier:</label>
+        <input type="number" name="runThroughAtR" value="2" min="2" max="6"/>
+      </div>
       <script>(function(){
         const r = document.currentScript.parentElement;
         const sel = r.querySelector('select[name=defenseType]');
         const n = r.querySelector('.simul-note');
-        function upd(){ n.style.display = (sel.value === 'simultaneous') ? '' : 'none'; }
+        const rt = r.querySelector('.runthrough-group');
+        function upd(){
+          n.style.display = (sel.value === 'simultaneous') ? '' : 'none';
+          rt.style.display = (sel.value === 'runThrough') ? '' : 'none';
+        }
         sel.addEventListener('change', upd); upd();
       })();</script>`;
 
@@ -2275,14 +2291,25 @@ export class HolyLandsActor extends Actor {
           action: "roll",
           label: "Roll Defense",
           default: true,
-          callback: (event, button) => button.form.elements.defenseType.value
+          callback: (event, button) => ({
+            type: button.form.elements.defenseType.value,
+            runThroughAtR: Number(button.form.elements.runThroughAtR?.value) || 2
+          })
         },
         { action: "cancel", label: "Cancel" }
       ],
       rejectClose: false
     });
 
-    return (choice && choice !== "cancel") ? choice : null;
+    if (!choice || choice === "cancel") return null;
+    // Backward-compatible: callers expect a string; carry Run Through's AtR via
+    // a property on the String object when needed.
+    if (choice.type === "runThrough") {
+      const s = new String("runThrough");
+      s.runThroughAtR = Math.min(6, Math.max(2, choice.runThroughAtR));
+      return s;
+    }
+    return choice.type;
   }
 
   /**
@@ -2468,15 +2495,24 @@ export class HolyLandsActor extends Actor {
   async _resolveDefense(weapon, defender, attackContext, defenseType) {
     const { attackTotal, isNat20: isNat20Attack, free, isCounter = false, atrCost, weaponSkill } = attackContext;
 
+    // defenseType may be a String object carrying extra data (Run Through's AtR).
+    const runThroughAtR = defenseType?.runThroughAtR;
+    const defType = String(defenseType);
+
     // Simultaneous Attack (Genesis p.50): instead of Dodge/Defend, the defender
     // forfeits defense and strikes back at the same instant.
-    if (defenseType === "simultaneous") {
+    if (defType === "simultaneous") {
       return this._resolveSimultaneous(weapon, defender, attackContext);
+    }
+    // Run Through (Combat Handbook p.21): Defend the blow, then counterstrike
+    // as a Critical for a 2-6x multiplier equal to the AtR spent.
+    if (defType === "runThrough") {
+      return this._resolveRunThrough(weapon, defender, attackContext, runThroughAtR || 2);
     }
 
     // Assemble the defender's Bonus:
     // base -> x2 if Advantage was forfeited -> -3 if Natural 1 Advantage.
-    let defenderBonus = defenseType === "dodge"
+    let defenderBonus = defType === "dodge"
       ? (defender.system.combat?.dodgeBonus || 0)
       : (defender.system.combat?.defendBonus || 0);
     const notes = [];
@@ -2519,7 +2555,7 @@ export class HolyLandsActor extends Actor {
       await this.spendActionAtR(atrCost);
       await ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: defender }),
-        flavor: `${defender.name} rolled a <strong>Natural 20 ${defenseType.capitalize()}!</strong> The attack is stopped and ${defender.name} gains a free counter-attack (no AtR).`,
+        flavor: `${defender.name} rolled a <strong>Natural 20 ${defType.capitalize()}!</strong> The attack is stopped and ${defender.name} gains a free counter-attack (no AtR).`,
         rolls: [defenseRoll]
       });
       // A counter does not spawn another counter (Combat Handbook: the
@@ -2533,7 +2569,7 @@ export class HolyLandsActor extends Actor {
       await this.spendActionAtR(atrCost);
       await ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: defender }),
-        flavor: `${defender.name} rolled a <strong>Natural 1 ${defenseType.capitalize()}!</strong> Automatic failure - Damage will be x1.5.`,
+        flavor: `${defender.name} rolled a <strong>Natural 1 ${defType.capitalize()}!</strong> Automatic failure - Damage will be x1.5.`,
         rolls: [defenseRoll]
       });
       return this._resolveDamage(weapon, defender, { ...attackContext, isNat1Defense: true });
@@ -2545,7 +2581,7 @@ export class HolyLandsActor extends Actor {
     const attackHits = attackContext.isNat20 || (finalDefenseTotal < attackTotal);
     await this.spendActionAtR(atrCost);
 
-    let flavor = `${weapon?.name || "Unarmed"} Attack ${attackTotal} vs ${defenseType.capitalize()} ${finalDefenseTotal}${noteText}`;
+    let flavor = `${weapon?.name || "Unarmed"} Attack ${attackTotal} vs ${defType.capitalize()} ${finalDefenseTotal}${noteText}`;
     flavor += attackHits ? " - <strong>Hit!</strong>" : " - <strong>Defended!</strong>";
 
     await ChatMessage.create({
@@ -2555,7 +2591,7 @@ export class HolyLandsActor extends Actor {
     });
 
     // Retreat: a successful Dodge of the initial Attack breaks away.
-    if (!attackHits && defender.getCombatFlag("retreating") && (defenseType === "dodge")) {
+    if (!attackHits && defender.getCombatFlag("retreating") && (defType === "dodge")) {
       await defender.setCombatFlag("retreating", false);
       await ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: defender }),
@@ -2693,6 +2729,64 @@ export class HolyLandsActor extends Actor {
       });
     }
   }
+
+  /**
+   * Run Through (Combat Handbook p.21): the defender Defends the incoming blow,
+   * and if the Defend succeeds, immediately counterstrikes as a Critical whose
+   * multiplier equals the AtR spent (2-6). If the Defend fails, the attack lands
+   * as normal and there is no counterstrike.
+   */
+  async _resolveRunThrough(weapon, defender, attackContext, atrSpent = 2) {
+    const { attackTotal } = attackContext;
+    const mult = Math.min(6, Math.max(2, atrSpent));
+
+    // Must have the AtR to attempt it.
+    const defWsKey = defender.system.activeWeaponSkill || "lightArms";
+    if (defender.getAtR(defWsKey).current < mult) {
+      ui.notifications.warn(`${defender.name} needs ${mult} AtR for that Run Through.`);
+      // fall back to a normal Defend
+      return this._resolveDefense(weapon, defender, attackContext, "defend");
+    }
+
+    // Roll the Defend.
+    const defendBonus = defender.system.combat?.defendBonus || 0;
+    const dRoll = new Roll("1d20 + @b", { b: defendBonus });
+    await dRoll.evaluate();
+    const defended = dRoll.total >= attackTotal;
+
+    await ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: defender }),
+      flavor: `<strong>${defender.name} - Run Through</strong>: Defend ${dRoll.total} vs ${this.name}'s ${attackTotal}. ${defended ? "Defended - counterstrike follows!" : "Defense failed - the attack lands."}`,
+      rolls: [dRoll]
+    });
+
+    if (!defended) {
+      // The attack hits normally; resolve its Damage against the defender.
+      return this._resolveDamage(weapon, defender, attackContext);
+    }
+
+    // Successful Defend -> counterstrike as a Critical at the chosen multiplier.
+    await defender.spendActionAtR(mult);
+    const defWeapon = defender.items.find(i => i.type === "weapon" && i.system.equipped
+      && (i.system.weaponSkill === defWsKey)) || null;
+    const ws = defender.system.weaponSkills?.[defWsKey];
+    const critBonus = ws?.criticalBonus || 0;
+    const csRoll = new Roll("1d20 + @b", { b: critBonus });
+    await csRoll.evaluate();
+
+    await ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: defender }),
+      flavor: `<strong>${defender.name}'s Run Through counterstrike</strong> (Critical x${mult}): ${csRoll.total} vs ${this.name}.`,
+      rolls: [csRoll]
+    });
+
+    // Resolve the counterstrike Damage as a Critical against the original attacker.
+    return defender._resolveDamage(defWeapon, this, {
+      attackTotal: csRoll.total, isNat20: false, mode: "critical", multiplier: mult,
+      free: false, isCounter: true, atrCost: 0, weaponSkill: defWsKey
+    });
+  }
+
 
   /**
    * Sweeping Attack (Genesis p.51): one broad Special strike against several
@@ -2840,6 +2934,28 @@ export class HolyLandsActor extends Actor {
     // Determine hit location: a Called Shot targets a specific armor placement;
     // otherwise the torso/chest takes the blow by default.
     const hitAP = attackContext.calledShotDef?.ap || "chest";
+
+    // Multi-hit maneuvers (Double Attack: two half-power hits; Twin Attack: two
+    // full hits with two weapons). Scale per-hit Damage and apply it N times.
+    const mh = (attackContext.maneuverDef?.effect === "multiHit") ? attackContext.maneuverDef : null;
+    if (mh) {
+      const perHit = Math.max(1, Math.floor(finalDamage * (mh.damageScale ?? 1)));
+      const hits = mh.hits || 2;
+      let total = 0;
+      for (let i = 0; i < hits; i++) {
+        await this._applyArmorDegradation(defender, hitAP, perHit);
+        await defender.applyDamage(perHit, { source: mh.label, silent: true });
+        total += perHit;
+      }
+      if (typeof defender._consumeAtRFromDamage === "function") await defender._consumeAtRFromDamage();
+      if (defender.getCombatFlag("advNat20")) await defender.setCombatFlag("advNat20", false);
+      await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        flavor: `${weapon?.name || "Unarmed"} <strong>${mh.label}</strong>: ${hits} hits of ${perHit} = <strong>${total}</strong> Damage.`,
+        rolls: [damageRoll]
+      });
+      return;
+    }
 
     await this._applyArmorDegradation(defender, hitAP, finalDamage);
 

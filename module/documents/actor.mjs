@@ -1612,6 +1612,24 @@ export class HolyLandsActor extends Actor {
   }
 
   /**
+   * The talent/craft skill list available for a level-up new-skill pick. When
+   * the character is dual-classed and the grant falls in the L2-7 window, both
+   * the base and the dual class's lists are offered (per designer clarification:
+   * the p.62 grants are by TOTAL character level - 7 skills total - but a
+   * dual-classed character may pick from either class's list). Returns a
+   * de-duplicated array (or []).
+   */
+  async combinedTalentCraftList() {
+    const names = new Set((this.talentCraftList || []).map(n => n));
+    if (this.system.isDualClassed) {
+      const dual = await this.getDualClassDoc();
+      const raw = dual?.system.talentCraftList || "";
+      for (const n of raw.split("\n").map(x => x.trim().replace(/\*$/, "")).filter(Boolean)) names.add(n);
+    }
+    return Array.from(names);
+  }
+
+  /**
    * Grant chosen Talents (+2 PF) and Crafts (+1 PF) from the class list at
    * creation. Skills are matched against the Skills compendium so links come
    * across; unmatched names become plain skills. Locks when done.
@@ -2000,8 +2018,8 @@ export class HolyLandsActor extends Actor {
 
     const combined = this.system.combinedLevel;
     const skillNote = raisingDual
-      ? `<em>Dual-class advance: Skill increases are inverted - +1 to 3 Crafts, 2 Talents, 1 Gift (Book of Life p.10). New-skill grant is left to the Rac.</em>`
-      : `<em>Also gain: +1 to one Attribute and +1 to one Saving Throw; new Talent at Levels 2-3 / new Craft at Levels 3-7; Saints/Clerics select new Miracles. ${blessingNote}</em>`;
+      ? `<em>Dual-class advance: Skill increases are inverted - +1 to 3 Crafts, 2 Talents, 1 Gift (Book of Life p.10). Any new-skill grant this level (by combined level) may be chosen from either class's list.</em>`
+      : `<em>Also gain: +1 to one Attribute and +1 to one Saving Throw; new Talent at Levels 2-3 / new Craft at Levels 3-7 (by total level); Saints/Clerics select new Miracles. ${blessingNote}</em>`;
 
     return ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),

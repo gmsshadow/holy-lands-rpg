@@ -1268,16 +1268,23 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     const saveOpts = Object.entries(saves)
       .map(([k, s]) => `<option value="${k}">${s.label} (${s.value} \u2192 ${s.value + 1})</option>`).join("");
 
-    // New-skill grant: base class only, keyed to the BASE class level.
+    // New-skill grant (Genesis p.62, per designer clarification): keyed to
+    // TOTAL/combined character level, so a character only ever gets 7 (a Talent
+    // at combined L2-3, a Craft at combined L3-7) regardless of dual-classing.
+    // A dual-classed character in that window may pick from EITHER class's
+    // talent/craft list. Runs on both base and dual advances.
     let skillBlock = "";
-    if (!raisingDual) {
-      const baseLevel = this.actor.system.level;
+    {
       const owned = new Set(this.actor.items
         .filter(i => i.type === "skill")
         .map(i => i.name.toLowerCase()));
-      const list = (this.actor.talentCraftList || []).filter(n => !owned.has(n.toLowerCase()));
-      const wantsTalent = (baseLevel >= 2 && baseLevel <= 3);
-      const wantsCraft = (baseLevel >= 3 && baseLevel <= 7);
+      const fullList = this.actor.system.isDualClassed
+        ? await this.actor.combinedTalentCraftList()
+        : (this.actor.talentCraftList || []);
+      const list = fullList.filter(n => !owned.has(n.toLowerCase()));
+      const wantsTalent = (level >= 2 && level <= 3);
+      const wantsCraft = (level >= 3 && level <= 7);
+      const bothClasses = this.actor.system.isDualClassed;
       if ((wantsTalent || wantsCraft) && list.length) {
         const skillOpts = `<option value="">- none -</option>` +
           list.map(n => `<option value="${foundry.utils.escapeHTML(n)}">${foundry.utils.escapeHTML(n)}</option>`).join("");
@@ -1285,16 +1292,15 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
           ? `<div class="form-group"><label>Add as:</label><select name="skillSection"><option value="talent">Talent (+1 PF)</option><option value="craft">Craft (+1 PF)</option></select></div>`
           : `<input type="hidden" name="skillSection" value="${wantsTalent ? "talent" : "craft"}"/>`;
         const which = (wantsTalent && wantsCraft) ? "Talent or Craft" : (wantsTalent ? "Talent" : "Craft");
-        skillBlock = `<fieldset><legend>New ${which} (p.62)</legend>
+        skillBlock = `<fieldset><legend>New ${which} (p.62, combined level ${level})</legend>
+          ${bothClasses ? `<p class="hint">Dual-classed: choose from either class's list.</p>` : ""}
           <div class="form-group"><label>Skill:</label><select name="skillName">${skillOpts}</select></div>
           ${sectionField}</fieldset>`;
-      } else if ((wantsTalent || wantsCraft) && this.actor.talentCraftList?.length) {
-        skillBlock = `<p class="hint">This level grants a new ${wantsTalent ? "Talent" : "Craft"}, but this character already has every skill on the class list - add one manually if the Rac allows an off-list choice.</p>`;
+      } else if ((wantsTalent || wantsCraft) && fullList.length) {
+        skillBlock = `<p class="hint">This level grants a new ${wantsTalent ? "Talent" : "Craft"}, but this character already has every skill on the available list - add one manually if the Rac allows an off-list choice.</p>`;
       } else if (wantsTalent || wantsCraft) {
-        skillBlock = `<p class="hint">This level grants a new ${wantsTalent ? "Talent" : "Craft"}, but this class doesn't use the standard Talent/Craft list (Adventurer/Fighter differ) - add it manually.</p>`;
+        skillBlock = `<p class="hint">This level grants a new ${wantsTalent ? "Talent" : "Craft"}, but no standard Talent/Craft list is available (Adventurer/Fighter differ) - add it manually.</p>`;
       }
-    } else {
-      skillBlock = `<p class="hint">Dual-class advance: the per-level new Talent/Craft grant is left to the Rac's discretion for now (pending a rules clarification).</p>`;
     }
 
     const result = await DialogV2.wait({

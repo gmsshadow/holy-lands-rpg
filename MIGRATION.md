@@ -1532,3 +1532,15 @@ Subvert Armor, Sweeping Leglock, Sweeping Attack, Knock-out) remain.
   advances; on a dual-class advance it's left to the Rac (pending a rules
   clarification), as requested.
 - GM-only "remove dual class" control on the header.
+
+## v3.9.1 — Dual-class new-skill grant clarified (by combined level)
+
+Per a designer clarification on the Genesis p.62 new-skill grants:
+- The new Talent (L2-3) / Craft (L3-7) grants are keyed to TOTAL (combined)
+  character level, so a character only ever receives 7 of them, regardless of
+  dual-classing. Now runs on BOTH base- and dual-class advances (previously the
+  dual-class path omitted it pending this clarification).
+- When a dual-classed character receives a grant within the L2-7 window, the
+  skill may be chosen from EITHER class's talent/craft list (the lists are
+  merged, de-duplicated, and filtered to skills not already owned).
+- New actor helper combinedTalentCraftList().

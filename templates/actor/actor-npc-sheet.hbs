@@ -32,7 +32,7 @@
         <span> / </span>
         <input type="number" name="system.life.max" value="{{system.life.max}}"/>
       </div>
-      {{#if isMonster}}
+      {{#if isCreature}}
       <div class="resource-group">
         <label>Range</label>
         <input type="text" name="system.lifeRange" value="{{system.lifeRange}}" placeholder="428-523"/>
@@ -43,6 +43,33 @@
       </div>
       {{/if}}
     </div>
+
+    {{#if isAnimal}}
+    <div class="resource animal-factors">
+      <div class="resource-group">
+        <label title="Likelihood the animal attacks on encounter (Ch15)">Aggression</label>
+        <select name="system.aggression">{{selectOptions aggressionLevels selected=system.aggression}}</select>
+      </div>
+      <div class="resource-group">
+        <label title="Speed in approximate MPH">Speed (MPH)</label>
+        <input type="number" name="system.speedMph" value="{{system.speedMph}}" placeholder="35"/>
+      </div>
+      <div class="resource-group">
+        <label title="Live purchase cost (varies; more if trained)">Value</label>
+        <input type="text" name="system.animalValue" value="{{system.animalValue}}" placeholder="100g"/>
+      </div>
+      <div class="resource-group">
+        <label title="DF to shoot the creature at short range during normal activity (Rac raises it for distance/movement)">Ranged DF</label>
+        <input type="number" name="system.rangedDF" value="{{system.rangedDF}}" placeholder="21"/>
+      </div>
+    </div>
+    <div class="resource">
+      <div class="resource-group full-width">
+        <label title="Special Critical (Maul/Gore/Kick-Trample): knocks the target down; escaping needs a Moderate DF (21) Skill roll or -1 BTY">Special Critical</label>
+        <input type="text" name="system.specialCritical" value="{{system.specialCritical}}" placeholder="Maul, Gore, Kick/Trample..."/>
+      </div>
+    </div>
+    {{/if}}
   </div>
 </header>
 
@@ -252,7 +279,7 @@
     {{/each}}
   </div>
 
-  {{#if isMonster}}
+  {{#if isCreature}}
   <h3>Experience &amp; Features</h3>
   <div class="combat-stats">
     <div class="stat">

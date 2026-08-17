@@ -71,12 +71,20 @@ export class NpcData extends foundry.abstract.TypeDataModel {
       type: new fields.StringField({ required: true, initial: "enemy" }),
 
       // Stat-block identity
-      npcKind: new fields.StringField({ required: true, initial: "human", choices: ["human", "monster"] }),
+      npcKind: new fields.StringField({ required: true, initial: "human", choices: ["human", "monster", "animal"] }),
       category: new fields.StringField({ required: true, initial: "nonChristian", choices: ["christian", "nonChristian", "demon"] }),
 
       // Monster-block extras
       lifeRange: new fields.StringField({ required: true, initial: "" }),
       size: new fields.StringField({ required: true, initial: "" }),
+      // Animal/Creature factors (Book of Life Ch15). Aggression drives reaction
+      // (nil = avoids, provoked = defends, certain = attacks readily). Speed is
+      // in approximate MPH. Value is the (variable) live-purchase cost text.
+      aggression: new fields.StringField({ required: true, initial: "provoked", choices: ["nil", "provoked", "certain"] }),
+      speedMph: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
+      animalValue: new fields.StringField({ required: true, initial: "" }),
+      specialCritical: new fields.StringField({ required: true, initial: "" }),
+      rangedDF: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
       exp: new fields.SchemaField({
         value: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
         range: new fields.StringField({ required: true, initial: "" })

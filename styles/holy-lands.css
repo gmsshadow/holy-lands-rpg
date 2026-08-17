@@ -1088,3 +1088,8 @@
   border-left: 1px solid var(--hl-border);
   color: var(--hl-accent);
 }
+
+/* Animal/creature factor blocks on the NPC sheet */
+.holy-lands-rpg .animal-factors .resource-group { min-width: 90px; }
+.holy-lands-rpg .resource-group.full-width { flex: 1 1 100%; }
+.holy-lands-rpg .resource-group.full-width input { width: 100%; }

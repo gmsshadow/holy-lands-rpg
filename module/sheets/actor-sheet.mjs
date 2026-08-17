@@ -284,13 +284,17 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
   /** Selection choices for NPC/Monster sheets. */
   #prepareNpcContext(context) {
-    context.npcKinds = { human: "Human NPC", monster: "Monster" };
+    context.npcKinds = { human: "Human NPC", monster: "Monster", animal: "Animal / Creature" };
     context.categories = {
       christian: "Christian",
       nonChristian: "Non-Christian",
       demon: "Demon"
     };
     context.isMonster = this.actor.system.npcKind === "monster";
+    context.isAnimal = this.actor.system.npcKind === "animal";
+    // The size/range/animal-factor blocks show for both monsters and animals.
+    context.isCreature = context.isMonster || context.isAnimal;
+    context.aggressionLevels = { nil: "Nil (avoids)", provoked: "Provoked (defends)", certain: "Certain (attacks)" };
     context.notableSkills = this.actor.system.notableSkills;
   }
 

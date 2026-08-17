@@ -1544,3 +1544,18 @@ Per a designer clarification on the Genesis p.62 new-skill grants:
   skill may be chosen from EITHER class's talent/craft list (the lists are
   merged, de-duplicated, and filtered to skills not already owned).
 - New actor helper combinedTalentCraftList().
+
+## v3.10.0 — Animal/Creature stat-block fields (Book of Life Ch15)
+
+- Added an "Animal / Creature" NPC kind alongside Human and Monster.
+- Added the animal-specific stat-block factors from Ch15 that were missing:
+  - **Aggression** (nil / provoked / certain) - reaction behaviour.
+  - **Speed (MPH)** - the animal's speed in approximate miles per hour.
+  - **Value** - live-purchase cost (text, varies by training).
+  - **Ranged DF** - the DF to shoot the creature at short range.
+  - **Special Critical** - Maul/Gore/Kick-Trample text, with a tooltip noting
+    the knockdown rule (grounded target must pass a Moderate DF 21 Skill roll
+    to break away or lose -1 BTY; only CS Ground Fight / Roll with Blows help).
+- The size/range, EXP/features, and new animal-factor blocks now show for both
+  Monster and Animal kinds (via a shared isCreature flag). Existing ADV, ATT,
+  CRI, DAM, tDEF, and DOD (dodge) fields already covered the rest of the block.

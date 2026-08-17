@@ -1506,3 +1506,29 @@ Subvert Armor, Sweeping Leglock, Sweeping Attack, Knock-out) remain.
 - EXP applied via the socket-safe path (awardExp); the button confirms and
   disables after awarding. Since XP drives leveling, the Level Up button then
   appears automatically once a threshold is crossed.
+
+## v3.9.0 — Dual-Classing (Book of Life p.10)
+
+- Characters can now take a second class after creation (max two classes).
+  The base class (chosen at creation) and the dual class are tracked
+  separately; the header shows both with their individual levels and a
+  "= N combined" indicator.
+- **Level-up choice**: when not yet dual-classed, the Level Up flow offers
+  "advance class" or "take a Dual Class". Once dual-classed, it asks which
+  class to advance. The dual-class option only appears if at least one class
+  qualifies, and never appears once a dual class exists (two-class max).
+- **Eligibility** (checked before offering a class): meets the class's
+  Attribute Requirements AND holds all its Gifts at +1 PF or greater - checked
+  across ALL skill sections on the sheet (Gift/Talent/Craft), since a dual
+  class's Gifts typically live outside the base Gift section. Adventurer and
+  Fighter can never be a dual class (base only).
+- **Combined level / EXP**: EXP thresholds use base + dual level combined
+  (p.10: a 4th Spy + 1st Saint needs the combined next level's EXP to raise
+  either class). canLevelUp/nextLevelXp now use the combined level.
+- **Skill progression on a dual-class advance**: Gift and Craft quotas swap -
+  +1 to 1 Gift, 2 Talents, 3 Crafts (vs the base 3/2/1), operating on the
+  sheet's sections. Base-class advances are unchanged.
+- **New-skill grant** (the Talent/Craft-per-level pick) runs only on base-class
+  advances; on a dual-class advance it's left to the Rac (pending a rules
+  clarification), as requested.
+- GM-only "remove dual class" control on the header.

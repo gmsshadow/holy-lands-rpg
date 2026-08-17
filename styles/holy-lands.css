@@ -1080,3 +1080,11 @@
   background: var(--hl-field-bg); color: var(--hl-accent);
 }
 .holy-lands-rpg .consumable-tag.tox { color: #a11; border-color: #a11; }
+
+/* Dual-class display in the header */
+.holy-lands-rpg .dual-class-display {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-left: 6px; padding-left: 6px;
+  border-left: 1px solid var(--hl-border);
+  color: var(--hl-accent);
+}

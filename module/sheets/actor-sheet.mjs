@@ -62,6 +62,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       npcSkillDelete: HolyLandsActorSheet.#onNpcSkillDelete,
       addCustomSkill: HolyLandsActorSheet.#onAddCustomSkill,
       levelUp: HolyLandsActorSheet.#onLevelUp,
+      removeDualClass: HolyLandsActorSheet.#onRemoveDualClass,
       rollStartingLifeFaith: HolyLandsActorSheet.#onRollStartingLifeFaith,
       rollCreationAttributes: HolyLandsActorSheet.#onRollCreationAttributes,
       unlockCreationAttributes: HolyLandsActorSheet.#onUnlockCreationAttributes,
@@ -213,7 +214,20 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     // Level-up (Genesis p.62): surface the button only when earned XP allows.
     context.canLevelUp = this.actor.system.canLevelUp;
     context.nextLevelXp = this.actor.system.nextLevelXp;
-    context.nextLevel = (this.actor.system.level || 1) + 1;
+    context.nextLevel = this.actor.system.combinedLevel + 1;
+
+    // Dual-classing (Book of Life p.10): expose the dual class name/level and
+    // combined level for the header.
+    context.isDualClassed = this.actor.system.isDualClassed;
+    context.combinedLevel = this.actor.system.combinedLevel;
+    context.dualClassLevel = this.actor.system.dualClassLevel;
+    if (context.isDualClassed) {
+      const pack = game.packs.get("holy-lands-rpg.classes");
+      const key = this.actor.system.dualClass;
+      // Try the loaded compendium index for a display name without awaiting.
+      context.dualClassName = pack?.index?.find(e => e.system?.key === key)?.name
+        || key.charAt(0).toUpperCase() + key.slice(1);
+    }
 
     // Ability derivation formulas (paper sheet), keyed to the same source
     // attribute pairs used to compute the mods, so they can't drift apart.
@@ -1190,20 +1204,62 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   }
 
   static async #onLevelUp(event, target) {
-    const nextLevel = (this.actor.system.level || 1) + 1;
-    const proceed = await DialogV2.confirm({
-      window: { title: "Level Up" },
-      content: `<p>Advance <strong>${this.actor.name}</strong> to Level ${nextLevel}? This rolls the class Life and Faith dice, then lets you choose this level's increases.</p>`,
-      rejectClose: false
-    });
-    if (!proceed) return;
+    const sys = this.actor.system;
+    const hasDual = sys.isDualClassed;
 
-    // 1) Roll the automatic grants (Life/Faith dice, Blessings) and advance level.
-    await this.actor.levelUp();
+    // Determine what this level-up does: add a dual class, or advance base/dual.
+    let whichClass = "base";
+    let addingDual = false;
 
-    // 2) Guided choices for this level (Genesis p.62): +1 Attribute, +1 Save,
-    //    and a new skill (Talent at L2-3, Craft at L3-7).
-    const level = this.actor.system.level;
+    if (!hasDual) {
+      // Offer: advance base class, or take a dual class (if any are eligible).
+      const eligible = await this.#eligibleDualClasses();
+      const choice = await DialogV2.wait({
+        window: { title: "Level Up" },
+        content: `<p>Advance <strong>${this.actor.name}</strong>. Raise their class as normal, or take a <strong>Dual Class</strong> instead (Book of Life p.10)?</p>
+          ${eligible.length ? "" : `<p class="hint">No classes currently qualify for dual-classing (need their Gifts at +1 PF and their Attribute Requirements met).</p>`}`,
+        buttons: [
+          { action: "base", label: `Advance ${this.actor.classItem?.name || "class"}`, default: true },
+          ...(eligible.length ? [{ action: "dual", label: "Take a Dual Class..." }] : []),
+          { action: "cancel", label: "Cancel" }
+        ],
+        rejectClose: false
+      });
+      if (!choice || choice === "cancel") return;
+      if (choice === "dual") { addingDual = true; }
+    } else {
+      // Already dual-classed: choose which class to advance.
+      const dualDoc = await this.actor.getDualClassDoc();
+      const choice = await DialogV2.wait({
+        window: { title: "Level Up - Which Class?" },
+        content: `<p>${this.actor.name} is dual-classed (${this.actor.classItem?.name} ${sys.level} / ${dualDoc?.name || sys.dualClass} ${sys.dualClassLevel}). Which class do you advance?</p>`,
+        buttons: [
+          { action: "base", label: `${this.actor.classItem?.name || "Base"} (${sys.level} \u2192 ${sys.level + 1})`, default: true },
+          { action: "dual", label: `${dualDoc?.name || "Dual"} (${sys.dualClassLevel} \u2192 ${sys.dualClassLevel + 1})` },
+          { action: "cancel", label: "Cancel" }
+        ],
+        rejectClose: false
+      });
+      if (!choice || choice === "cancel") return;
+      whichClass = choice;
+    }
+
+    // --- Adding a dual class: pick from eligible classes, then set it. ---
+    if (addingDual) {
+      await this.#promptAddDualClass();
+      return;
+    }
+
+    const raisingDual = (whichClass === "dual");
+
+    // 1) Roll the automatic grants (Life/Faith dice, Blessings) and advance the
+    //    chosen class's level.
+    await this.actor.levelUp(whichClass);
+
+    // 2) Guided choices (Genesis p.62): +1 Attribute, +1 Save. The new-skill
+    //    grant runs only for BASE-class advances (dual-class new-skill handling
+    //    is left to the Rac pending clarification).
+    const level = this.actor.system.combinedLevel;
     const attrs = this.actor.system.attributes;
     const saves = this.actor.system.saves;
 
@@ -1212,30 +1268,33 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     const saveOpts = Object.entries(saves)
       .map(([k, s]) => `<option value="${k}">${s.label} (${s.value} \u2192 ${s.value + 1})</option>`).join("");
 
-    // Skill: Talent at levels 2-3, Craft at levels 3-7 (both possible at L3).
-    // Exclude skills the character already has - offering a duplicate is a
-    // wasted choice (and grantLevelUpSkill would reject it anyway).
-    const owned = new Set(this.actor.items
-      .filter(i => i.type === "skill")
-      .map(i => i.name.toLowerCase()));
-    const list = (this.actor.talentCraftList || []).filter(n => !owned.has(n.toLowerCase()));
-    const wantsTalent = (level >= 2 && level <= 3);
-    const wantsCraft = (level >= 3 && level <= 7);
+    // New-skill grant: base class only, keyed to the BASE class level.
     let skillBlock = "";
-    if ((wantsTalent || wantsCraft) && list.length) {
-      const skillOpts = `<option value="">- none -</option>` +
-        list.map(n => `<option value="${foundry.utils.escapeHTML(n)}">${foundry.utils.escapeHTML(n)}</option>`).join("");
-      const sectionField = (wantsTalent && wantsCraft)
-        ? `<div class="form-group"><label>Add as:</label><select name="skillSection"><option value="talent">Talent (+1 PF)</option><option value="craft">Craft (+1 PF)</option></select></div>`
-        : `<input type="hidden" name="skillSection" value="${wantsTalent ? "talent" : "craft"}"/>`;
-      const which = (wantsTalent && wantsCraft) ? "Talent or Craft" : (wantsTalent ? "Talent" : "Craft");
-      skillBlock = `<fieldset><legend>New ${which} (p.62)</legend>
-        <div class="form-group"><label>Skill:</label><select name="skillName">${skillOpts}</select></div>
-        ${sectionField}</fieldset>`;
-    } else if ((wantsTalent || wantsCraft) && this.actor.talentCraftList?.length) {
-      skillBlock = `<p class="hint">This level grants a new ${wantsTalent ? "Talent" : "Craft"}, but this character already has every skill on the class list - add one manually if the Rac allows an off-list choice.</p>`;
-    } else if (wantsTalent || wantsCraft) {
-      skillBlock = `<p class="hint">This level grants a new ${wantsTalent ? "Talent" : "Craft"}, but this class doesn't use the standard Talent/Craft list (Adventurer/Fighter differ) - add it manually.</p>`;
+    if (!raisingDual) {
+      const baseLevel = this.actor.system.level;
+      const owned = new Set(this.actor.items
+        .filter(i => i.type === "skill")
+        .map(i => i.name.toLowerCase()));
+      const list = (this.actor.talentCraftList || []).filter(n => !owned.has(n.toLowerCase()));
+      const wantsTalent = (baseLevel >= 2 && baseLevel <= 3);
+      const wantsCraft = (baseLevel >= 3 && baseLevel <= 7);
+      if ((wantsTalent || wantsCraft) && list.length) {
+        const skillOpts = `<option value="">- none -</option>` +
+          list.map(n => `<option value="${foundry.utils.escapeHTML(n)}">${foundry.utils.escapeHTML(n)}</option>`).join("");
+        const sectionField = (wantsTalent && wantsCraft)
+          ? `<div class="form-group"><label>Add as:</label><select name="skillSection"><option value="talent">Talent (+1 PF)</option><option value="craft">Craft (+1 PF)</option></select></div>`
+          : `<input type="hidden" name="skillSection" value="${wantsTalent ? "talent" : "craft"}"/>`;
+        const which = (wantsTalent && wantsCraft) ? "Talent or Craft" : (wantsTalent ? "Talent" : "Craft");
+        skillBlock = `<fieldset><legend>New ${which} (p.62)</legend>
+          <div class="form-group"><label>Skill:</label><select name="skillName">${skillOpts}</select></div>
+          ${sectionField}</fieldset>`;
+      } else if ((wantsTalent || wantsCraft) && this.actor.talentCraftList?.length) {
+        skillBlock = `<p class="hint">This level grants a new ${wantsTalent ? "Talent" : "Craft"}, but this character already has every skill on the class list - add one manually if the Rac allows an off-list choice.</p>`;
+      } else if (wantsTalent || wantsCraft) {
+        skillBlock = `<p class="hint">This level grants a new ${wantsTalent ? "Talent" : "Craft"}, but this class doesn't use the standard Talent/Craft list (Adventurer/Fighter differ) - add it manually.</p>`;
+      }
+    } else {
+      skillBlock = `<p class="hint">Dual-class advance: the per-level new Talent/Craft grant is left to the Rac's discretion for now (pending a rules clarification).</p>`;
     }
 
     const result = await DialogV2.wait({
@@ -1276,13 +1335,14 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       });
     }
 
-    // 3) Per-level Skill increases (Book of Life p.2): +1 to 3 Gifts, 2 Talents,
-    //    1 Craft, with WS/Combat-Abilities knock-ons.
-    const skillSummary = await this.#promptSkillIncreases(level);
+    // 3) Per-level Skill increases (Book of Life p.2). Base-class advance uses
+    //    the normal quota (3 Gifts / 2 Talents / 1 Craft); a dual-class advance
+    //    inverts Gift and Craft (3 Crafts / 2 Talents / 1 Gift, p.10).
+    const skillSummary = await this.#promptSkillIncreases(level, raisingDual);
 
     // 4) AtR growth by category (Book of Life p.2): Gift WS every 3rd level,
-    //    Talent every 4th, Craft every 5th - applied automatically.
-    const atrSummary = await this.actor.applyAtRGrowth(level);
+    //    Talent every 4th, Craft every 5th - by combined level.
+    const atrSummary = await this.actor.applyAtRGrowth(this.actor.system.combinedLevel);
 
     const extra = [skillSummary, atrSummary].filter(Boolean).join("; ");
     if (extra) {
@@ -1299,14 +1359,77 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
    * Weapon Skill or Combat Abilities skill picked, also choose one action Bonus
    * in its section to raise. Returns a summary string (or "" if skipped).
    */
-  async #promptSkillIncreases(level) {
+  /**
+   * All classes in the compendium the character currently qualifies to
+   * Dual-Class into (eligibility met, excludes Adventurer/Fighter and the
+   * character's own base class). Returns [{ doc, reasons }].
+   */
+  static async #onRemoveDualClass(event, target) {
+    if (!game.user.isGM) return;
+    const confirmed = await DialogV2.confirm({
+      window: { title: "Remove Dual Class" },
+      content: `<p>Remove ${this.actor.name}'s dual class? Their combined level and EXP thresholds revert to the base class alone. This does not undo any skill/attribute increases already applied.</p>`,
+      rejectClose: false
+    });
+    if (!confirmed) return;
+    await this.actor.update({ "system.dualClass": "", "system.dualClassLevel": 0 });
+  }
+
+  async #eligibleDualClasses() {
+    const pack = game.packs.get("holy-lands-rpg.classes");
+    if (!pack) return [];
+    const docs = await pack.getDocuments();
+    const baseKey = this.actor.classItem?.system.key ?? this.actor.system.class;
+    const out = [];
+    for (const doc of docs) {
+      if (doc.system.key === baseKey) continue;                 // not the base class itself
+      if (doc.system.key === "adventurer" || doc.system.key === "fighter") continue;
+      const elig = this.actor.dualClassEligibility(doc);
+      if (elig.eligible) out.push({ doc });
+    }
+    return out;
+  }
+
+  /**
+   * Prompt to pick a dual class from those the character qualifies for, then
+   * add it (Book of Life p.10). The dual class starts at Level 1; the base
+   * class's level is unchanged.
+   */
+  async #promptAddDualClass() {
+    const eligible = await this.#eligibleDualClasses();
+    if (!eligible.length) {
+      ui.notifications.info("No classes currently qualify for dual-classing.");
+      return;
+    }
+    const opts = eligible.map(({ doc }) =>
+      `<option value="${doc.system.key}">${doc.name}</option>`).join("");
+    const choice = await DialogV2.wait({
+      window: { title: "Take a Dual Class (Book of Life p.10)" },
+      content: `<p>Add a second class to <strong>${this.actor.name}</strong>. It begins at Level 1; from now on, EXP thresholds use the two classes' <em>combined</em> level, and each level-up you choose which class to advance.</p>
+        <div class="form-group"><label>Dual Class:</label><select name="dualKey">${opts}</select></div>
+        <p class="hint">Only classes whose Gifts you hold at +1 PF and whose Attribute Requirements you meet are listed.</p>`,
+      buttons: [
+        { action: "add", label: "Take Dual Class", default: true, callback: (e, b) => b.form.elements.dualKey.value },
+        { action: "cancel", label: "Cancel" }
+      ],
+      rejectClose: false
+    });
+    if (!choice || choice === "cancel") return;
+    await this.actor.addDualClass(choice);
+  }
+
+  async #promptSkillIncreases(level, raisingDual = false) {
     const skills = this.actor.items.filter(i => i.type === "skill");
     if (!skills.length) return "";
 
     const CA = this.actor.constructor;
     const byCat = { gift: [], talent: [], craft: [] };
     for (const s of skills) (byCat[s.system.skillType] ?? byCat.gift).push(s);
-    const quota = { gift: 3, talent: 2, craft: 1 };
+    // Base-class advance: 3 Gifts / 2 Talents / 1 Craft. Dual-class advance
+    // (Book of Life p.10) swaps Gift and Craft: 1 Gift / 2 Talents / 3 Crafts.
+    const quota = raisingDual
+      ? { gift: 1, talent: 2, craft: 3 }
+      : { gift: 3, talent: 2, craft: 1 };
 
     const catBlock = (cat, label) => {
       const items = byCat[cat];
@@ -1338,7 +1461,7 @@ export class HolyLandsActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       <p class="lvl-warn" style="color:#a11;display:none;"></p>
       <script>(function(){
         const r = document.currentScript.parentElement;
-        const quota = { gift:3, talent:2, craft:1 };
+        const quota = ${JSON.stringify(quota)};
         const warn = r.querySelector('.lvl-warn');
         r.querySelectorAll('input[type=checkbox]').forEach(cb => cb.addEventListener('change', () => {
           const cat = cb.dataset.cat;

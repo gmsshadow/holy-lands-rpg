@@ -795,6 +795,89 @@ export class HolyLandsActor extends Actor {
     return this.items.find(i => i.type === "class") ?? null;
   }
 
+  /**
+   * The dual class's compendium document (or null). The base class is an
+   * embedded item; the dual class is referenced by key and looked up in the
+   * Character Classes compendium.
+   */
+  async getDualClassDoc() {
+    const key = this.system.dualClass;
+    if (!key) return null;
+    const pack = game.packs.get("holy-lands-rpg.classes");
+    if (!pack) return null;
+    const docs = await pack.getDocuments();
+    return docs.find(d => d.system.key === key || d.name.toLowerCase() === key.toLowerCase()) ?? null;
+  }
+
+  /**
+   * Whether this character currently meets the requirements to Dual-Class into
+   * the given class doc (Book of Life p.10): meets its Attribute Requirements
+   * AND has all its Gifts at +1 PF or greater (checked across ALL skill
+   * sections on the sheet, not just the Gift section). Adventurer and Fighter
+   * can never be dual-classed INTO. Returns { eligible, reasons[] }.
+   */
+  dualClassEligibility(classDoc) {
+    const reasons = [];
+    if (!classDoc) return { eligible: false, reasons: ["No class provided."] };
+    const key = classDoc.system.key;
+    if (key === "adventurer" || key === "fighter") {
+      return { eligible: false, reasons: ["Adventurer and Fighter can only be a base class."] };
+    }
+    // Attribute requirements.
+    const attrs = this.system.attributes;
+    const checkAttr = (attrKey, min) => {
+      if (!attrKey || !min) return;
+      const av = attrs?.[attrKey]?.value ?? 0;
+      if (av < min) reasons.push(`${attrs?.[attrKey]?.label || attrKey} ${av} below required ${min}`);
+    };
+    checkAttr(classDoc.system.primaryAttribute, classDoc.system.primaryMin);
+    checkAttr(classDoc.system.secondaryAttribute, classDoc.system.secondaryMin);
+
+    // Gift requirement: every one of the class's Gifts must be owned at +1 PF or
+    // more, in ANY skill section (Gift/Talent/Craft).
+    const giftNames = (classDoc.system.grantedGifts || "")
+      .split(/[,\n]/).map(s => s.trim()).filter(Boolean);
+    const owned = new Map(this.items
+      .filter(i => i.type === "skill")
+      .map(i => [i.name.toLowerCase(), i.system.pf || 0]));
+    for (const g of giftNames) {
+      const pf = owned.get(g.toLowerCase());
+      if (pf === undefined) reasons.push(`Missing Gift "${g}" (need it at +1 PF)`);
+      else if (pf < 1) reasons.push(`Gift "${g}" is at +${pf} PF (need +1 or more)`);
+    }
+    return { eligible: reasons.length === 0, reasons };
+  }
+
+  /**
+   * Add a dual class (Book of Life p.10). Sets the dual class at Level 1. Does
+   * not itself advance a level - it's chosen AS the level-up when reaching a
+   * new level. Guards: no existing dual class, eligibility met.
+   */
+  async addDualClass(classKey) {
+    if (this.system.dualClass) {
+      ui.notifications.warn(`${this.name} already has a dual class - only two classes are allowed.`);
+      return false;
+    }
+    const pack = game.packs.get("holy-lands-rpg.classes");
+    const docs = pack ? await pack.getDocuments() : [];
+    const doc = docs.find(d => d.system.key === classKey || d.name.toLowerCase() === classKey.toLowerCase());
+    if (!doc) { ui.notifications.error("Class not found in the compendium."); return false; }
+    const elig = this.dualClassEligibility(doc);
+    if (!elig.eligible && !game.user.isGM) {
+      ui.notifications.warn(`Not eligible to Dual-Class into ${doc.name}: ${elig.reasons.join("; ")}`);
+      return false;
+    }
+    await this.update({
+      "system.dualClass": doc.system.key,
+      "system.dualClassLevel": 1
+    });
+    await ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name} takes a Dual Class: ${doc.name}!</strong> (now ${this.classItem?.name || this.system.class} ${this.system.level} / ${doc.name} 1)`
+    });
+    return true;
+  }
+
   /** Build a synthetic weapon-like object for an innate attack (Punch/Kick). */
   #innateWeapon(kind) {
     const wsKey = (kind === "kick") ? "kickAttack" : "handToHand";
@@ -1863,14 +1946,14 @@ export class HolyLandsActor extends Actor {
    * per-level Life and Faith dice (GE) and add each to BOTH max and current;
    * remind about the manual gains (+1 Attribute, +1 Save, Skills, Blessings).
    */
-  async levelUp() {
-    const cls = this.classItem;
-    if (!cls) {
+  async levelUp(whichClass = "base") {
+    const baseCls = this.classItem;
+    if (!baseCls) {
       ui.notifications.warn("No Class item on this character - drop one from the Character Classes compendium first.");
       return;
     }
-    if ((this.system.level || 1) >= this.system.constructor.MAX_LEVEL) {
-      ui.notifications.info(`${this.name} is already at the maximum level (${this.system.constructor.MAX_LEVEL}).`);
+    if (this.system.combinedLevel >= this.system.constructor.MAX_LEVEL) {
+      ui.notifications.info(`${this.name} is already at the maximum (combined) level (${this.system.constructor.MAX_LEVEL}).`);
       return;
     }
     // Normally the character must have earned the XP; a GM may force it anyway.
@@ -1878,7 +1961,20 @@ export class HolyLandsActor extends Actor {
       ui.notifications.warn(`${this.name} hasn't earned enough EXP to level up yet (needs ${this.system.nextLevelXp}).`);
       return;
     }
-    const newLevel = (this.system.level || 1) + 1;
+
+    const raisingDual = (whichClass === "dual");
+    if (raisingDual && !this.system.isDualClassed) {
+      ui.notifications.warn(`${this.name} has no dual class to raise.`);
+      return;
+    }
+
+    // Use the raised class's dice. The base class is the embedded item; the
+    // dual class comes from the compendium.
+    const cls = raisingDual ? (await this.getDualClassDoc()) : baseCls;
+    if (!cls) { ui.notifications.error("Could not resolve the class to advance."); return; }
+
+    const curClassLevel = raisingDual ? (this.system.dualClassLevel || 0) : (this.system.level || 1);
+    const newClassLevel = curClassLevel + 1;
 
     const lifeRoll = new Roll(this.constructor.graceFormula(cls.system.lifePerLevelDie || "1d4"));
     await lifeRoll.evaluate();
@@ -1887,29 +1983,32 @@ export class HolyLandsActor extends Actor {
 
     const oldFaithMax = this.system.faith.max || 0;
     const newFaithMax = oldFaithMax + faithRoll.total;
+    const levelField = raisingDual ? "system.dualClassLevel" : "system.level";
     await this.update({
-      "system.level": newLevel,
+      [levelField]: newClassLevel,
       "system.life.max": (this.system.life.max || 0) + lifeRoll.total,
       "system.life.value": (this.system.life.value || 0) + lifeRoll.total,
       "system.faith.max": newFaithMax,
       "system.faith.value": (this.system.faith.value || 0) + faithRoll.total
     });
 
-    // Blessings on level-up (p.62): two new Blessings for each increment of
-    // five (5) max Faith crossed by this level's Faith gain.
     const incrementsCrossed = Math.floor(newFaithMax / 5) - Math.floor(oldFaithMax / 5);
     const newBlessings = Math.max(0, incrementsCrossed) * 2;
     const blessingNote = (newBlessings > 0)
       ? `Blessings: crossed a Faith increment of 5 - gain ${newBlessings} new Blessing${newBlessings === 1 ? "" : "s"} (use Roll Blessings).`
-      : `Blessings: no new Blessings this level (none gained until max Faith next crosses a multiple of 5).`;
+      : `Blessings: no new Blessings this level.`;
+
+    const combined = this.system.combinedLevel;
+    const skillNote = raisingDual
+      ? `<em>Dual-class advance: Skill increases are inverted - +1 to 3 Crafts, 2 Talents, 1 Gift (Book of Life p.10). New-skill grant is left to the Rac.</em>`
+      : `<em>Also gain: +1 to one Attribute and +1 to one Saving Throw; new Talent at Levels 2-3 / new Craft at Levels 3-7; Saints/Clerics select new Miracles. ${blessingNote}</em>`;
+
     return ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: `<strong>${this.name} reaches Level ${newLevel}!</strong> (${cls.name})<br>`
+      flavor: `<strong>${this.name} advances ${cls.name} to Level ${newClassLevel}!</strong>`
+        + (this.system.isDualClassed ? ` (combined level ${combined})` : "") + `<br>`
         + `Life +${lifeRoll.total} (max and current), Faith +${faithRoll.total} (max and current).<br>`
-        + `<em>Also gain: +1 to one Attribute and +1 to one Saving Throw (Rule of Halves applies); `
-        + `new Talent at Levels 2-3 / new Craft at Levels 3-7 (start at +1 PF); `
-        + `Saints and Clerics select new Miracles. `
-        + `${blessingNote}</em>`,
+        + skillNote,
       rolls: [lifeRoll, faithRoll]
     });
   }

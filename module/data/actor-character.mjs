@@ -23,6 +23,11 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
       level: new fields.NumberField({ required: true, integer: true, initial: 1, min: 1 }),
       experience: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
       class: new fields.StringField({ required: true, initial: "adventurer" }),
+      // Dual-Classing (Book of Life p.10): an optional second class added after
+      // creation. `class`/`level` are the BASE class; these track the dual one.
+      // Combined level = level + dualClassLevel; only two classes ever allowed.
+      dualClass: new fields.StringField({ required: true, initial: "" }),
+      dualClassLevel: new fields.NumberField({ required: true, integer: true, initial: 0, min: 0 }),
       stature: new fields.StringField({ required: true, initial: "commonFolk" }),
       age: new fields.NumberField({ required: true, integer: true, initial: 20 }),
       gender: new fields.StringField({ required: true, initial: "male" }),
@@ -270,6 +275,18 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
   /** Maximum defined level. */
   static get MAX_LEVEL() { return this.EXP_TABLE.length - 1; }
 
+  /** Combined character level (base + dual). For a single-classed character
+   *  this is just the base level. EXP thresholds use the combined level
+   *  (Book of Life p.10: "the EXP of the combined next Level"). */
+  get combinedLevel() {
+    return (this.level || 1) + (this.dualClassLevel || 0);
+  }
+
+  /** Whether this character has taken a dual class. */
+  get isDualClassed() {
+    return !!this.dualClass && (this.dualClassLevel || 0) >= 1;
+  }
+
   /** The highest level this character's current EXP entitles them to. */
   get earnedLevel() {
     const table = this.constructor.EXP_TABLE;
@@ -281,14 +298,14 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
     return lvl;
   }
 
-  /** Whether current EXP entitles the character to a higher level than they are. */
+  /** Whether current EXP entitles the character to a higher (combined) level. */
   get canLevelUp() {
-    return this.earnedLevel > (this.level || 1);
+    return this.earnedLevel > this.combinedLevel;
   }
 
-  /** EXP required to reach the next level (or null at max level). */
+  /** EXP required to reach the next (combined) level (or null at max level). */
   get nextLevelXp() {
-    const next = (this.level || 1) + 1;
+    const next = this.combinedLevel + 1;
     return (next <= this.constructor.MAX_LEVEL) ? this.constructor.EXP_TABLE[next] : null;
   }
 

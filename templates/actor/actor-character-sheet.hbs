@@ -18,8 +18,15 @@
           {{#if classItem}}
           <span class="class-item-display" data-item-id="{{classItem.id}}">
             <a data-action="itemEdit" title="Open class"><strong>{{classItem.name}}</strong></a>
+            <span class="hint">{{system.level}}</span>
             <a data-action="itemDelete" title="Remove class"><i class="fas fa-times"></i></a>
           </span>
+          {{#if isDualClassed}}
+          <span class="dual-class-display" title="Dual Class (Book of Life p.10)">
+            <i class="fas fa-plus"></i> <strong>{{dualClassName}}</strong> <span class="hint">{{dualClassLevel}}</span>
+            {{#if isGM}}<a data-action="removeDualClass" title="Rac: remove dual class"><i class="fas fa-times"></i></a>{{/if}}
+          </span>
+          {{/if}}
           {{else}}
           {{#if legacyClassLabel}}<span class="legacy-class" title="Assigned before class items existed - choose a class item to enable full automation">{{legacyClassLabel}} <span class="hint">(legacy)</span></span>{{/if}}
           <button type="button" data-action="chooseClass" title="Pick a class legal for this Stature from the Character Classes compendium (p.53)"><i class="fas fa-scroll"></i> Choose Class</button>
@@ -45,6 +52,7 @@
       <div class="ci-row ci-level-row"><label>Level</label>
         <div class="ci-value">
           <input type="number" name="system.level" value="{{system.level}}" class="ci-level-input"/>
+          {{#if isDualClassed}}<span class="hint" title="Combined level (base + dual) - used for EXP thresholds">= {{combinedLevel}} combined</span>{{/if}}
           {{#if classItem}}
           {{#if canLevelUp}}<button type="button" class="level-up-ready" data-action="levelUp" title="XP threshold reached - roll class Life/Faith dice and advance a level"><i class="fas fa-arrow-up"></i> Level Up!</button>{{/if}}
           {{#unless startingRolled}}
